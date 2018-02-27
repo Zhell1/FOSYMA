@@ -2,6 +2,7 @@ package mas.behaviours;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,7 +49,7 @@ public class GraphBehaviour extends SimpleBehaviour{
 	
 	protected Graph graph;
 	private Set<String> bordure;
-
+	private List<String> attributs;
 	private abstractAgent agt;
 
 	public GraphBehaviour (final mas.abstractAgent myagent, Graph mygraph) {
@@ -56,7 +57,9 @@ public class GraphBehaviour extends SimpleBehaviour{
 		this.agt = ((mas.abstractAgent)this.myAgent);
 				//Example to retrieve the current position
 		this.graph = mygraph;
-		this.bordure = new HashSet<String>();		
+		this.bordure = new HashSet<String>();
+		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+
 		//super(myagent);
 	}
 	// à override
@@ -213,7 +216,27 @@ public class GraphBehaviour extends SimpleBehaviour{
 			
 		}
 	}
-}
+	}
+		
+	public String toJSON() {
+		/* ===============================
+		 * IL RESTE A FAIRE LES ARETES
+		 * ===============================
+		 */
+		String node = "nodes : {";
+		String temp = "";
+		for (Node n : this.graph.getNodeSet()){
+			temp = "{id : " + n.getId() + "," + "attribute : {" ;
+			for(String att : this.attributs){
+				temp += att+" : "+ n.getAttribute(att) +",";
+			}
+			temp = (String) temp.subSequence(0, temp.length()-1);
+			temp += "}";
+			System.out.println(temp);
+		}
+		return node;
+		// nodes : { node1: [a1:a2:a3], node2 : [a5:a3:a0]}
+	}
 	@Override
 	public void action() {
 		// TODO Auto-generated method stub

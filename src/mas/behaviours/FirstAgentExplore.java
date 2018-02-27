@@ -44,6 +44,7 @@ public class FirstAgentExplore extends GraphBehaviour{
 
 	@Override
 	public void action() {
+		System.out.println(toJSON());
 		//Example to retrieve the current position
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
 		add();

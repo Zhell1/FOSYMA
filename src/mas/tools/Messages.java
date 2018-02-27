@@ -8,6 +8,7 @@ import mas.abstractAgent;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
 public class Messages {
@@ -22,6 +23,7 @@ public class Messages {
 	public void sendObject(Object o, String destinataire){
 		ACLMessage msg = new ACLMessage();
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
+		msg.setSender(this.agent.getAID());
 		try {
 			msg.setContentObject((Serializable) o);
 			//agt.send(msg);
@@ -35,6 +37,7 @@ public class Messages {
 	public boolean sendString(String content, String destinataire){
 		ACLMessage msg = new ACLMessage();
 		AID aid = new AID(destinataire,AID.ISLOCALNAME);
+		msg.setSender(this.agent.getAID());
 		System.out.println("AID : " + aid);
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
 		msg.setContent(content);
@@ -61,17 +64,23 @@ public class Messages {
 	
 	public Object getMsgObject() {
 		ACLMessage msg = this.agt.receive();
-		try {
-			return msg.getContentObject();
-		} catch (UnreadableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (msg != null){
+			 try {
+				return msg.getContentObject();
+			} catch (UnreadableException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}
 			return null;
-		}
 	}
 	
 	public String getMsgString(){
-		ACLMessage msg = this.agt.receive();
-		return msg.getContent();
+		MessageTemplate mt = MessageTemplate.MatchAll();
+		ACLMessage msg = this.agt.receive(mt);
+		if (msg != null){
+			return msg.getContent();
+		}
+		return null;
 	}
 }

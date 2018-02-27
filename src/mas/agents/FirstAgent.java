@@ -66,7 +66,7 @@ public class FirstAgent extends abstractAgent{
 		//this.graph = new SingleGraph("test");
 		
 		//Add the behaviours
-		//addBehaviour(new FirstAgentExplore((this), this.graph));
+		addBehaviour(new FirstAgentExplore((this), this.graph));
 		addBehaviour(new ShareMapBehaviour((this)));
 		addBehaviour(new ListenerBehaviour((this)));
 		//addBehaviour(new SayHello(this));
