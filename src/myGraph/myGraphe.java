@@ -1,0 +1,5 @@
+package myGraph;
+
+class myGraphe {
+
+}
