@@ -1,22 +1,11 @@
 package mas.behaviours;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
-import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
-import org.graphstream.algorithm.generator.Generator;
-import org.graphstream.algorithm.generator.GridGenerator;
+import jade.core.behaviours.SimpleBehaviour;
+import mas.tools.MyGraph;
+
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.graph.implementations.SingleGraph;
-
-import env.Attribute;
-import env.Couple;
-import jade.core.behaviours.TickerBehaviour;
 
 /**************************************
  * 
@@ -27,36 +16,42 @@ import jade.core.behaviours.TickerBehaviour;
  **************************************/
 
 
-public class FirstAgentExplore extends GraphBehaviour{
+public class FirstAgentExplore extends SimpleBehaviour {
 	/**
 	 * When an agent choose to move
 	 *  
 	 */
 	private static final long serialVersionUID = 9088209402507795289L;
 	private boolean finished;
+	private MyGraph graph;
 	
 	
 	public FirstAgentExplore (final mas.abstractAgent myagent, Graph g) {
-		super(myagent, g);
+		super(myagent);
 		this.finished = false;
+		this.graph = new mas.tools.MyGraph(myagent, g);
 		//super(myagent);
 	}
 
 	@Override
 	public void action() {
-		System.out.println(toJSON());
+		//==================================================
+		String s = this.graph.toJSON();
+		//this.graph.unparse(s);
+		this.graph.test(s);
+		//==================================================
 		//Example to retrieve the current position
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
-		add();
+		this.graph.add();
 		//example related to the use of the backpack for the treasure hunt
-		ArrayList<String> path = NextDijsktra();
+		ArrayList<String> path = this.graph.NextDijsktra();
 		if (path != null){
 			String move = path.get(path.size()-1);
 			System.out.println(this.myAgent.getLocalName()+": I try to move to : " + move);
 			((mas.abstractAgent)this.myAgent).moveTo(move);
 		}
 		else {
-			System.out.println("Fin de l'exploration !"+"\tNombre de noeud exploré : " + this.graph.getNodeCount());
+			System.out.println("Fin de l'exploration !"+"\tNombre de noeud exploré : " + this.graph.getGraphStream().getNodeCount());
 			this.finished = true;
 		}
 		try {
