@@ -38,10 +38,10 @@ public class Messages {
 		ACLMessage msg = new ACLMessage();
 		AID aid = new AID(destinataire,AID.ISLOCALNAME);
 		msg.setSender(this.agent.getAID());
-		System.out.println("AID : " + aid);
+		//System.out.println("AID : " + aid);
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
 		msg.setContent(content);
-		System.out.println("Message sendString : " + msg);
+		//System.out.println("Message sendString : " + msg);
 		try{
 			this.agt.sendMessage(msg);
 			return true;

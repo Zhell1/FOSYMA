@@ -1,6 +1,7 @@
 package mas.behaviours;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import jade.core.behaviours.SimpleBehaviour;
 import mas.tools.MyGraph;
@@ -36,9 +37,8 @@ public class FirstAgentExplore extends SimpleBehaviour {
 	@Override
 	public void action() {
 		//==================================================
-		String s = this.graph.toJSON();
-		//this.graph.unparse(s);
-		this.graph.test(s);
+		//HashMap<String, Object> map = this.graph.toHashMap();
+		//System.out.println(map);
 		//==================================================
 		//Example to retrieve the current position
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();

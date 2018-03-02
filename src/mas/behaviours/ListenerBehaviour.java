@@ -1,7 +1,10 @@
 package mas.behaviours;
 
+import java.util.ArrayList;
+
 import jade.core.Agent;
 import jade.core.behaviours.SimpleBehaviour;
+import mas.tools.DFManager;
 import mas.tools.Messages;
 
 public class ListenerBehaviour extends SimpleBehaviour {
@@ -20,7 +23,11 @@ public class ListenerBehaviour extends SimpleBehaviour {
 		// TODO Auto-generated method stub
 		String msg = mailbox.getMsgString();
 		if (msg != null){
-			System.out.println("Message : " + msg);	
+			System.out.println("I receive the message : " + msg);
+			if (msg == "ping"){
+				ArrayList<String> listAgents = (ArrayList<String>) DFManager.getAllAgents(this.myAgent);
+				this.mailbox.broadcastString("roger", listAgents);
+			}
 		}
 		block(100);
 		

@@ -5,6 +5,7 @@ package mas.tools;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,6 +75,7 @@ public class MyGraph {
 
 		//super(myagent);
 	}
+	
 	// à override
 	public void onTick() {}
 	
@@ -146,7 +148,7 @@ public class MyGraph {
 		Node n = this.graph.getNode(position);
 		if (n == null){
 			n = this.graph.addNode(position);
-			n.addAttribute("explored", false);
+			n.addAttribute("explored", false);		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
 			this.bordure.add(position);
 		}
 	}
@@ -279,9 +281,57 @@ public class MyGraph {
 		// nodes : { node1: [a1:a2:a3], node2 : [a5:a3:a0]}
 	}
 	
+	/* ====================================================
+	 *              HASH PART
+	 ==================================================== */
+	
+	public HashMap<String, Object> getAttributeHashMap(Node n){
+		HashMap<String, Object> res = new HashMap<String, Object>();
+			for (String at : n.getAttributeKeySet()){
+				res.put(at, n.getAttribute(at));
+			}
+		return res;
+	}
+	
+	public HashMap<String, Object> toHashMap(){
+		HashMap<String, Object> res = new HashMap<String, Object>();
+		res.put("nodes", this.graph.getNodeSet());
+		res.put("edges", this.graph.getEdgeSet());
+		res.put("border", this.bordure);
+		Collection<Edge> e = this.graph.getEdgeSet();
+		return res;
+	}
+	
+	public MyGraph (abstractAgent myagent, HashMap<String, Object> map, Graph g){
+		Collection<Node>  nodes = (Collection<Node>) map.get("nodes");
+		Collection<Edge> edges = (Collection<Edge>) map.get("edges");
+		HashSet<String> border = (HashSet<String>) map.get("border");
+		this.graph = g;
+		Node addedNode;
+		HashMap<String, Object> attMap;
+		//add Node
+		for (Node n : nodes){
+			this.graph.addNode(n.getId());
+			addedNode = this.graph.getNode(n.getId());
+			attMap = getAttributeHashMap(n);
+			addedNode.addAttributes(attMap);
+		}
+		for (Edge e : edges){
+			Node p0 = e.getNode0();
+			Node p1 = e.getNode1();
+			String liaison = p0.toString() + "-" + p1.toString();
+			this.graph.addEdge(liaison, p0, p1);
+		}
+		this.myAgent = ((mas.abstractAgent) myagent);
+		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+		this.bordure = border;
+		
+	}
+	
 	public Graph getGraphStream(){
 		return this.graph;
 	}
+	/* ============================================================ */
 	
 	public static String[] split(int i1, int i2, String[] tab){
 		// i2 > i1
@@ -294,8 +344,8 @@ public class MyGraph {
 			res[i] = s.copyValueOf(s.toCharArray());
 		}
 		return res;
-		
 	}
+
 	public void test(String s){
 		System.out.println("input : " + s);
 		String[] q = s.split(":");
