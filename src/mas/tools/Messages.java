@@ -25,9 +25,10 @@ public class Messages {
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
 		msg.setSender(this.agent.getAID());
 		try {
-			msg.setContentObject((Serializable) o);
-			//agt.send(msg);
-			this.agt.sendMessage(msg);
+			if (o != null){
+				msg.setContentObject((Serializable) o);
+				this.agt.sendMessage(msg);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

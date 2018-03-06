@@ -7,18 +7,14 @@ import jade.core.behaviours.SimpleBehaviour;
 import mas.abstractAgent;
 import mas.behaviours.FirstAgentExplore;
 
-public class FirstFSMBehaviour {
-	FSMBehaviour o;
-	public FirstFSMBehaviour(abstractAgent a, Graph g){
+public class FirstFSMBehaviour extends FSMBehaviour {
+	public FirstFSMBehaviour(abstractAgent a){
 		/* Il faut que les comportements implémentent une fonction int onEnd() qui indique le signal de transition */
-		this.o = new FSMBehaviour();
-		o.registerFirstState(new FirstAgentExplore(a, g), "Explo");
-		o.registerState(new ShareMapBehaviour(a), "send");
-		o.registerState(new ListenerBehaviour(a), "listener");
-		
-		
+		registerFirstState(new FirstAgentExplore(a), "explo");
+		registerState(new ListenerBehaviour(a), "listener");
+		registerTransition("listener", "listener", 1);
+		registerDefaultTransition("listener", "explo");
+		registerDefaultTransition("explo", "listener");
 	}
-	public void test(){
-		
-	}
+	
 }

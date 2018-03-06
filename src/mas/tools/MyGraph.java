@@ -31,6 +31,7 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
+import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.spriteManager.Sprite;
@@ -278,7 +279,7 @@ public class MyGraph {
 		}
 		arretes = (String) arretes.subSequence(0, arretes.length()-1);
 		return node+arretes+" }";
-		// nodes : { node1: [a1:a2:a3], node2 : [a5:a3:a0]}
+		// nodes : { node1: [a1:a2:a3], node2 : [a5:a3:a0]}mas.abstractAgent)
 	}
 	
 	/* ====================================================
@@ -302,11 +303,11 @@ public class MyGraph {
 		return res;
 	}
 	
-	public MyGraph (abstractAgent myagent, HashMap<String, Object> map, Graph g){
+	public MyGraph (abstractAgent myagent, HashMap<String, Object> map){
 		Collection<Node>  nodes = (Collection<Node>) map.get("nodes");
 		Collection<Edge> edges = (Collection<Edge>) map.get("edges");
 		HashSet<String> border = (HashSet<String>) map.get("border");
-		this.graph = g;
+		this.graph = new SingleGraph("bla");
 		Node addedNode;
 		HashMap<String, Object> attMap;
 		//add Node
@@ -328,63 +329,17 @@ public class MyGraph {
 		
 	}
 	
+	public void merge(MyGraph g){
+		//modifie sur place
+		Graphs.mergeIn(this.graph, g.getGraphStream());
+		this.bordure.retainAll(g.getBordure());
+	}
+	
 	public Graph getGraphStream(){
 		return this.graph;
 	}
 	/* ============================================================ */
-	
-	public static String[] split(int i1, int i2, String[] tab){
-		// i2 > i1
-		int len = i2 - i1;
-		if (len < 0)
-			return null;
-		String[] res = new String[len];
-		for (int i = i1; i < i2; i++){
-			String s = tab[i];
-			res[i] = s.copyValueOf(s.toCharArray());
-		}
-		return res;
-	}
 
-	public void test(String s){
-		System.out.println("input : " + s);
-		String[] q = s.split(":");
-		String[] tab = q[0].split(" ");
-		String constructeur = tab[0];
-		System.out.println("tab : " + Arrays.toString(tab));
-		String[] reste = split(1, tab.length - 1, tab);
-		System.out.println("reste : " + Arrays.toString(reste));
-		if (constructeur.equals("nodes")){
-			System.out.println("constructeurnode" + constructeur);
-		}
-		if (constructeur.equals("id")){
-			System.out.println("constructeuId" + constructeur);
-		}
-		if (constructeur.equals("attributs")){
-			System.out.println("attributs");
-		}
-		if (constructeur.equals("edges")){
-			System.out.println("Edges");
-		}
-		
-	}
-	
-	public static MyGraph unparse(String s) {
-		MyGraph currgraph = null;
-		String[] tab = s.split(";");
-		String nodes = tab[0];
-		System.out.println("nodes : "+nodes);
-		String[] tabnodes = nodes.split("}");
-		String arretes = tab[1];
-		
-		for (String node : tabnodes) {
-			//node = node.replaceAll("\\s",""); // remove all spaces
-			if(node.length() > 0) {
-				//System.out.println("> "+ node);
-				
-			}
-		}
-		
-		return currgraph;
-	}
+
+
 }

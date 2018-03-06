@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import jade.core.behaviours.SimpleBehaviour;
 import mas.tools.MyGraph;
+import mas.agents.*;
 
 import org.graphstream.graph.Graph;
 
@@ -27,10 +28,10 @@ public class FirstAgentExplore extends SimpleBehaviour {
 	private MyGraph graph;
 	
 	
-	public FirstAgentExplore (final mas.abstractAgent myagent, Graph g) {
+	public FirstAgentExplore (final mas.abstractAgent myagent) {
 		super(myagent);
 		this.finished = false;
-		this.graph = new mas.tools.MyGraph(myagent, g);
+		this.graph = ((FirstAgent)myagent).getmyGraph();
 		//super(myagent);
 	}
 
@@ -62,7 +63,12 @@ public class FirstAgentExplore extends SimpleBehaviour {
 		}
 	}
 	
+	public int onEnd(){
+		return 0;
+	}
+	
 	public boolean done(){
-		return this.finished;
+		//return this.finished;
+		return true;
 	}
 }

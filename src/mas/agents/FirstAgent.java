@@ -1,6 +1,7 @@
 package mas.agents;
 
 
+import jade.core.behaviours.FSMBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -14,7 +15,7 @@ import env.Couple;
 import env.Environment;
 import mas.abstractAgent;
 import mas.behaviours.*;
-import mas.tools.DFManager;
+import mas.tools.*;
 
 import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
 import org.graphstream.algorithm.generator.Generator;
@@ -37,6 +38,7 @@ public class FirstAgent extends abstractAgent{
 	
 	// graphe partiel connu
 	Graph graph;
+	MyGraph myGraph;
 	Iterator<Node> iter;
 
 
@@ -47,6 +49,18 @@ public class FirstAgent extends abstractAgent{
 	 *	 		2) add the behaviours
 	 *          
 	 */
+	public MyGraph getmyGraph(){
+		return this.myGraph;
+	}
+	
+	
+
+	public void initMyGraph(){
+		this.myGraph = new mas.tools.MyGraph((mas.abstractAgent)this, this.graph);
+	}
+
+
+
 	protected void setup(){
 
 		super.setup();
@@ -64,11 +78,12 @@ public class FirstAgent extends abstractAgent{
 		//setup graph
 		setupgraph();
 		//this.graph = new SingleGraph("test");
-		
+		initMyGraph();
 		//Add the behaviours
-		addBehaviour(new FirstAgentExplore((this), this.graph));
-		addBehaviour(new ShareMapBehaviour((this)));
-		addBehaviour(new ListenerBehaviour((this)));
+		addBehaviour(new FirstFSMBehaviour(this));
+		//addBehaviour(new FirstAgentExplore((this)));
+		//addBehaviour(new ShareMapBehaviour((this)));
+		//addBehaviour(new ListenerBehaviour((this)));
 		//addBehaviour(new SayHello(this));
 
 		DFManager.register(this, "explorer");
