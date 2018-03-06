@@ -1,11 +1,13 @@
 package mas.behaviours;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 
+import env.Couple;
 import jade.core.Agent;
 import jade.core.behaviours.SimpleBehaviour;
 import mas.abstractAgent;
@@ -27,7 +29,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 	public ListenerBehaviour(final Agent myagent) {
 		super(myagent);
 		this.mailbox = new Messages(myagent);
-		this.timeout = 10;
+		this.timeout = 100;
 		this.cpt = 0;
 		this.finished = false;
 		this.signalOut = 0;
@@ -42,14 +44,18 @@ public class ListenerBehaviour extends SimpleBehaviour {
 		// TODO Auto-generated method stub
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
 		ArrayList<String> listAgents = (ArrayList<String>) DFManager.getAllAgents(this.myAgent);
-		if (myPosition!=""){
-			System.out.println("I send ping");
+		String msgString = null ;
+		Object msgObject = null;
+		this.cpt++;
+		if (myPosition!="" && this.signalOut == 0){
+		//	System.out.println("I send ping");
 		    this.mailbox.broadcastString("ping", listAgents);
 		}
 		
-		if (this.cpt > this.timeout){
+		if (this.signalOut == 1 && this.cpt > this.timeout){
 			System.out.println("TIMEOUT");
 			this.signalOut = 0;
+			this.cpt = 0;
 		}
 		if(this.mapsent && this.mapreceived) {
 			System.out.println("SENT & RECEIVED");
@@ -57,28 +63,38 @@ public class ListenerBehaviour extends SimpleBehaviour {
 			//reinit
 			this.mapsent = false;
 			this.mapreceived = false;
+			this.cpt = 0;
 		}
 		else {
-			String msg = mailbox.getMsgString();
-			Object msgobject = mailbox.getMsgObject();
+			//Couple couple = mailbox.getMsg();
+			//getMsgObject et getString prennent un object dans la boite au lettre peu import que ce soit un string ou un object
+			msgString = this.mailbox.getMsgString(); 
+			msgObject = this.mailbox.getMsgObject();
 				
-			if (msg != null){
-				System.out.println("I receive the message : " + msg);
-				if (msg.equals("ping")){
+			if (msgString != null){
+			//	System.out.println("I receive the message : " + msgString);
+				if (msgString.equals("ping")){
 					//on répond
-					this.mailbox.broadcastString("roger ", listAgents);
+			//		System.out.println("I received the msg : ping, i stop and wait for the map");
+					this.mailbox.broadcastString("roger", listAgents);
 					this.signalOut = 1;
 					//on s'arrete
-				}else if (this.signalOut == 1 && msg.equals("roqer")){
+				}
+				if (msgString.equals("roger")){
+					//System.out.println("WOW");
 					//partager cartes
-					System.out.println("I AM SENDING MY MAP");
 					HashMap<String, Object> send = this.graph.toHashMap();
-					this.mailbox.broadcastObject(send, listAgents);
+					System.out.println("I AM SENDING MY MAP : " + send);
+					this.mailbox.broadcastObject((Serializable)(send), listAgents);
 					this.mapsent = true;
-				} else if(this.signalOut == 1 && this.mapreceived == false && msgobject instanceof HashMap) {
+				}
+			}
+				
+			if (msgObject != null){
+				if (msgObject instanceof HashMap){
 					//merger todo
 					System.out.println("I AM RECEIVEING A MAP");
-					HashMap<String, Object> received = (HashMap<String, Object>)msgobject;
+					HashMap<String, Object> received = (HashMap<String, Object>)msgObject;
 					MyGraph newMap = new mas.tools.MyGraph((abstractAgent) this.myAgent, received);
 					this.graph.merge(newMap);
 					

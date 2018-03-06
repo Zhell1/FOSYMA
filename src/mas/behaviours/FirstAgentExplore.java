@@ -38,8 +38,7 @@ public class FirstAgentExplore extends SimpleBehaviour {
 	@Override
 	public void action() {
 		//==================================================
-		//HashMap<String, Object> map = this.graph.toHashMap();
-		//System.out.println(map);
+		//Il y a un probleme de noeud qui reviennent dans la bordure
 		//==================================================
 		//Example to retrieve the current position
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();

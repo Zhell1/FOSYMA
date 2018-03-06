@@ -39,6 +39,7 @@ import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.view.Viewer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import java.util.Random;
 
 /**************************************
  * 
@@ -109,25 +110,32 @@ public class MyGraph {
 		Float mini = Float.MAX_VALUE;
 		float dist;
 		int cpt = 0;
-		Node bestNode = null;
+		List<Node> LbestNode = new ArrayList<Node>();
 		for (String name: this.getBordure()){
 			Node node = this.graph.getNode(name);
 			dist = (float) (dijkstra.getPathLength(node) - 1);
 			if (dist < mini){
 				mini = dist;
-				bestNode = node;
+				LbestNode.clear();
+				LbestNode.add(node);
+			}
+			if (dist == mini){
+				LbestNode.add(node);
 			}
 		}
 		// Le path est une pile, on doit donc la reverse
+		Random r = new Random();
+		Node bestNode = LbestNode.get(r.nextInt(LbestNode.size()));
 		Path path = dijkstra.getPath(bestNode);
 		ArrayList <String> res = new ArrayList <String>();
 		while (path.size() > 1){
 			Node n = path.popNode();
 			res.add(n.toString());
 		}
+		
 	
 		String name = this.myAgent.getLocalName();
-		System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
+		//System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
 		return res;
 	}
 	
@@ -149,7 +157,8 @@ public class MyGraph {
 		Node n = this.graph.getNode(position);
 		if (n == null){
 			n = this.graph.addNode(position);
-			n.addAttribute("explored", false);		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+			n.addAttribute("explored", false);		
+			this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
 			this.bordure.add(position);
 		}
 	}
@@ -210,7 +219,8 @@ public class MyGraph {
 					String liaison = myPosition +"_"+ voisin;
 					String inv = voisin + "_" + myPosition;
 					addVoisin(voisin);
-					if (this.graph.getEdge(inv) == null){
+					/* Pour une raison étrange apres le merge, on a des probleme de creation d'arrete deja existante */
+					if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
 					this.graph.addEdge(liaison, myPosition, voisin).addAttribute("length",1);
 					}
 				}
@@ -289,38 +299,68 @@ public class MyGraph {
 	public HashMap<String, Object> getAttributeHashMap(Node n){
 		HashMap<String, Object> res = new HashMap<String, Object>();
 			for (String at : n.getAttributeKeySet()){
+				if (this.attributs.contains(at)){
 				res.put(at, n.getAttribute(at));
+				}
 			}
 		return res;
 	}
 	
+	public Set<String> getNodeIDSet(){
+		Set<String> res = new HashSet<String>();
+		for (Node n : this.graph.getNodeSet()){
+			res.add(n.getId());
+		}
+		return res;
+	}
+	
 	public HashMap<String, Object> toHashMap(){
+		/* Normalement c'est Serializable maintenent
+		 * Je fais des conversion car les types nodes et Edges ne sont pas serializable donc je convertis tous en String ... */
 		HashMap<String, Object> res = new HashMap<String, Object>();
-		res.put("nodes", this.graph.getNodeSet());
-		res.put("edges", this.graph.getEdgeSet());
+		HashMap<String, Object> att;
+		String id;
+		List<Couple> nodes = new ArrayList<Couple>();
+		List<Couple> edges = new ArrayList<Couple>();
+		for (Node n : this.graph.getNodeSet()){
+			id = (n.getId());
+			att = getAttributeHashMap(n);
+			Couple couple = new Couple(id, att);
+			nodes.add(couple);
+		}
+		for (Edge e : this.graph.getEdgeSet()){
+			Node p0 = e.getNode0();
+			Node p1 = e.getNode1();
+			Couple couple = new Couple(p0.toString(), p1.toString());
+			edges.add(couple);
+		}
+		res.put("nodes", nodes);
+		res.put("edges", edges);
 		res.put("border", this.bordure);
-		Collection<Edge> e = this.graph.getEdgeSet();
 		return res;
 	}
 	
 	public MyGraph (abstractAgent myagent, HashMap<String, Object> map){
-		Collection<Node>  nodes = (Collection<Node>) map.get("nodes");
-		Collection<Edge> edges = (Collection<Edge>) map.get("edges");
+		Collection<Couple>  nodes = (Collection<Couple>) map.get("nodes");
+		Collection<Couple> edges = (Collection<Couple>) map.get("edges");
 		HashSet<String> border = (HashSet<String>) map.get("border");
 		this.graph = new SingleGraph("bla");
 		Node addedNode;
 		HashMap<String, Object> attMap;
 		//add Node
-		for (Node n : nodes){
-			this.graph.addNode(n.getId());
-			addedNode = this.graph.getNode(n.getId());
-			attMap = getAttributeHashMap(n);
-			addedNode.addAttributes(attMap);
+		String n;
+		HashMap<String, Object> att;
+		for (Couple c : nodes){
+			n = (String)c.getLeft();
+			att = (HashMap<String, Object>)c.getRight();
+			this.graph.addNode(n);
+			addedNode = this.graph.getNode(n);
+			addedNode.addAttributes(att);
 		}
-		for (Edge e : edges){
-			Node p0 = e.getNode0();
-			Node p1 = e.getNode1();
-			String liaison = p0.toString() + "-" + p1.toString();
+		for (Couple c : edges){
+			String p0 = (String)c.getLeft();
+			String p1 = (String)c.getRight();
+			String liaison = p0 + "_" + p1;
 			this.graph.addEdge(liaison, p0, p1);
 		}
 		this.myAgent = ((mas.abstractAgent) myagent);
@@ -330,9 +370,23 @@ public class MyGraph {
 	}
 	
 	public void merge(MyGraph g){
-		//modifie sur place
+		/* modifie sur place
+		 * Pour la bordure on est obliger de la recalculer
+		 */
 		Graphs.mergeIn(this.graph, g.getGraphStream());
-		this.bordure.retainAll(g.getBordure());
+		Set<String> newBordure = new HashSet<String>();
+		for (Node n : this.graph.getNodeSet()){
+			boolean e = n.getAttribute("explored");
+			Node other = g.graph.getNode(n.getId());
+			if (other != null) {
+				boolean other_e = other.getAttribute("explored");
+				n.setAttribute("explored", e || other_e);
+			}
+			if (!((boolean) n.getAttribute("explored"))){
+				newBordure.add(n.getId());
+			}
+		}
+		this.bordure = newBordure;
 	}
 	
 	public Graph getGraphStream(){

@@ -26,10 +26,10 @@ public class ShareMapBehaviour extends SimpleBehaviour {
 	public void action() {
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
 		ArrayList<String> listAgents = (ArrayList<String>) DFManager.getAllAgents(this.myAgent);
-		System.out.println(this.myAgent.getLocalName()+" sees : " + listAgents);
+		//System.out.println(this.myAgent.getLocalName()+" sees : " + listAgents);
 
 		if (myPosition!=""){
-			System.out.println("Agent "+this.myAgent.getLocalName()+ " is trying to reach its friends");
+			//System.out.println("Agent "+this.myAgent.getLocalName()+ " is trying to reach its friends");
 		    this.mailbox.broadcastString("ping", listAgents);
 			this.finished = true;
 		}
