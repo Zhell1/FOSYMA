@@ -26,20 +26,19 @@ public class FirstAgentExplore extends SimpleBehaviour {
 	private static final long serialVersionUID = 9088209402507795289L;
 	private boolean finished;
 	private MyGraph graph;
+	private int signal;
 	
 	
 	public FirstAgentExplore (final mas.abstractAgent myagent) {
 		super(myagent);
 		this.finished = false;
 		this.graph = ((FirstAgent)myagent).getmyGraph();
+		this.signal = 0;
 		//super(myagent);
 	}
 
 	@Override
 	public void action() {
-		//==================================================
-		//Il y a un probleme de noeud qui reviennent dans la bordure
-		//==================================================
 		//Example to retrieve the current position
 		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
 		this.graph.add();
@@ -48,7 +47,15 @@ public class FirstAgentExplore extends SimpleBehaviour {
 		if (path != null){
 			String move = path.get(path.size()-1);
 			System.out.println(this.myAgent.getLocalName()+": I try to move to : " + move);
-			((mas.abstractAgent)this.myAgent).moveTo(move);
+			boolean successMove = ((mas.abstractAgent)this.myAgent).moveTo(move);
+			if (!successMove){
+				System.out.println("blocage");
+				this.signal = 1;
+			}
+			else {
+				this.signal = 0;
+			}
+			
 		}
 		else {
 			System.out.println("Fin de l'exploration !"+"\tNombre de noeud exploré : " + this.graph.getGraphStream().getNodeCount());
@@ -62,8 +69,12 @@ public class FirstAgentExplore extends SimpleBehaviour {
 		}
 	}
 	
+	public void reset(){
+		this.signal = 0;
+	}
+	
 	public int onEnd(){
-		return 0;
+		return this.signal;
 	}
 	
 	public boolean done(){

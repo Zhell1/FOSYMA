@@ -29,7 +29,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 	public ListenerBehaviour(final Agent myagent) {
 		super(myagent);
 		this.mailbox = new Messages(myagent);
-		this.timeout = 100;
+		this.timeout = 1000;
 		this.cpt = 0;
 		this.finished = false;
 		this.signalOut = 0;
@@ -84,7 +84,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 					//System.out.println("WOW");
 					//partager cartes
 					HashMap<String, Object> send = this.graph.toHashMap();
-					System.out.println("I AM SENDING MY MAP : " + send);
+					System.out.println("Agent " + this.myAgent.getLocalName() + "is sending his map" + send);
 					this.mailbox.broadcastObject((Serializable)(send), listAgents);
 					this.mapsent = true;
 				}
@@ -93,10 +93,12 @@ public class ListenerBehaviour extends SimpleBehaviour {
 			if (msgObject != null){
 				if (msgObject instanceof HashMap){
 					//merger todo
-					System.out.println("I AM RECEIVEING A MAP");
+					System.out.println(this.myAgent.getLocalName() + " is receiving a map");
+					System.out.println("bordure before merge : " + this.graph.getBordure());
 					HashMap<String, Object> received = (HashMap<String, Object>)msgObject;
 					MyGraph newMap = new mas.tools.MyGraph((abstractAgent) this.myAgent, received);
 					this.graph.merge(newMap);
+					System.out.println("new bordure : " + this.graph.getBordure());
 					
 					this.mapreceived = true;
 				}
@@ -108,6 +110,11 @@ public class ListenerBehaviour extends SimpleBehaviour {
 			}
 		}
 		
+	}
+	
+	public void onStart(){
+		this.signalOut = 0;
+		this.cpt = 0;
 	}
 	
 	public int onEnd(){

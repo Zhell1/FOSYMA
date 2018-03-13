@@ -39,6 +39,7 @@ import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.view.Viewer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
 import java.util.Random;
 
 /**************************************
@@ -64,6 +65,8 @@ public class MyGraph {
 
 	private abstractAgent myAgent;
 
+	//private HashSet<String> history;
+
 	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
 		if (myagent == null || mygraph == null){
 			System.out.println("Les composants ne sont pas encore prêts");
@@ -74,6 +77,7 @@ public class MyGraph {
 		this.graph = mygraph;
 		this.bordure = new HashSet<String>();
 		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+		//this.history = new HashSet<String>();
 
 		//super(myagent);
 	}
@@ -139,6 +143,23 @@ public class MyGraph {
 		return res;
 	}
 	
+	public boolean bordureConsistance(){
+		Set<String> L = new HashSet<String>();
+		
+		yield(this.graph.getNodeSet().toString());
+		
+		for (Node n: this.graph.getNodeSet()){
+			Object o = n.getAttribute("explored");
+			//probleme car les noeuds false ne sont pas toujours rajouter
+			if (!(boolean)(n.getAttribute("explored"))){
+				L.add(n.getId());
+			}
+		}
+		yield("Lstring :" + L.toString() + "\n bordure : " + this.bordure+"\n"+L.equals(this.bordure));
+		return L.equals(this.bordure);
+		
+	}
+	
 	public Set<String> getBordure(){
 		return this.bordure;
 	}
@@ -158,8 +179,13 @@ public class MyGraph {
 		if (n == null){
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);		
-			this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+			this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2"));
+			/*if (this.history.contains(position)){
+				System.out.println("=========== Ajout d'un noeud deja exploré =============");
+			}
+			*/
 			this.bordure.add(position);
+			//this.history.add(position);
 		}
 	}
 	
@@ -170,6 +196,12 @@ public class MyGraph {
 		else{
 			return false;
 		}
+	}
+	
+	public void yield(String msg){
+		System.out.println("\n\n\n==========================================");
+		System.out.println(msg);
+		System.out.println("\n\n\n==========================================");
 	}
 	
 	public void add() {
@@ -214,6 +246,7 @@ public class MyGraph {
 				n.addAttribute("tresortype2", tresortype2);
 				n.addAttribute("value2", value2);
 				this.bordure.remove(myPosition);
+			
 				for (int i =1; i < lobs.size(); i++){
 					String voisin = (lobs.get(i)).getLeft();
 					String liaison = myPosition +"_"+ voisin;
@@ -228,6 +261,7 @@ public class MyGraph {
 		}
 		else {
 			// Le noeud n'est pas dans le graphe (seulement non initialiser)
+			System.out.println("Initialisation du graphe en : " + myPosition);
 			n = this.graph.addNode(myPosition);
 			n.addAttribute("explored", true);
 			n.addAttribute("tresortype1", tresortype1);
@@ -242,55 +276,18 @@ public class MyGraph {
 			}
 			
 		}
+		/*
+		boolean test = bordureConsistance();
+		if (!(test)){
+			System.out.println("\n\n\n ===============================");
+			System.out.println("Probleme consistance add");
+			System.out.println("\n\n\n ===============================");
+		}
+		*/
 	}
 	}
 	
-	public JSONObject toJSON(){
-		//https://www.geeksforgeeks.org/parse-json-java/
-		JSONObject j = new JSONObject();
-		JSONObject help = new JSONObject();
-		for(Node n : this.graph.getNodeSet()){
-			Map m = new HashMap(2);
-			m.put("id", n.getId());
-			JSONArray L = new JSONArray();
-			for(String att : this.attributs){
-				JSONObject temp = new JSONObject();
-				temp.put(att, n.getAttribute(att));
-				L.add(temp);
-			}
-			m.put("attribute", L);
-			help.put("node", m);
-		}
-		j.put("nodes", help);
-		//il nous reste a faire les aretes
-		return j;
-	}
-		
-	public String toStringJSON() {
-		JSONObject j = new JSONObject();
-		
-		String node = "nodes : {";
-		String temp = "";
-		for (Node n : this.graph.getNodeSet()){
-			temp = "{id : " + n.getId() + "," + "attribute : (" ;
-			for(String att : this.attributs){
-				temp += att+" : "+ n.getAttribute(att) +",";
-			}
-			temp = (String) temp.subSequence(0, temp.length()-1);
-			temp += ")";
-			//System.out.println(temp);
-			node += temp;
-		}
-		String arretes = "} ; arretes : { ";
-		for (Edge e : this.graph.getEdgeSet()){
-			String g = e.getNode0().toString();
-			String d = e.getNode1().toString();
-			arretes += "{" + g + "," + d + "},";
-		}
-		arretes = (String) arretes.subSequence(0, arretes.length()-1);
-		return node+arretes+" }";
-		// nodes : { node1: [a1:a2:a3], node2 : [a5:a3:a0]}mas.abstractAgent)
-	}
+
 	
 	/* ====================================================
 	 *              HASH PART
@@ -373,18 +370,37 @@ public class MyGraph {
 		/* modifie sur place
 		 * Pour la bordure on est obliger de la recalculer
 		 */
+		boolean test = bordureConsistance();
+		if (!test){
+			yield("Erreur consistance merge");
+		}
 		Graphs.mergeIn(this.graph, g.getGraphStream());
 		Set<String> newBordure = new HashSet<String>();
 		for (Node n : this.graph.getNodeSet()){
 			boolean e = n.getAttribute("explored");
+			//System.out.println("node :" + n.getId());
 			Node other = g.graph.getNode(n.getId());
+			
 			if (other != null) {
 				boolean other_e = other.getAttribute("explored");
-				n.setAttribute("explored", e || other_e);
+				boolean b = e || other_e;
+				System.out.println("node : " + n.getId() + ",e : " + e + " other e : " + other_e + " resultat ou : " + b);
+				n.setAttribute("explored",b);
 			}
 			if (!((boolean) n.getAttribute("explored"))){
+				System.out.println("the node " + n.getId() +  "is added to the bordure");
 				newBordure.add(n.getId());
 			}
+		}
+		if(this.bordure.size() == 0 && newBordure.size() > 0) {
+			System.out.println("\n\n################## \n");
+			System.out.println();
+			System.out.println("Noeuds :" + this.graph.getNodeSet());
+			for (Node n : this.graph.getNodeSet()){
+				System.out.println(n.getId()+" "+n.getAttribute("explored"));
+			}
+			System.out.println("\n\n################## \n");
+			
 		}
 		this.bordure = newBordure;
 	}
