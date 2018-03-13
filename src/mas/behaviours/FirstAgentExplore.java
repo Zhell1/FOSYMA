@@ -46,10 +46,10 @@ public class FirstAgentExplore extends SimpleBehaviour {
 		ArrayList<String> path = this.graph.NextDijsktra();
 		if (path != null){
 			String move = path.get(path.size()-1);
-			System.out.println(this.myAgent.getLocalName()+": I try to move to : " + move);
-			boolean successMove = ((mas.abstractAgent)this.myAgent).moveTo(move);
+			print("I try to move to : " + move);
+			boolean successMove = ((FirstAgent)this.myAgent).moveAgent(move);
 			if (!successMove){
-				System.out.println("blocage");
+				print("blocage");
 				this.signal = 1;
 			}
 			else {
@@ -58,7 +58,7 @@ public class FirstAgentExplore extends SimpleBehaviour {
 			
 		}
 		else {
-			System.out.println("Fin de l'exploration !"+"\tNombre de noeud exploré : " + this.graph.getGraphStream().getNodeCount());
+			print("Fin de l'exploration !"+"\tNombre de noeud exploré : " + this.graph.getGraphStream().getNodeCount());
 			this.finished = true;
 		}
 		try {
@@ -67,6 +67,10 @@ public class FirstAgentExplore extends SimpleBehaviour {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private void print(String m){
+		System.out.println(this.myAgent.getLocalName()+" : "+m);
 	}
 	
 	public void reset(){

@@ -22,9 +22,14 @@ public class Messages {
 	}
 	
 	public void sendObject(Object o, String destinataire){
+		sendObject(o, destinataire, "broadcast");
+	}
+	
+	public void sendObject(Object o, String destinataire, String idconv){
 		ACLMessage msg = new ACLMessage();
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
 		msg.setSender(this.agent.getAID());
+		msg.setConversationId(idconv);
 		msg.setLanguage("Object");
 		try {
 			if (o != null){
@@ -39,11 +44,16 @@ public class Messages {
 	}
 	
 	public boolean sendString(String content, String destinataire){
+		return sendString(content, destinataire, "broadcast"); //channel de base = "broadcast"
+	}
+	
+	public boolean sendString(String content, String destinataire, String idconv){
 		ACLMessage msg = new ACLMessage();
 		AID aid = new AID(destinataire,AID.ISLOCALNAME);
 		msg.setSender(this.agent.getAID());
+		msg.setConversationId(idconv);
 		//System.out.println("AID : " + aid);
-		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
+		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));		
 		msg.setContent(content);
 		msg.setLanguage("String");
 		//System.out.println("Message sendString : " + msg);
@@ -68,11 +78,14 @@ public class Messages {
 	}
 		
 	public Couple getMsg(){
+		return getMsg("broadcast");
+	}
+	public Couple getMsg(String idconv){
 		/* 
 		 * res.getLeft() -> String
 		 * res.getRight() -> Object 
 		 * provoque une null pointeur exception quand on print car 1 des 2 elements est forcement null*/
-		ACLMessage msg = this.agt.receive();
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
 		String c1 = null;
 		Object c2 = null;
 		if (msg != null){
@@ -88,7 +101,11 @@ public class Messages {
 	}
 	
 	public Object getMsgObject() {
-		ACLMessage msg = this.agt.receive();
+		return getMsgObject("broadcast");
+	}
+	
+	public Object getMsgObject(String idconv) {
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
 		if (msg != null){
 			 try {
 				 if (msg.getLanguage().equals("Object")){
@@ -104,10 +121,12 @@ public class Messages {
 			}
 			return null;
 	}
-	
 	public String getMsgString(){
-		MessageTemplate mt = MessageTemplate.MatchAll();
-		ACLMessage msg = this.agt.receive(mt);
+		return getMsgString("broadcast");
+	}
+	
+	public String getMsgString(String idconv){
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
 		if (msg != null){
 			if (msg.getLanguage().equals("String")){
 				return msg.getContent();
@@ -117,5 +136,47 @@ public class Messages {
 			}
 		}
 		return null;
+	}
+	
+	public Couple getMsgStringAndSender(){
+		return getMsgStringAndSender("broadcast");
+	}
+	
+	public Couple getMsgStringAndSender(String idconv){
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
+		if (msg != null){
+			String sender = msg.getSender().getLocalName();
+			String mess = "";
+			if (msg.getLanguage().equals("String")){
+				mess = msg.getContent();
+			}
+			else {
+				this.agt.sendMessage(msg);
+			}
+			Couple res = new Couple(mess,sender);
+			return res;
+		}
+		return null;
+	}
+	
+	public Couple getMsgObjectAndSender(){
+		return getMsgObjectAndSender("broadcast");
+	}
+	
+	public Couple getMsgObjectAndSender(String idconv){
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
+		String sender = msg.getSender().getLocalName();
+		String mess = "";
+		if (msg != null){
+			if (msg.getLanguage().equals("String")){
+				mess = msg.getContent();
+			}
+		}
+		Couple res = new Couple(mess,sender);
+		return res;
+	}
+	
+	public static void print(Agent agent, String m){
+		System.out.println(agent.getLocalName()+" : "+m);
 	}
 }

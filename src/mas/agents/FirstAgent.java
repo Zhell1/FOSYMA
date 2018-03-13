@@ -7,6 +7,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,15 +41,18 @@ public class FirstAgent extends abstractAgent{
 	Graph graph;
 	MyGraph myGraph;
 	Iterator<Node> iter;
-
-
-	/**
-	 * This method is automatically called when "agent".start() is executed.
-	 * Consider that Agent is launched for the first time. 
-	 * 			1) set the agent attributes 
-	 *	 		2) add the behaviours
-	 *          
-	 */
+	HashMap<String, Integer> stepMap = new HashMap<String, Integer>();
+	Integer step;
+	
+	public void updateStep(String idAgent){
+		stepMap.put(idAgent, step);
+	}
+	
+	public boolean moveAgent(String move){
+		this.step++;
+		return ((mas.abstractAgent)this).moveTo(move);	
+	}
+	
 	public MyGraph getmyGraph(){
 		return this.myGraph;
 	}
@@ -59,7 +63,13 @@ public class FirstAgent extends abstractAgent{
 		this.myGraph = new mas.tools.MyGraph((mas.abstractAgent)this, this.graph);
 	}
 
-
+	/**
+	 * This method is automatically called when "agent".start() is executed.
+	 * Consider that Agent is launched for the first time. 
+	 * 			1) set the agent attributes 
+	 *	 		2) add the behaviours
+	 *          
+	 */
 
 	protected void setup(){
 
@@ -79,6 +89,7 @@ public class FirstAgent extends abstractAgent{
 		setupgraph();
 		//this.graph = new SingleGraph("test");
 		initMyGraph();
+		this.step = 0;
 		//Add the behaviours
 		addBehaviour(new FirstFSMBehaviour(this));
 		//addBehaviour(new FirstAgentExplore((this)));
@@ -114,7 +125,9 @@ public class FirstAgent extends abstractAgent{
 		//SpriteManager sman = new SpriteManager(graph);
 		
 	}
-
+	public void print(String m){
+		System.out.println(this.getLocalName()+" : "+m);
+	}
 	/**
 	 * This method is automatically called after doDelete()
 	 */

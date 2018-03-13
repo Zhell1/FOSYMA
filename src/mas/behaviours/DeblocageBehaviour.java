@@ -22,7 +22,7 @@ public class DeblocageBehaviour extends SimpleBehaviour{
 		super(myagent);
 		this.graph = ((FirstAgent)myagent).getmyGraph();
 		this.signal = 0;
-		this.timeOut = 1000;
+		this.timeOut = 5;
 		this.cpt = 0;
 	}
 	
@@ -30,7 +30,7 @@ public class DeblocageBehaviour extends SimpleBehaviour{
 	public void action() {
 		// TODO Auto-generated method stub
 		if (this.cpt > this.timeOut){
-			System.out.println("RANDOM TIMEOUT");
+			print("RANDOM TIMEOUT");
 			this.signal = 1;
 		}
 		else {
@@ -39,8 +39,17 @@ public class DeblocageBehaviour extends SimpleBehaviour{
 			List<Couple<String,List<Attribute>>> lobs2=((mas.abstractAgent)this.myAgent).observe();//myPosition
 			Random r = new Random();
 			String nextMove = lobs2.get(r.nextInt(lobs2.size())).getLeft();
-			System.out.println("Random move to :" + nextMove);
-			((mas.abstractAgent)this.myAgent).moveTo(nextMove);
+			print("Random move to :" + nextMove);
+			boolean successMove =((FirstAgent)this.myAgent).moveTo(nextMove);
+			/*
+			if (!successMove){
+				print("blocage");
+				this.signal = 0;
+			}
+			else {
+				this.signal = 1;
+			}
+			*/
 			this.cpt++;
 		}
 	}
@@ -52,6 +61,9 @@ public class DeblocageBehaviour extends SimpleBehaviour{
 	public void reset(){
 		this.signal = 0;
 		this.cpt = 0;
+	}
+	private void print(String m){
+		System.out.println(this.myAgent.getLocalName()+" : "+m);
 	}
 
 	@Override

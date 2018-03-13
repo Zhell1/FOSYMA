@@ -3,6 +3,8 @@ package mas.behaviours;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -19,23 +21,24 @@ import mas.agents.*;
 public class ListenerBehaviour extends SimpleBehaviour {
 	private boolean finished;
 	private Messages mailbox;
-	private int signalOut;
+	private int stopmoving;
 	private int timeout;
 	private int cpt;
 	private boolean mapsent;
 	private boolean mapreceived;
 	private MyGraph graph;
+	private Set<CommunicationBehaviour> communicationSet;
 	
 	public ListenerBehaviour(final Agent myagent) {
 		super(myagent);
 		this.mailbox = new Messages(myagent);
-		this.timeout = 1000;
+		this.timeout = 2000;
 		this.cpt = 0;
-		this.finished = false;
-		this.signalOut = 0;
+		this.stopmoving = 0;
 		this.mapsent = false;
 		this.mapreceived = false;
 		this.graph = ((FirstAgent)myagent).getmyGraph();
+		this.communicationSet = new HashSet<CommunicationBehaviour>();
 	}
 
 
@@ -46,79 +49,64 @@ public class ListenerBehaviour extends SimpleBehaviour {
 		ArrayList<String> listAgents = (ArrayList<String>) DFManager.getAllAgents(this.myAgent);
 		String msgString = null ;
 		Object msgObject = null;
-		this.cpt++;
-		if (myPosition!="" && this.signalOut == 0){
-		//	System.out.println("I send ping");
-		    this.mailbox.broadcastString("ping", listAgents);
+		String idsender = null;
+		boolean allDead = true;
+		for (CommunicationBehaviour c : this.communicationSet){
+			if (!(c.done())){
+				allDead = false;
+			}
 		}
-		
-		if (this.signalOut == 1 && this.cpt > this.timeout){
-			System.out.println("TIMEOUT");
-			this.signalOut = 0;
-			this.cpt = 0;
-		}
-		if(this.mapsent && this.mapreceived) {
-			System.out.println("SENT & RECEIVED");
-			this.signalOut = 0;
-			//reinit
-			this.mapsent = false;
-			this.mapreceived = false;
-			this.cpt = 0;
+		if (allDead && this.stopmoving == 1){
+			this.stopmoving = 0;
 		}
 		else {
+			if (myPosition!="" && this.stopmoving == 0){
+				System.out.println("I send ping");
+			    this.mailbox.broadcastString("ping", listAgents);
+			}
 			//Couple couple = mailbox.getMsg();
 			//getMsgObject et getString prennent un object dans la boite au lettre peu import que ce soit un string ou un object
-			msgString = this.mailbox.getMsgString(); 
-			msgObject = this.mailbox.getMsgObject();
+			Couple couple = this.mailbox.getMsgStringAndSender("broadcast"); 
+			if (couple != null){
+				msgString = (String) couple.getLeft();
+				idsender = (String) couple.getRight();
+			}
 				
 			if (msgString != null){
 			//	System.out.println("I receive the message : " + msgString);
 				if (msgString.equals("ping")){
 					//on répond
-			//		System.out.println("I received the msg : ping, i stop and wait for the map");
+					System.out.println("I received the msg : ping, i stop and wait for the map");
 					this.mailbox.broadcastString("roger", listAgents);
-					this.signalOut = 1;
-					//on s'arrete
+					this.stopmoving = 1; //on s'arrete
 				}
 				if (msgString.equals("roger")){
-					//System.out.println("WOW");
-					//partager cartes
-					HashMap<String, Object> send = this.graph.toHashMap();
-					System.out.println("Agent " + this.myAgent.getLocalName() + "is sending his map" + send);
-					this.mailbox.broadcastObject((Serializable)(send), listAgents);
-					this.mapsent = true;
+					CommunicationBehaviour b = new CommunicationBehaviour((mas.abstractAgent)this.myAgent, idsender);
+					this.myAgent.addBehaviour(b);
+					this.communicationSet.add(b);
+
 				}
-			}
 				
-			if (msgObject != null){
-				if (msgObject instanceof HashMap){
-					//merger todo
-					System.out.println(this.myAgent.getLocalName() + " is receiving a map");
-					System.out.println("bordure before merge : " + this.graph.getBordure());
-					HashMap<String, Object> received = (HashMap<String, Object>)msgObject;
-					MyGraph newMap = new mas.tools.MyGraph((abstractAgent) this.myAgent, received);
-					this.graph.merge(newMap);
-					System.out.println("new bordure : " + this.graph.getBordure());
-					
-					this.mapreceived = true;
-				}
 			}
-		
-			else {
-			//Pour eviter de boucler comme une brute
-			block(100);
-			}
+
 		}
 		
+		//Pour eviter de boucler comme une brute
+		block(100);
+		
+			
 	}
 	
 	public void onStart(){
-		this.signalOut = 0;
+		this.stopmoving= 0;
 		this.cpt = 0;
 	}
 	
 	public int onEnd(){
-		return this.signalOut;
+		return this.stopmoving;
+	}
+	private void print(String m){
+		System.out.println(this.myAgent.getLocalName()+" : "+m);
 	}
 
 	@Override

@@ -155,7 +155,7 @@ public class MyGraph {
 				L.add(n.getId());
 			}
 		}
-		yield("Lstring :" + L.toString() + "\n bordure : " + this.bordure+"\n"+L.equals(this.bordure));
+		//yield("Lstring :" + L.toString() + "\n bordure : " + this.bordure+"\n"+L.equals(this.bordure));
 		return L.equals(this.bordure);
 		
 	}
@@ -261,7 +261,7 @@ public class MyGraph {
 		}
 		else {
 			// Le noeud n'est pas dans le graphe (seulement non initialiser)
-			System.out.println("Initialisation du graphe en : " + myPosition);
+			print("Initialisation du graphe en : " + myPosition);
 			n = this.graph.addNode(myPosition);
 			n.addAttribute("explored", true);
 			n.addAttribute("tresortype1", tresortype1);
@@ -370,43 +370,82 @@ public class MyGraph {
 		/* modifie sur place
 		 * Pour la bordure on est obliger de la recalculer
 		 */
-		boolean test = bordureConsistance();
-		if (!test){
-			yield("Erreur consistance merge");
+		boolean printdebug = false; //passer à true pour afficher le debug
+		
+		if(printdebug) {
+			System.out.println("\n\n---------MERGE ----------");
+			System.out.println("current graph:");
+			printGraph(this);
+			System.out.println("new graph to merge:");
+			printGraph(g);
 		}
-		Graphs.mergeIn(this.graph, g.getGraphStream());
+		
+		//Graphs.mergeIn(this.graph, g.getGraphStream());  //!\\ merge les noeuds mais force les attributs du nouveau graph
+		Graph newGraph = Graphs.merge(this.graph, g.getGraphStream()); //!\\ les attributs sont foireux aussi avec ça
+		MyGraph myNewGraph = new MyGraph(this.myAgent, newGraph);
+		
+		//System.out.println("after graphstream mergeIn():");
+		//printGraph(myNewGraph);
+		
+		//System.out.println("mise à jour des attributs et de la bordure:");
+		
+		if(printdebug) System.out.println("noeud déjà explorés dans l'union des 2 précédents:");
+		
 		Set<String> newBordure = new HashSet<String>();
-		for (Node n : this.graph.getNodeSet()){
-			boolean e = n.getAttribute("explored");
-			//System.out.println("node :" + n.getId());
-			Node other = g.graph.getNode(n.getId());
+		for (Node n : newGraph.getNodeSet()){
+			String nid = n.getId();
+			Node node1 = this.graph.getNode(nid);
+			Node node2 = g.graph.getNode(nid);
 			
-			if (other != null) {
-				boolean other_e = other.getAttribute("explored");
-				boolean b = e || other_e;
-				System.out.println("node : " + n.getId() + ",e : " + e + " other e : " + other_e + " resultat ou : " + b);
-				n.setAttribute("explored",b);
+			boolean e = false;
+			if(node1 != null) {
+				e = node1.getAttribute("explored");
 			}
+			boolean e2 = false;
+			if(node2 != null) {
+				e2 = node2.getAttribute("explored");
+			}
+			
+			boolean b = (e || e2);
+			if(printdebug) {
+				if(b) System.out.println(n.getId());
+			}
+			n.setAttribute("explored",b);
+			//System.out.println("test du noeud"+n.getId()+" mis à "+b);
+			
 			if (!((boolean) n.getAttribute("explored"))){
-				System.out.println("the node " + n.getId() +  "is added to the bordure");
+				//System.out.println("the node " + n.getId() +  "is added to the bordure");
 				newBordure.add(n.getId());
 			}
 		}
-		if(this.bordure.size() == 0 && newBordure.size() > 0) {
-			System.out.println("\n\n################## \n");
-			System.out.println();
-			System.out.println("Noeuds :" + this.graph.getNodeSet());
-			for (Node n : this.graph.getNodeSet()){
-				System.out.println(n.getId()+" "+n.getAttribute("explored"));
-			}
-			System.out.println("\n\n################## \n");
-			
-		}
 		this.bordure = newBordure;
+		this.graph = newGraph;
+		
+		if(printdebug){
+			System.out.println("\nnew graph obtained after merging:");
+			printGraph(this);
+			System.out.println("\n\n-------------------------");
+		}
+		
+		
+	}
+	
+	public void printGraph(MyGraph mygraph){
+		System.out.println("\n######## GRAPH ##########");
+		System.out.println("Noeuds : " + mygraph.graph.getNodeSet());
+		System.out.println("Bordure: " + mygraph.getBordure());
+		System.out.println("Noeuds Explorés?:");
+		for (Node n : mygraph.graph.getNodeSet()){
+			System.out.println(n.getId()+" "+n.getAttribute("explored"));
+		}
+		System.out.println("###########################\n");
 	}
 	
 	public Graph getGraphStream(){
 		return this.graph;
+	}
+	private void print(String m){
+		System.out.println(this.myAgent.getLocalName()+" : "+m);
 	}
 	/* ============================================================ */
 
