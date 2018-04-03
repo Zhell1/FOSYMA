@@ -287,6 +287,48 @@ public class MyGraph {
 	}
 	}
 	
+	public ArrayList<Node> getTreasuresList(){
+		ArrayList<Node> L = new ArrayList<Node>();
+		for (Node n : this.graph.getNodeSet()){
+			if ((boolean)n.getAttribute("tresortype1") || (boolean)n.getAttribute("tresortype2")){
+				L.add(n);
+			}
+		}
+		return L;
+	}
+	
+	public ArrayList<String> getCollectorNextNode(HeuristiqueInterface f){
+		/* f : la fonction heuristique */
+		if (this.graph.getNodeCount() == 0){
+			return null;
+		}
+		String position = (this.myAgent.getCurrentPosition());
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		dijkstra.init(this.graph);
+		dijkstra.setSource(this.graph.getNode(position));
+		dijkstra.compute();
+		
+		ArrayList<Node> L = getTreasuresList();
+		ArrayList<Couple<Node, Integer>> distMap = new ArrayList<Couple<Node, Integer>>();
+		Float mini = Float.MAX_VALUE;
+		float dist;
+		int cpt = 0;
+		for (Node node: L){
+			dist = (float) (dijkstra.getPathLength(node) - 1);
+			distMap.add(new Couple(node, dist));
+		}
+		// on applique une fonction heurisitique ()
+		Node pos = f.consult(distMap);
+		Path path = dijkstra.getPath(pos);
+		ArrayList <String> res = new ArrayList <String>();
+		while (path.size() > 1){
+			Node n = path.popNode();
+			res.add(n.toString());
+		}
+		return res;
+		
+	}
+	
 
 	
 	/* ====================================================

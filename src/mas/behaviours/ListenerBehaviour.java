@@ -28,10 +28,13 @@ public class ListenerBehaviour extends SimpleBehaviour {
 	private boolean mapreceived;
 	private MyGraph graph;
 	private Set<CommunicationBehaviour> communicationSet;
+	private FirstAgent a;
+	private int treshold; //nombre de pas avant de renvoyer la map (ou recevoir)
 	
 	public ListenerBehaviour(final Agent myagent) {
 		super(myagent);
 		this.mailbox = new Messages(myagent);
+		this.a = (FirstAgent)(myagent);
 		this.timeout = 2000;
 		this.cpt = 0;
 		this.stopmoving = 0;
@@ -39,6 +42,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 		this.mapreceived = false;
 		this.graph = ((FirstAgent)myagent).getmyGraph();
 		this.communicationSet = new HashSet<CommunicationBehaviour>();
+		this.treshold = 5; 
 	}
 
 
@@ -77,14 +81,18 @@ public class ListenerBehaviour extends SimpleBehaviour {
 				if (msgString.equals("ping")){
 					//on répond
 					System.out.println("I received the msg : ping, i stop and wait for the map");
-					this.mailbox.broadcastString("roger", listAgents);
-					this.stopmoving = 1; //on s'arrete
+					if (a.getStep() - a.getStepId(idsender) >= this.treshold){ //10 pas avant de renvoyer map
+						this.mailbox.broadcastString("roger", listAgents);
+						this.stopmoving = 1; //on s'arrete
+					}
+					else {
+						//System.out.println("******************************************************* \n \n");
+					}
 				}
 				if (msgString.equals("roger")){
 					CommunicationBehaviour b = new CommunicationBehaviour((mas.abstractAgent)this.myAgent, idsender);
 					this.myAgent.addBehaviour(b);
 					this.communicationSet.add(b);
-
 				}
 				
 			}

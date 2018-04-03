@@ -13,6 +13,7 @@ import java.util.List;
 
 import env.Attribute;
 import env.Couple;
+import env.EntityType;
 import env.Environment;
 import mas.abstractAgent;
 import mas.behaviours.*;
@@ -35,17 +36,35 @@ public class FirstAgent extends abstractAgent{
 	/**
 	 * 
 	 */
+	
+	public void supersetup(){
+		super.setup();
+	}
+	
 	private static final long serialVersionUID = -1784844593772918359L;
 	
 	// graphe partiel connu
 	Graph graph;
 	MyGraph myGraph;
 	Iterator<Node> iter;
-	HashMap<String, Integer> stepMap = new HashMap<String, Integer>();
+	HashMap<String, Integer> stepMap;
 	Integer step;
 	
+	public Integer getStep(){
+		return this.step;
+	}
+	
+	public Integer getStepId(String idAgent){
+		Integer v = this.stepMap.get(idAgent);
+		if (v == null){
+			this.stepMap.put(idAgent, 0);
+			return 0;
+		}
+		return v;
+	}
+	
 	public void updateStep(String idAgent){
-		stepMap.put(idAgent, step);
+		this.stepMap.put(idAgent, step);
 	}
 	
 	public boolean moveAgent(String move){
@@ -75,21 +94,19 @@ public class FirstAgent extends abstractAgent{
 
 		super.setup();
 
-		//get the parameters given into the object[]. In the current case, the environment where the agent will evolve
 		final Object[] args = getArguments();
-		if(args[0]!=null){
-
-			deployAgent((Environment) args[0]);
-
+		if(args!=null && args[0]!=null && args[1]!=null){
+			deployAgent((Environment) args[0],(EntityType)args[1]);
 		}else{
 			System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
-			System.exit(-1);
-		}
+                        System.exit(-1);
+                }
 		//setup graph
 		setupgraph();
 		//this.graph = new SingleGraph("test");
 		initMyGraph();
 		this.step = 0;
+		this.stepMap = new HashMap<String, Integer>();
 		//Add the behaviours
 		addBehaviour(new FirstFSMBehaviour(this));
 		//addBehaviour(new FirstAgentExplore((this)));

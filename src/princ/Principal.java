@@ -9,6 +9,7 @@ import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import mas.agents.CollectorAgent;
 import mas.agents.DummyCollectorAgent;
 import mas.agents.DummyExploAgent;
 import mas.agents.DummyTankerAgent;
@@ -232,20 +233,21 @@ public class Principal {
 			e.printStackTrace();
 		}
 		
-		/*
+
 		//Collector (backPack)
 		c = containerList.get("container0");
 		agentName="Agent3";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,DummyCollectorAgent.class.getName(),objtab);
+			AgentController	ag=c.createNewAgent(agentName,CollectorAgent.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
 
+		/*
 		//Collector (backPack)
 		c = containerList.get("container0");
 		agentName="Agent4";
@@ -258,6 +260,7 @@ public class Principal {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
+		*/
 
 		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
 		c = containerList.get("container0");
@@ -271,7 +274,7 @@ public class Principal {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 
 
 
