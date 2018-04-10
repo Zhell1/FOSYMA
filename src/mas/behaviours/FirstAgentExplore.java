@@ -28,45 +28,62 @@ public class FirstAgentExplore extends SimpleBehaviour {
 	private boolean finished;
 	private MyGraph graph;
 	private int signal; // 1 = blocage, 0 = ok, 2 = tresor trouvé en explo
-	boolean isexplo;
+	int inputsignal;
 	private abstractAgent myagent;
+	private ArrayList<String> path;
 	
-	
-	public FirstAgentExplore (final mas.abstractAgent myagent, boolean isexplo) {
+	/*
+	 * inputsignal:
+	 * 0 -> explorateur
+	 * 1 -> collecteur qui cherche un trésor
+	 * 2 -> collecteur qui à un backpack et cherche le silo
+	 */
+	public FirstAgentExplore (final mas.abstractAgent myagent, int inputsignal) {
 		super(myagent);
 		this.finished = false;
-		this.graph = ((FirstAgent)myagent).getmyGraph();
+		this.graph = ((GraphAgent)myagent).getmyGraph();
 		this.signal = 0;
 		//super(myagent);
-		this.isexplo = isexplo;
+		this.inputsignal= inputsignal;
 		this.myagent = myagent;
 	}
+
 
 	@Override
 	public void action() {
 		//Example to retrieve the current position
-		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
+		String myPosition=((GraphAgent)this.myAgent).getCurrentPosition();
 		this.graph.add();
-		//example related to the use of the backpack for the treasure hunt
-		ArrayList<String> path = this.graph.NextDijsktra();
+		
+		if(this.inputsignal==1){
+			print("IIIII AAAAAAAAAAAMMMMMMMMMMMMMM AGENT 33333333333333333");
+		}
+		
+		// si collecteur qui cherche un trésor et en trouve un
+		if (this.graph.getMyTreasuresList().size() > 0 && this.inputsignal==1){
+			//si il trouve un tresors il sort du behaviors explorer
+			print("EXPLOOOOOOOOOOO COLLLEECTTOOOOOOR");
+			this.signal = 2;
+			return;
+		}
+		// si collecteur qui cherche le silo et le trouve
+		if (this.graph.getMyTreasuresList().size() > 0 && this.inputsignal==2){
+			//si il trouve le silo il sort du behaviors explorer
+			this.signal = 3;
+			return;
+		}
+		//
+		path = graph.NextDijsktra();
 		if (path != null){
 			String move = path.get(path.size()-1);
 			print("I try to move to : " + move);
-			boolean successMove = ((FirstAgent)this.myAgent).moveAgent(move);
+			boolean successMove = ((GraphAgent)this.myAgent).moveAgent(move);
 			if (!successMove){
 				print("blocage");
 				this.signal = 1;
 			}
 			else {
 				this.signal = 0;
-				//regarder si il y a un trésor sur le nouveau noeud exploré
-				if(isexplo) {
-					String type = this.myagent.getMyTreasureType();
-					int treasurevalue = this.graph.getTreasureValue(myPosition, type);
-					if(treasurevalue > 0) {
-						this.signal = 2;
-					}
-				}
 			}
 		}
 		else {

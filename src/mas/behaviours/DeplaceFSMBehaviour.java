@@ -13,7 +13,7 @@ public class DeplaceFSMBehaviour extends FSMBehaviour {
 	public DeplaceFSMBehaviour(abstractAgent a){
 		/* Il faut que les comportements implémentent une fonction int onEnd() qui indique le signal de transition */
 		
-		registerFirstState(new FirstAgentExplore(a, false), "explo");
+		registerFirstState(new FirstAgentExplore(a, 0), "explo");
 		registerState(new DeblocageBehaviour(a), "deblocage");
 		
 		registerDefaultTransition("listener", "explo");

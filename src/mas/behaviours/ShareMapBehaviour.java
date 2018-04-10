@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import mas.abstractAgent;
 import mas.agents.FirstAgent;
+import mas.agents.GraphAgent;
 import mas.tools.Messages;
 import mas.tools.MyGraph;
 import jade.core.behaviours.SimpleBehaviour;
@@ -24,7 +25,7 @@ public class ShareMapBehaviour extends SimpleBehaviour {
 	
 	
 
-	public ShareMapBehaviour(final mas.abstractAgent myagent, String sender ){
+	public ShareMapBehaviour(final GraphAgent myagent, String sender ){
 		super(myagent);
 		this.finished = false;
 		if((this.myAgent.getLocalName()).compareTo(sender) > 0){
@@ -39,7 +40,7 @@ public class ShareMapBehaviour extends SimpleBehaviour {
 		this.ackreceived = false;
 		this.timeout = 10;
 		this.cpt = 0;
-		this.graph = ((FirstAgent)myagent).getmyGraph();
+		this.graph = ((GraphAgent)myagent).getmyGraph();
 		this.sender = sender;
 		
 	}

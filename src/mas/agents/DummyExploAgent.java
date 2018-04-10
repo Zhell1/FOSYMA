@@ -7,7 +7,7 @@ import mas.abstractAgent;
 import mas.behaviours.*;
 
 
-public class DummyExploAgent extends abstractAgent{
+public class DummyExploAgent extends GraphAgent{
 
 	/**
 	 * 

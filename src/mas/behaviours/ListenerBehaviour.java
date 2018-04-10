@@ -28,19 +28,19 @@ public class ListenerBehaviour extends SimpleBehaviour {
 	private boolean mapreceived;
 	private MyGraph graph;
 	private Set<ShareMapBehaviour> communicationSet;
-	private FirstAgent a;
+	private GraphAgent a;
 	private int treshold; //nombre de pas avant de renvoyer la map (ou recevoir)
 	
 	public ListenerBehaviour(final Agent myagent) {
 		super(myagent);
 		this.mailbox = new Messages(myagent);
-		this.a = (FirstAgent)(myagent);
+		this.a = (GraphAgent)(myagent);
 		this.timeout = 2000;
 		this.cpt = 0;
 		this.stopmoving = 0;
 		this.mapsent = false;
 		this.mapreceived = false;
-		this.graph = ((FirstAgent)myagent).getmyGraph();
+		this.graph = ((GraphAgent)myagent).getmyGraph();
 		this.communicationSet = new HashSet<ShareMapBehaviour>();
 		this.treshold = 5; 
 	}
@@ -49,7 +49,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 	@Override
 	public void action() {
 		// TODO Auto-generated method stub
-		String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
+		String myPosition=((GraphAgent)this.myAgent).getCurrentPosition();
 		ArrayList<String> listAgents = (ArrayList<String>) DFManager.getAllAgents(this.myAgent);
 		String msgString = null ;
 		Object msgObject = null;
@@ -90,9 +90,19 @@ public class ListenerBehaviour extends SimpleBehaviour {
 					}
 				}
 				if (msgString.equals("roger")){
-					ShareMapBehaviour b = new ShareMapBehaviour((mas.abstractAgent)this.myAgent, idsender);
+					ShareMapBehaviour b = new ShareMapBehaviour((GraphAgent)this.myAgent, idsender);
 					this.myAgent.addBehaviour(b);
 					this.communicationSet.add(b);
+				}
+				if(msgString.startsWith("silo")){
+					print("**********************************************************");
+					String s = "silo";
+					String siloposition = (String) msgString.subSequence(s.length()+1, msgString.length());
+					print("siloposition : "+siloposition);
+					print("**********************************************************");
+					
+					//get position
+					//this.graph.
 				}
 				
 			}

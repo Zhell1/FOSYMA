@@ -12,6 +12,7 @@ import jade.wrapper.StaleProxyException;
 import mas.agents.CollectorAgent;
 import mas.agents.DummyCollectorAgent;
 import mas.agents.DummyExploAgent;
+import mas.agents.DummySilo;
 import mas.agents.DummyTankerAgent;
 import mas.agents.DummyWumpusAgent;
 import mas.agents.DummyWumpusShift;
@@ -209,7 +210,7 @@ public class Principal {
 
 		//	Explorer (no backpack)
 		c = containerList.get("container0");
-		agentName="Agent1";
+		agentName="Agent1(explo)";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
@@ -222,7 +223,7 @@ public class Principal {
 
 		//Explorer (no backpack)
 		c = containerList.get("container0");
-		agentName="Agent2";
+		agentName="Agent2(explo)";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
@@ -236,7 +237,7 @@ public class Principal {
 
 		//Collector (backPack)
 		c = containerList.get("container0");
-		agentName="Agent3";
+		agentName="Agent3(collector)";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
@@ -263,12 +264,25 @@ public class Principal {
 		*/
 
 		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
-		c = containerList.get("container0");
+		/*c = containerList.get("container0");
 		agentName="Agent5";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_TANKER};//used to give informations to the agent
 			AgentController	ag=c.createNewAgent(agentName,DummyTankerAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}*/
+		
+		// notre silo
+		c = containerList.get("container0");
+		agentName="Agent5(silo)";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_TANKER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,DummySilo.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {

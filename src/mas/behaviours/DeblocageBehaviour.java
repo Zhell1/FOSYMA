@@ -8,6 +8,7 @@ import org.graphstream.graph.Node;
 import env.Attribute;
 import env.Couple;
 import mas.agents.FirstAgent;
+import mas.agents.GraphAgent;
 import mas.tools.MyGraph;
 import jade.core.behaviours.SimpleBehaviour;
 
@@ -20,7 +21,7 @@ public class DeblocageBehaviour extends SimpleBehaviour{
 
 	public DeblocageBehaviour(final mas.abstractAgent myagent){
 		super(myagent);
-		this.graph = ((FirstAgent)myagent).getmyGraph();
+		this.graph = ((GraphAgent)myagent).getmyGraph();
 		this.signal = 0;
 		this.timeOut = 5;
 		this.cpt = 0;
@@ -34,13 +35,13 @@ public class DeblocageBehaviour extends SimpleBehaviour{
 			this.signal = 1;
 		}
 		else {
-			String myPosition=((mas.abstractAgent)this.myAgent).getCurrentPosition();
+			String myPosition=((GraphAgent)this.myAgent).getCurrentPosition();
 			this.graph.add();
-			List<Couple<String,List<Attribute>>> lobs2=((mas.abstractAgent)this.myAgent).observe();//myPosition
+			List<Couple<String,List<Attribute>>> lobs2=((GraphAgent)this.myAgent).observe();//myPosition
 			Random r = new Random();
 			String nextMove = lobs2.get(r.nextInt(lobs2.size())).getLeft();
 			print("Random move to :" + nextMove);
-			boolean successMove =((FirstAgent)this.myAgent).moveTo(nextMove);
+			boolean successMove =((GraphAgent)this.myAgent).moveTo(nextMove);
 			/*
 			if (!successMove){
 				print("blocage");

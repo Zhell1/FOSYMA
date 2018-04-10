@@ -191,7 +191,8 @@ public class MyGraph {
 		Node n = this.graph.getNode(position);
 		if (n == null){
 			n = this.graph.addNode(position);
-			n.addAttribute("explored", false);		
+			n.addAttribute("explored", false);
+			n.addAttribute("timeStamp", new Date().getTime());
 			//this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2"));
 			/*if (this.history.contains(position)){
 				System.out.println("=========== Ajout d'un noeud deja exploré =============");
@@ -247,7 +248,7 @@ public class MyGraph {
 		if (n != null){
 		//	System.out.println("Position :" + myPosition);
 		//	System.out.println(n.toString());
-			boolean explored = n.getAttribute("explored");
+			boolean explored = n.getAttribute("explored");;
 			n.setAttribute("timeStamp", new Date().getTime() );
 			if (explored){
 				n.setAttribute("tresortype1", tresortype1);
@@ -291,6 +292,7 @@ public class MyGraph {
 			n.addAttribute("value1", value1);
 			n.addAttribute("tresortype2", tresortype2);
 			n.addAttribute("value2", value2);
+			n.addAttribute("timeStamp", new Date().getTime() );
 			if (tresortype1){
 				this.tresorList1.add(myPosition);
 			}
@@ -316,6 +318,7 @@ public class MyGraph {
 	}
 	}
 	
+	/*
 	public ArrayList<String> getMyTreasuresList(){
 		String type = this.myAgent.getMyTreasureType();
 		if (type.equals("tresortype1")){
@@ -325,6 +328,38 @@ public class MyGraph {
 			return this.tresorList2;
 		}
 	}
+	
+	*/
+	
+	public String getTrueTreasureType(){
+		String type = this.myAgent.getMyTreasureType();
+		System.out.println("================== Sp TYPE : " + type + "===============================");
+		if (type.equals("Treasure")){
+			return "tresortype1";
+		}
+		if (type.equals("Diamonds")){
+			return "tresortype2";
+		}
+		else{
+			return "NONE";
+		}
+	}
+	
+	public ArrayList<Node> getMyTreasuresList(){
+		String type = getTrueTreasureType();
+		System.out.println("*************** TYPE : " + type + "************************");
+		ArrayList<Node> L = new ArrayList<Node>();
+		for (Node n : this.graph.getNodeSet()){
+			if (n != null){
+				
+				if (n.getAttribute(type) != null && (boolean)n.getAttribute(type)){
+					L.add(n);
+				}
+			}
+		}
+		return L;
+	}
+	
 	public int getTreasureValue(String nodename, String type){
 		boolean res = false;
 		Node n = this.graph.getNode(nodename);
@@ -357,13 +392,13 @@ public class MyGraph {
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
 		
-		ArrayList<Node> L = (ArrayList<Node>) toNode(getMyTreasuresList());
+		ArrayList<Node> L = getMyTreasuresList();
 		ArrayList<Couple<Node, Integer>> distMap = new ArrayList<Couple<Node, Integer>>();
 		Float mini = Float.MAX_VALUE;
-		float dist;
+		Integer dist;
 		int cpt = 0;
 		for (Node node: L){
-			dist = (float) (dijkstra.getPathLength(node) - 1);
+			dist = (int) (dijkstra.getPathLength(node) - 1);
 			distMap.add(new Couple(node, dist));
 		}
 		// on applique une fonction heurisitique ()
@@ -463,6 +498,13 @@ public class MyGraph {
 	 * en début d'action() afin de voir si on à de nouveaux trésors, auquel cas on  sort du behavior
 	 * avec un signal spécifique qui va indiquer au FSM de passer en collector
 	 */
+	public int get(Node n, String at){
+		if (n.getAttribute(at) == null){
+			return 0;
+		}
+		return n.getAttribute(at);
+	}
+	
 	public void merge(MyGraph g){
 		/* modifie sur place
 		 * Pour la bordure on est obliger de la recalculer
@@ -495,24 +537,24 @@ public class MyGraph {
 			Node node2 = g.graph.getNode(nid);
 			
 			boolean explored1 = false;
-			int timestamp1 = 0;
+			long timestamp1 = 0;
 			int v1_1=0; // valeur du tresor
 			int v1_2=0;
 			if(node1 != null) {
 				explored1 = node1.getAttribute("explored");
 				timestamp1 = node1.getAttribute("timeStamp");
-				v1_1 = node1.getAttribute("value1");
-				v1_2 = node1.getAttribute("value2");
+				v1_1 = get(node1, "value1");
+				v1_2 = get(node1, "value2");
 			}
 			boolean explored2 = false;
-			int timestamp2 = 0;
+			long timestamp2 = 0;
 			int v2_1=0; // valeur du tresor
 			int v2_2=0;
 			if(node2 != null) {
 				explored2 = node2.getAttribute("explored");
 				timestamp2 = node2.getAttribute("timeStamp");
-				v2_1 = node2.getAttribute("value1");
-				v2_2 = node2.getAttribute("value2");
+				v2_1 = get(node2, "value1");
+				v2_2 = get(node2, "value2");
 			}
 			
 			boolean b = (explored1 || explored2);

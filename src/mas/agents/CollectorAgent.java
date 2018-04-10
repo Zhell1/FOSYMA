@@ -3,11 +3,12 @@ package mas.agents;
 import java.util.HashMap;
 
 import mas.behaviours.CollectorBehaviour;
+import mas.behaviours.CollectorFSMBehaviour;
 import mas.behaviours.FirstFSMBehaviour;
 import mas.tools.DFManager;
 import env.Environment;
 
-public class CollectorAgent extends FirstAgent {
+public class CollectorAgent extends GraphAgent {
 	protected void setup(){
 
 		supersetup();
@@ -28,7 +29,7 @@ public class CollectorAgent extends FirstAgent {
 		this.step = 0;
 		this.stepMap = new HashMap<String, Integer>();
 		//Add the behaviours
-		addBehaviour(new CollectorBehaviour(this));
+		addBehaviour(new CollectorFSMBehaviour(this));
 
 		DFManager.register(this, "collector");
 		

@@ -31,7 +31,7 @@ import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.view.Viewer;
 
 
-public class FirstAgent extends abstractAgent{
+public class FirstAgent extends GraphAgent{
 
 	/**
 	 * 
@@ -43,53 +43,6 @@ public class FirstAgent extends abstractAgent{
 	
 	private static final long serialVersionUID = -1784844593772918359L;
 	
-	// graphe partiel connu
-	Graph graph;
-	MyGraph myGraph;
-	Iterator<Node> iter;
-	HashMap<String, Integer> stepMap;
-	Integer step;
-	
-	public Integer getStep(){
-		return this.step;
-	}
-	
-	public Integer getStepId(String idAgent){
-		Integer v = this.stepMap.get(idAgent);
-		if (v == null){
-			this.stepMap.put(idAgent, 0);
-			return 0;
-		}
-		return v;
-	}
-	
-	public void updateStep(String idAgent){
-		this.stepMap.put(idAgent, step);
-	}
-	
-	public boolean moveAgent(String move){
-		this.step++;
-		return ((mas.abstractAgent)this).moveTo(move);	
-	}
-	
-	public MyGraph getmyGraph(){
-		return this.myGraph;
-	}
-	
-	
-
-	public void initMyGraph(){
-		this.myGraph = new mas.tools.MyGraph((mas.abstractAgent)this, this.graph);
-	}
-
-	/**
-	 * This method is automatically called when "agent".start() is executed.
-	 * Consider that Agent is launched for the first time. 
-	 * 			1) set the agent attributes 
-	 *	 		2) add the behaviours
-	 *          
-	 */
-
 	protected void setup(){
 
 		super.setup();

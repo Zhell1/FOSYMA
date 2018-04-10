@@ -11,7 +11,7 @@ public class FirstFSMBehaviour extends FSMBehaviour {
 	public FirstFSMBehaviour(abstractAgent a){
 		/* Il faut que les comportements implémentent une fonction int onEnd() qui indique le signal de transition */
 		
-		registerFirstState(new FirstAgentExplore(a, false), "explo");
+		registerFirstState(new FirstAgentExplore(a, 0), "explo");
 		registerState(new ListenerBehaviour(a), "listener");
 		registerState(new DeblocageBehaviour(a), "deblocage");
 		
