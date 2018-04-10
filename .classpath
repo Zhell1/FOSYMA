@@ -16,6 +16,5 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/DedaleEtuFull2018/lib/dedale/dedale-full-0.2-doc.jar!/lib/dedale/doc"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="/users/nfs/Etu7/3262287/json-simple-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

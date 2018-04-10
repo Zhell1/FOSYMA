@@ -193,7 +193,7 @@ public class Principal {
 		 * Local and no GateKeeper
 		 */
 
-		/*
+		
 		//	wumpus on container0
 		c = containerList.get("container0");
 		agentName="Golem";
@@ -205,7 +205,7 @@ public class Principal {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 
 		//	Explorer (no backpack)
 		c = containerList.get("container0");

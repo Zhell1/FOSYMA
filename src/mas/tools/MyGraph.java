@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Function;
+import java.util.Date;
 
 import env.Attribute;
 import env.Couple;
@@ -37,8 +38,6 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.view.Viewer;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.util.Random;
 
@@ -65,6 +64,10 @@ public class MyGraph {
 
 	private abstractAgent myAgent;
 
+	private ArrayList<String> tresorList1;
+
+	private ArrayList<String> tresorList2;
+
 	//private HashSet<String> history;
 
 	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
@@ -76,15 +79,15 @@ public class MyGraph {
 				//Example to retrieve the current position
 		this.graph = mygraph;
 		this.bordure = new HashSet<String>();
-		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2","timeStamp"));
+		this.tresorList1 = new ArrayList<String>();
+		this.tresorList2 = new ArrayList<String>();
 		//this.history = new HashSet<String>();
 
 		//super(myagent);
 	}
 	
-	// à override
-	public void onTick() {}
-	
+
 	/*
 	public void test(){
 		String sourcename = this.myAgent.getCurrentPosition();
@@ -160,6 +163,16 @@ public class MyGraph {
 		
 	}
 	
+
+	public List<Node> toNode(List<String> v){
+		ArrayList<Node> res = new ArrayList<Node>();
+		for(String s : v){
+			res.add(this.graph.getNode(s));
+		}
+		return res;
+	}
+	
+	
 	public Set<String> getBordure(){
 		return this.bordure;
 	}
@@ -179,7 +192,7 @@ public class MyGraph {
 		if (n == null){
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);		
-			this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2"));
+			//this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2"));
 			/*if (this.history.contains(position)){
 				System.out.println("=========== Ajout d'un noeud deja exploré =============");
 			}
@@ -235,8 +248,12 @@ public class MyGraph {
 		//	System.out.println("Position :" + myPosition);
 		//	System.out.println(n.toString());
 			boolean explored = n.getAttribute("explored");
+			n.setAttribute("timeStamp", new Date().getTime() );
 			if (explored){
-				return;
+				n.setAttribute("tresortype1", tresortype1);
+				n.setAttribute("value1", value1);
+				n.setAttribute("tresortype2", tresortype2);
+				n.setAttribute("value2", value2);
 			}
 			else {
 				// le noeud appartenait à la frontière
@@ -246,6 +263,12 @@ public class MyGraph {
 				n.addAttribute("tresortype2", tresortype2);
 				n.addAttribute("value2", value2);
 				this.bordure.remove(myPosition);
+				if (tresortype1){
+					this.tresorList1.add(myPosition);
+				}
+				if (tresortype2){
+					this.tresorList2.add(myPosition);
+				}
 			
 				for (int i =1; i < lobs.size(); i++){
 					String voisin = (lobs.get(i)).getLeft();
@@ -268,6 +291,12 @@ public class MyGraph {
 			n.addAttribute("value1", value1);
 			n.addAttribute("tresortype2", tresortype2);
 			n.addAttribute("value2", value2);
+			if (tresortype1){
+				this.tresorList1.add(myPosition);
+			}
+			if (tresortype2){
+				this.tresorList2.add(myPosition);
+			}
 			for (int i =1; i < lobs.size(); i++){
 				String voisin = (lobs.get(i)).getLeft();
 				String liaison = myPosition + "_" + voisin;
@@ -285,6 +314,26 @@ public class MyGraph {
 		}
 		*/
 	}
+	}
+	
+	public ArrayList<String> getMyTreasuresList(){
+		String type = this.myAgent.getMyTreasureType();
+		if (type.equals("tresortype1")){
+			return this.tresorList1;
+		}
+		else {
+			return this.tresorList2;
+		}
+	}
+	public int getTreasureValue(String nodename, String type){
+		boolean res = false;
+		Node n = this.graph.getNode(nodename);
+		if(type.equals("tresortype1")){
+			return n.getAttribute("value1");
+		}
+		else {
+			return n.getAttribute("value2");
+		}
 	}
 	
 	public ArrayList<Node> getTreasuresList(){
@@ -308,7 +357,7 @@ public class MyGraph {
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
 		
-		ArrayList<Node> L = getTreasuresList();
+		ArrayList<Node> L = (ArrayList<Node>) toNode(getMyTreasuresList());
 		ArrayList<Couple<Node, Integer>> distMap = new ArrayList<Couple<Node, Integer>>();
 		Float mini = Float.MAX_VALUE;
 		float dist;
@@ -407,7 +456,13 @@ public class MyGraph {
 		this.bordure = border;
 		
 	}
-	
+	/*
+	 * TODO
+	 * quand on merge stocker les modifs dans une liste
+	 * qu'on pourra ensuite appeler depuis le FirstAgentExplore quand isexplo=true (agent explorateur)
+	 * en début d'action() afin de voir si on à de nouveaux trésors, auquel cas on  sort du behavior
+	 * avec un signal spécifique qui va indiquer au FSM de passer en collector
+	 */
 	public void merge(MyGraph g){
 		/* modifie sur place
 		 * Pour la bordure on est obliger de la recalculer
@@ -439,16 +494,28 @@ public class MyGraph {
 			Node node1 = this.graph.getNode(nid);
 			Node node2 = g.graph.getNode(nid);
 			
-			boolean e = false;
+			boolean explored1 = false;
+			int timestamp1 = 0;
+			int v1_1=0; // valeur du tresor
+			int v1_2=0;
 			if(node1 != null) {
-				e = node1.getAttribute("explored");
+				explored1 = node1.getAttribute("explored");
+				timestamp1 = node1.getAttribute("timeStamp");
+				v1_1 = node1.getAttribute("value1");
+				v1_2 = node1.getAttribute("value2");
 			}
-			boolean e2 = false;
+			boolean explored2 = false;
+			int timestamp2 = 0;
+			int v2_1=0; // valeur du tresor
+			int v2_2=0;
 			if(node2 != null) {
-				e2 = node2.getAttribute("explored");
+				explored2 = node2.getAttribute("explored");
+				timestamp2 = node2.getAttribute("timeStamp");
+				v2_1 = node2.getAttribute("value1");
+				v2_2 = node2.getAttribute("value2");
 			}
 			
-			boolean b = (e || e2);
+			boolean b = (explored1 || explored2);
 			if(printdebug) {
 				if(b) System.out.println(n.getId());
 			}
@@ -459,6 +526,34 @@ public class MyGraph {
 				//System.out.println("the node " + n.getId() +  "is added to the bordure");
 				newBordure.add(n.getId());
 			}
+			
+			/*mise à jour des attributs des trésors*/
+			//si plus récent
+			if(timestamp2 > timestamp1) {
+				n.setAttribute("value1",v2_1);
+				n.setAttribute("value2",v2_2);
+				if(v2_1 == 0) {
+					n.setAttribute("tresortype1",false);
+				}
+				if(v2_2 == 0) {
+					n.setAttribute("tresortype2",false);
+				}
+				n.setAttribute("timeStamp", timestamp2);
+			}
+			//sinon on remet l'ancien
+			else {
+				n.setAttribute("value1",v1_1);
+				n.setAttribute("value2",v1_2);
+				if(v1_1 == 0) {
+					n.setAttribute("tresortype1",false);
+				}
+				if(v1_2 == 0) {
+					n.setAttribute("tresortype2",false);
+				}
+				n.setAttribute("timeStamp", timestamp1);
+			}
+		
+			
 		}
 		this.bordure = newBordure;
 		this.graph = newGraph;

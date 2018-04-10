@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import jade.core.behaviours.SimpleBehaviour;
+import mas.abstractAgent;
 import mas.tools.MyGraph;
 import mas.agents.*;
 
@@ -26,15 +27,19 @@ public class FirstAgentExplore extends SimpleBehaviour {
 	private static final long serialVersionUID = 9088209402507795289L;
 	private boolean finished;
 	private MyGraph graph;
-	private int signal;
+	private int signal; // 1 = blocage, 0 = ok, 2 = tresor trouvé en explo
+	boolean isexplo;
+	private abstractAgent myagent;
 	
 	
-	public FirstAgentExplore (final mas.abstractAgent myagent) {
+	public FirstAgentExplore (final mas.abstractAgent myagent, boolean isexplo) {
 		super(myagent);
 		this.finished = false;
 		this.graph = ((FirstAgent)myagent).getmyGraph();
 		this.signal = 0;
 		//super(myagent);
+		this.isexplo = isexplo;
+		this.myagent = myagent;
 	}
 
 	@Override
@@ -54,8 +59,15 @@ public class FirstAgentExplore extends SimpleBehaviour {
 			}
 			else {
 				this.signal = 0;
+				//regarder si il y a un trésor sur le nouveau noeud exploré
+				if(isexplo) {
+					String type = this.myagent.getMyTreasureType();
+					int treasurevalue = this.graph.getTreasureValue(myPosition, type);
+					if(treasurevalue > 0) {
+						this.signal = 2;
+					}
+				}
 			}
-			
 		}
 		else {
 			print("Fin de l'exploration !"+"\tNombre de noeud exploré : " + this.graph.getGraphStream().getNodeCount());

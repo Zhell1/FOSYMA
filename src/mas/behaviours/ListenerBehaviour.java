@@ -27,7 +27,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 	private boolean mapsent;
 	private boolean mapreceived;
 	private MyGraph graph;
-	private Set<CommunicationBehaviour> communicationSet;
+	private Set<ShareMapBehaviour> communicationSet;
 	private FirstAgent a;
 	private int treshold; //nombre de pas avant de renvoyer la map (ou recevoir)
 	
@@ -41,7 +41,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 		this.mapsent = false;
 		this.mapreceived = false;
 		this.graph = ((FirstAgent)myagent).getmyGraph();
-		this.communicationSet = new HashSet<CommunicationBehaviour>();
+		this.communicationSet = new HashSet<ShareMapBehaviour>();
 		this.treshold = 5; 
 	}
 
@@ -55,7 +55,7 @@ public class ListenerBehaviour extends SimpleBehaviour {
 		Object msgObject = null;
 		String idsender = null;
 		boolean allDead = true;
-		for (CommunicationBehaviour c : this.communicationSet){
+		for (ShareMapBehaviour c : this.communicationSet){
 			if (!(c.done())){
 				allDead = false;
 			}
@@ -86,11 +86,11 @@ public class ListenerBehaviour extends SimpleBehaviour {
 						this.stopmoving = 1; //on s'arrete
 					}
 					else {
-						//System.out.println("******************************************************* \n \n");
+						//trop récent on fait rien
 					}
 				}
 				if (msgString.equals("roger")){
-					CommunicationBehaviour b = new CommunicationBehaviour((mas.abstractAgent)this.myAgent, idsender);
+					ShareMapBehaviour b = new ShareMapBehaviour((mas.abstractAgent)this.myAgent, idsender);
 					this.myAgent.addBehaviour(b);
 					this.communicationSet.add(b);
 				}
