@@ -5,31 +5,16 @@ import java.util.List;
 
 public class Module {
 	
-	private List<Functor> listAction;
-	private List<Functor> listCondition;
 	private int defaultSignal;
+	private Module chain;
 	
 	public Module(){
 		this.defaultSignal = -1;
-		this.listAction = new ArrayList<Functor>();
-		this.listCondition= new ArrayList<Functor>();
+		this.chain = null;
 		
 	}
 	
-	public void act(){
-		for (Functor f : this.listAction){
-			f.act(this);
-		}
-	}
-
-	public int output(){
-		int signal = 0;
-		for (Functor f : this.listCondition){
-			if (f.run(this)){
-				return signal;
-			}
-			signal++;
-		}
-		return this.defaultSignal;
+	public void link(Module m2){
+		
 	}
 }

@@ -33,6 +33,8 @@ public class GraphAgent extends abstractAgent{
 	Iterator<Node> iter;
 	HashMap<String, Integer> stepMap;
 	Integer step;
+	String position;
+	boolean succesLastMove;
 	
 	public Integer getStep(){
 		return this.step;
@@ -53,8 +55,19 @@ public class GraphAgent extends abstractAgent{
 	
 	public boolean moveAgent(String move){
 		this.step++;
-		return ((mas.abstractAgent)this).moveTo(move);	
+		this.succesLastMove = ((mas.abstractAgent)this).moveTo(move);
+		return this.succesLastMove;
 	}
+	
+	public boolean getSuccesLastMove(){
+		return this.succesLastMove;
+	}
+	
+	public String getPosition(){
+		return ((mas.abstractAgent)this).getCurrentPosition();
+	}
+	
+	
 	
 	public MyGraph getmyGraph(){
 		return this.myGraph;
