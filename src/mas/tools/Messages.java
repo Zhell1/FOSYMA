@@ -21,6 +21,24 @@ public class Messages {
 		this.agt = (abstractAgent)(a);
 	}
 	
+	public Couple<Object, String> get(){
+		ACLMessage msg = this.agt.receive();
+		if (msg == null) {
+			return null;
+		}
+		Object p1;
+		try {
+			p1 = msg.getContentObject();
+		} catch (UnreadableException e) {
+			// TODO Auto-generated catch block
+			p1 = null;
+			e.printStackTrace();
+		}
+		String p2 = msg.getLanguage();
+		Couple<Object, String> res = new Couple<Object, String>(p1, p2);
+		return res;
+	}
+	
 	public void sendObject(Object o, String destinataire){
 		sendObject(o, destinataire, "broadcast");
 	}

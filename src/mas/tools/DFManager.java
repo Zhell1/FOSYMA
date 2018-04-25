@@ -23,7 +23,7 @@ public class DFManager {
 		} catch(FIPAException fe) {fe.printStackTrace();}
 	}
 	
-	public static List<String> getAllAgents(Agent agt){
+	public static ArrayList<String> getAllAgents(Agent agt){
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
 		dfd.addServices(sd);

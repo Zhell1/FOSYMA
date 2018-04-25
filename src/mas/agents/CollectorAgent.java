@@ -23,7 +23,7 @@ public class CollectorAgent extends GraphAgent {
 			System.exit(-1);
 		}
 		//setup graph
-		setupgraph();
+		//setupgraph();
 		//this.graph = new SingleGraph("test");
 		initMyGraph();
 		this.step = 0;
