@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import mas.abstractAgent;
 import mas.tools.MyGraph;
 
-public class ExploreDestinationAtomic extends AtomicBehavior {
+public class ExploreDestinationAtomic extends AtomicBehaviour {
 
 	public ExploreDestinationAtomic(abstractAgent a) {
 		super(a);

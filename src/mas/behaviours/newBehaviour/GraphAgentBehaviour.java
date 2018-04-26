@@ -1,17 +1,19 @@
-package mas.behaviours;
+package mas.behaviours.newBehaviour;
+
+import java.util.ArrayList;
 
 import jade.core.behaviours.FSMBehaviour;
 import mas.abstractAgent;
 import mas.agents.GraphAgent;
 import mas.tools.MyGraph;
 
-public class GraphAgentBehavior extends FSMBehaviour{
+public class GraphAgentBehaviour extends FSMBehaviour{
 	
 	protected MyGraph g;
 	protected GraphAgent a;
 	protected int signal;
 
-	public GraphAgentBehavior(abstractAgent agent) {
+	public GraphAgentBehaviour(abstractAgent agent) {
 	
 	try {
 		Thread.sleep(1000);
@@ -31,4 +33,10 @@ public class GraphAgentBehavior extends FSMBehaviour{
 	public int onEnd() {
 		return this.signal;
 	}
+	
+	public void setSignal(int endSignal) {
+		this.signal = endSignal;
+	}
+	
+	
 }

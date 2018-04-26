@@ -1,5 +1,6 @@
 package mas.agents;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,13 +44,54 @@ public class GraphAgent extends abstractAgent{
 	boolean switchPath;
 
 	public Messages mailbox;
-	private Couple<Object, String> lastMsg;
+	private long timeOut;
+	private HashMap<String, Object> lastMsg;
+	private HashMap<String, Object> lastMap;
 	
-	public Couple<Object, String> getLastMsg(){
+	
+	public HashMap<String, Object> getMsg(){
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		long currentTime = timestamp.getTime();
+		long time;
+		HashMap<String, Object> msg;
+		Object t;
+		do { 
+			msg = this.mailbox.get2();
+			if (msg == null) {
+				return null;
+			}
+			time = (long) msg.get("timeStamp");
+			if (currentTime - time < this.timeOut) {
+				// print("difference temps " + (currentTime - time));
+				t = msg.get("type");
+				if (t.equals("String")){
+					this.lastMsg = msg;
+				}
+				if (t.equals("HashMap")) {
+					this.lastMap = msg;
+				}
+				return msg;
+			}
+			else {
+				print("Message non pris car TIMEOUT");
+			}
+			
+			
+		}while(true);
+
+	}
+
+		
+	
+	public HashMap<String, Object> consultLastMsg(){
 		return this.lastMsg;
 	}
 	
-	public void setLastMsg(Couple<Object, String> msg) {
+	public HashMap<String, Object> consultLastMap(){
+		return this.lastMap;
+	}
+	
+	public void setLastMsg(HashMap<String, Object> msg) {
 		this.lastMsg = msg;
 	}
 	
@@ -67,6 +109,9 @@ public class GraphAgent extends abstractAgent{
 	
 	public String getNextPath() {
 		//le path est inverser donc il faut prendre le dernier element
+		if (this.path.isEmpty()) {
+			return null;
+		}
 		int index = this.path.size() - 1;
 		String move = this.path.get(index);
 		this.path.remove(index);
@@ -167,9 +212,14 @@ public class GraphAgent extends abstractAgent{
 		this.mailbox = new Messages(this);
 		this.lastMsg = null;
 		this.switchPath = true;
+		this.timeOut = 1000 * 5;
 		
 		System.out.println("the agent "+this.getLocalName()+ " is started");
 
+	}
+	
+	public void print(String m){
+		System.out.println(this.getLocalName()+" : "+m);
 	}
 	/*
 	protected void setupgraph() {

@@ -222,18 +222,18 @@ public class Principal {
 			e.printStackTrace();
 		}
 //
-//		//Explorer (no backpack)
-//		c = containerList.get("container0");
-//		agentName="Agent2(explo)";
-//		try {
-//
-//			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,FirstAgent.class.getName(),objtab);
-//			agentList.add(ag);
-//			System.out.println(agentName+" launched");
-//		} catch (StaleProxyException e) {
-//			e.printStackTrace();
-//		}
+		//Explorer (no backpack)
+		c = containerList.get("container0");
+		agentName="Agent2(explo)";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 //		
 //
 //		//Collector (backPack)

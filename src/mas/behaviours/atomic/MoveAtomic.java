@@ -2,9 +2,9 @@ package mas.behaviours.atomic;
 
 import mas.abstractAgent;
 
-public class MoveAtomic extends AtomicBehavior{
+public class MoveAtomic extends AtomicBehaviour{
 	/*  Deplace l'agent sur la case suivante du path
-	 *  signal -1 = erreur (pas de mouvement possible))
+	 *  signal -1 = erreur (path vide)
 	 *  signal 1 = succes
 	 *  signal 2 = bloquage
 	 */

@@ -4,12 +4,12 @@ import jade.core.behaviours.SimpleBehaviour;
 import mas.abstractAgent;
 import mas.agents.GraphAgent;
 
-public class AtomicBehavior extends SimpleBehaviour {
+public class AtomicBehaviour extends SimpleBehaviour {
 
 	protected GraphAgent agent;
 	protected int signal;
 
-	public AtomicBehavior(abstractAgent a) {
+	public AtomicBehaviour(abstractAgent a) {
 		super(a);
 		this.agent = (GraphAgent)a;
 		this.signal = 0;

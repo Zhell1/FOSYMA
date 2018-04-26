@@ -2,7 +2,9 @@ package mas.tools;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import env.Couple;
 import mas.abstractAgent;
@@ -20,21 +22,26 @@ public class Messages {
 		this.agent = a;
 		this.agt = (abstractAgent)(a);
 	}
-	
+		
 	public Couple<Object, String> get(){
 		ACLMessage msg = this.agt.receive();
 		if (msg == null) {
 			return null;
 		}
 		Object p1;
-		try {
-			p1 = msg.getContentObject();
-		} catch (UnreadableException e) {
-			// TODO Auto-generated catch block
-			p1 = null;
-			e.printStackTrace();
-		}
 		String p2 = msg.getLanguage();
+		if (p2.equals("String")) {
+			p1 = msg.getContent();
+		}
+		else {
+			try {
+				p1 = msg.getContentObject();
+			} catch (UnreadableException e) {
+				// TODO Auto-generated catch block
+				p1 = null;
+				e.printStackTrace();
+			}
+		}
 		Couple<Object, String> res = new Couple<Object, String>(p1, p2);
 		return res;
 	}
@@ -74,7 +81,7 @@ public class Messages {
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));		
 		msg.setContent(content);
 		msg.setLanguage("String");
-		//System.out.println("Message sendString : " + msg);
+		// System.out.println("Message sendString : " + msg);
 		try{
 			this.agt.sendMessage(msg);
 			return true;
@@ -192,6 +199,62 @@ public class Messages {
 		}
 		Couple res = new Couple(mess,sender);
 		return res;
+	}
+	/* ============================================================================
+	 *                           FUNCTION 2.0
+	 * ============================================================================
+	 */
+	
+	public HashMap<String, Object> get2(){
+		ACLMessage msg = this.agt.receive(MessageTemplate.or(MessageTemplate.MatchConversationId("broadcast"), MessageTemplate.MatchConversationId(this.agent.getLocalName())));
+		if (msg == null) {
+			return null;
+		}
+		HashMap<String, Object> obj = null;
+		try {
+			obj =(HashMap<String, Object>)msg.getContentObject();
+		} catch (UnreadableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		AID sender = msg.getSender();
+		obj.put("sender", sender);
+		return obj;
+	}
+	
+	public void send(Object content) {
+		ArrayList<String> L = DFManager.getAllAgents(this.agent);
+		for (String dest : L) {
+			send(content, dest, "broadcast");
+		}
+	}
+	
+	public void send(Object content, String destinataire) {
+		send(content, destinataire, destinataire);
+	}
+	
+	public void send(Object content, String destinataire, String idconv) {
+		ACLMessage msg = new ACLMessage();
+		HashMap<String, Object> obj = new HashMap<String, Object>();
+		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
+		msg.setSender(this.agent.getAID());
+		msg.setConversationId(idconv);
+		
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		obj.put("type", content.getClass().getSimpleName());
+		obj.put("content", content);
+		obj.put("timeStamp", timestamp.getTime());
+		try {
+			if (obj != null){
+				msg.setContentObject((Serializable) obj);
+				this.agt.sendMessage(msg);
+				System.out.println(this.agent.getLocalName() + " SEND :" + obj);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static void print(Agent agent, String m){
