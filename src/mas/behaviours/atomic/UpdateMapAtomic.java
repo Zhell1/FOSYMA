@@ -2,6 +2,7 @@ package mas.behaviours.atomic;
 
 import java.util.HashMap;
 
+import jade.core.AID;
 import mas.abstractAgent;
 import mas.tools.MyGraph;
 
@@ -29,13 +30,21 @@ public class UpdateMapAtomic extends AtomicBehaviour {
 			return;
 		}
 		HashMap<String, Object> map = (HashMap<String, Object>)msg.get("content");
-		MyGraph newMap = new mas.tools.MyGraph((abstractAgent) this.myAgent, map);
 		MyGraph g = this.agent.getmyGraph();
-		//this.agent.print("My map :" + g.toHashMap());
-		g.merge(newMap);
-		//this.agent.print("After merge :" + g.toHashMap());
+
+		this.agent.print("My map :" + g.toHashMap());
+		this.agent.print("I receive :" + map);
+		g.merge(map);
+		this.agent.print("After merge :" + g.toHashMap());
 		this.agent.print("The map have been updated");
+		String s = (String) msg.get("sender");
+		if (s.equals("SiloAgent")) {
+			String pos = (String) map.get("position");
+			this.agent.print("Pilo found on position :" + pos);
+			g.setSiloPosition(pos);
+		}
 		this.agent.setSwitchPath(true);
+		//this.agent.print("sender :" + s);
 		this.signal = 1;
 		return;
 	}

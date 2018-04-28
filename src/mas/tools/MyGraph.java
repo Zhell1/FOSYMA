@@ -68,6 +68,8 @@ public class MyGraph {
 
 	private ArrayList<String> tresorList2;
 
+	private String siloPosition;
+
 	//private HashSet<String> history;
 
 	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
@@ -82,9 +84,15 @@ public class MyGraph {
 		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2","timeStamp"));
 		this.tresorList1 = new ArrayList<String>();
 		this.tresorList2 = new ArrayList<String>();
-		//this.history = new HashSet<String>();
-
-		//super(myagent);
+		this.siloPosition = null;
+	}
+	
+	public String getSiloPosition() {
+		return this.siloPosition;
+	}
+	
+	public void setSiloPosition(String position) {
+		this.siloPosition = position;
 	}
 	
 
@@ -132,6 +140,10 @@ public class MyGraph {
 		}
 		// Le path est une pile, on doit donc la reverse
 		Random r = new Random();
+		if (LbestNode.isEmpty()) {
+			return null;
+		}
+		
 		Node bestNode = LbestNode.get(r.nextInt(LbestNode.size()));
 		Path path = dijkstra.getPath(bestNode);
 		ArrayList <String> res = new ArrayList <String>();
@@ -163,11 +175,31 @@ public class MyGraph {
 		
 	}
 	
+	public void calculateBordure() {
+		//reset la bordure et recalcule;
+		this.bordure = new HashSet<String>();
+		for (Node n : this.graph.getNodeSet()) {
+			boolean b = n.getAttribute("explored");
+			if (!b) {
+				this.bordure.add(n.getId());
+			}
+		}
+		
+	}
+	
 
-	public List<Node> toNode(List<String> v){
+	public ArrayList<Node> toNode(ArrayList<String> v){
 		ArrayList<Node> res = new ArrayList<Node>();
 		for(String s : v){
 			res.add(this.graph.getNode(s));
+		}
+		return res;
+	}
+	
+	public ArrayList<String> NodeToString(ArrayList<Node> L){
+		ArrayList<String> res = new ArrayList<String>();
+		for (Node n : L) {
+			res.add(n.getId());
 		}
 		return res;
 	}
@@ -193,13 +225,7 @@ public class MyGraph {
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);
 			n.addAttribute("timeStamp", new Date().getTime());
-			//this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2"));
-			/*if (this.history.contains(position)){
-				System.out.println("=========== Ajout d'un noeud deja exploré =============");
-			}
-			*/
 			this.bordure.add(position);
-			//this.history.add(position);
 		}
 	}
 	
@@ -227,7 +253,6 @@ public class MyGraph {
 		
 		if (myPosition!=""){
 			List<Couple<String,List<Attribute>>> lobs=this.myAgent.observe();//myPosition
-			//list of attribute associated to the currentPosition
 			List<Attribute> lattribute= lobs.get(0).getRight();
 			
 			for(Attribute a:lattribute){
@@ -246,8 +271,7 @@ public class MyGraph {
 		//test si déjà dans graphe
 		Node n= this.graph.getNode(myPosition);
 		if (n != null){
-		//	System.out.println("Position :" + myPosition);
-		//	System.out.println(n.toString());
+			//le noeud existe dans le graphe
 			boolean explored = n.getAttribute("explored");;
 			n.setAttribute("timeStamp", new Date().getTime() );
 			if (explored){
@@ -263,6 +287,7 @@ public class MyGraph {
 				n.addAttribute("value1", value1);
 				n.addAttribute("tresortype2", tresortype2);
 				n.addAttribute("value2", value2);
+				//on supprime le noeud
 				this.bordure.remove(myPosition);
 				if (tresortype1){
 					this.tresorList1.add(myPosition);
@@ -307,15 +332,76 @@ public class MyGraph {
 			}
 			
 		}
-		/*
-		boolean test = bordureConsistance();
-		if (!(test)){
-			System.out.println("\n\n\n ===============================");
-			System.out.println("Probleme consistance add");
-			System.out.println("\n\n\n ===============================");
-		}
-		*/
 	}
+	}
+	
+	public ArrayList<String> getShortestPath(String pos){
+		if (pos == null) return null;
+		String position = (this.myAgent.getCurrentPosition());
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		dijkstra.init(this.graph);
+		dijkstra.setSource(this.graph.getNode(position));
+		dijkstra.compute();
+		
+		Node bestNode = this.graph.getNode(pos);
+		if (bestNode == null) {
+			return null;
+		}
+		Path path = dijkstra.getPath(bestNode);
+		
+		Node n;
+		ArrayList <String> res = new ArrayList <String>();
+		while (path.size() > 1){
+			n = path.popNode();
+			res.add(n.toString());
+		}
+		return res;
+		
+	}
+	
+	public ArrayList<String> getShortestPath(ArrayList<String> L){
+		if (L == null || L.isEmpty()) {
+			return null;
+		}
+		String position = (this.myAgent.getCurrentPosition());
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		dijkstra.init(this.graph);
+		dijkstra.setSource(this.graph.getNode(position));
+		dijkstra.compute();
+
+		// Print the lengths of the new shortest paths
+		Float mini = Float.MAX_VALUE;
+		Float dist;
+		Node bestNode = null;
+		Node n;
+		for (String s : L) {
+			n = this.graph.getNode(s);
+			if (n != null) {
+				dist = (float) (dijkstra.getPathLength(n) - 1);
+				if (dist < mini) {
+					bestNode = n;
+					mini = dist;
+				}
+			}
+		}
+		
+		Path path = dijkstra.getPath(bestNode);
+		
+		ArrayList <String> res = new ArrayList <String>();
+		while (path.size() > 1){
+			n = path.popNode();
+			res.add(n.toString());
+		}
+		return res;
+	}
+	
+	
+	public ArrayList<String> getBestTreasurePath() {
+		ArrayList<Node> L = this.getMyTreasuresList();
+		ArrayList<String> L2 = this.NodeToString(L);
+		ArrayList<String> res = this.getShortestPath(L2);
+		return res;
+	
 	}
 	
 	/*
@@ -333,7 +419,7 @@ public class MyGraph {
 	
 	public String getTrueTreasureType(){
 		String type = this.myAgent.getMyTreasureType();
-		System.out.println("================== Sp TYPE : " + type + "===============================");
+		// System.out.println("================== Sp TYPE : " + type + "===============================");
 		if (type.equals("Treasure")){
 			return "tresortype1";
 		}
@@ -347,7 +433,7 @@ public class MyGraph {
 	
 	public ArrayList<Node> getMyTreasuresList(){
 		String type = getTrueTreasureType();
-		System.out.println("*************** TYPE : " + type + "************************");
+		// System.out.println("*************** TYPE : " + type + "************************");
 		ArrayList<Node> L = new ArrayList<Node>();
 		for (Node n : this.graph.getNodeSet()){
 			if (n != null){
@@ -460,6 +546,8 @@ public class MyGraph {
 		res.put("nodes", nodes);
 		res.put("edges", edges);
 		res.put("border", this.bordure);
+		res.put("position", this.myAgent.getCurrentPosition());
+		res.put("siloPosition", this.siloPosition);
 		return res;
 	}
 	
@@ -503,6 +591,49 @@ public class MyGraph {
 			return 0;
 		}
 		return n.getAttribute(at);
+	}
+	
+	public void merge(HashMap<String, Object> map2) {
+		
+		Collection<Couple>  nodes = (Collection<Couple>) map2.get("nodes");
+		Collection<Couple> edges = (Collection<Couple>) map2.get("edges");
+		HashSet<String> border = (HashSet<String>) map2.get("border");
+		String position = (String) map2.get("position");
+		String siloPos = (String) map2.get("siloPosition");
+		
+		String id;
+		HashMap<String, Object> att;
+		Node n;
+		Node newNode;
+		boolean explored1;
+		boolean explored2;
+		boolean b;
+		for (Couple c : nodes) {
+			id = (String) c.getLeft();
+			att = (HashMap<String, Object>) c.getRight();
+			
+			n = this.graph.getNode(id);
+			//le noeud n'existe pas dans le mon graphe
+			if (n == null) {
+				this.graph.addNode(id);
+				newNode = this.graph.getNode(id);
+				newNode.addAttributes(att);
+			}
+			else {
+				explored1 = n.getAttribute("explored");
+				explored2 = (boolean) att.get("explored");
+				b = explored1 || explored2;
+				n.setAttribute("explored", b);
+			}
+			
+		}
+		//Tous les noeuds du graphe ne sont pas forcement exploré donc il faut recalculer la bordure
+		this.calculateBordure();
+		
+		if (this.siloPosition == null) {
+			this.siloPosition = siloPos;
+		}
+		
 	}
 	
 	public void merge(MyGraph g){
@@ -625,6 +756,12 @@ public class MyGraph {
 	}
 	private void print(String m){
 		System.out.println(this.myAgent.getLocalName()+" : "+m);
+	}
+	
+	public static ArrayList<String> visitedNode(HashMap<String, Object> map) {
+		ArrayList<String> res = new ArrayList<String>();
+		
+		return res;
 	}
 	/* ============================================================ */
 

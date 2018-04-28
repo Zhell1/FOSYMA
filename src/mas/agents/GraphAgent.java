@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -80,8 +81,26 @@ public class GraphAgent extends abstractAgent{
 		}while(true);
 
 	}
-
-		
+	
+	public void look() {
+		this.print((this.observe().get(0)).toString());
+	}
+	
+	public boolean pickTreasure() {
+		this.print("pick treasure !");
+		look();
+		this.print("capacity before pick :" + this.getBackPackFreeSpace());
+		int q = ((abstractAgent)this).pick();
+		this.print("capacity after pick :" + this.getBackPackFreeSpace());
+		if (q == 0) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean isFull() {
+		return (this.getBackPackFreeSpace() == 0);
+	}
 	
 	public HashMap<String, Object> consultLastMsg(){
 		return this.lastMsg;
@@ -158,6 +177,13 @@ public class GraphAgent extends abstractAgent{
 		this.step++;
 		this.succesLastMove = ((mas.abstractAgent)this).moveTo(move);
 		this.myGraph.add();
+		//wait time
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return this.succesLastMove;
 	}
 	
@@ -171,10 +197,12 @@ public class GraphAgent extends abstractAgent{
 		return ((mas.abstractAgent)this).getCurrentPosition();
 	}
 	
-	
-	
 	public MyGraph getmyGraph(){
 		return this.myGraph;
+	}
+	
+	public List<Node> getMyTreasureList(){
+		return this.myGraph.getMyTreasuresList();
 	}
 	
 	

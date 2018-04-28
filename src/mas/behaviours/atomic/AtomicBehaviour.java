@@ -12,7 +12,7 @@ public class AtomicBehaviour extends SimpleBehaviour {
 	public AtomicBehaviour(abstractAgent a) {
 		super(a);
 		this.agent = (GraphAgent)a;
-		this.signal = 0;
+		this.signal = 1;
 	}
 	
 	@Override

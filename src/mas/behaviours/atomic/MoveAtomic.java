@@ -26,13 +26,6 @@ public class MoveAtomic extends AtomicBehaviour{
 		}
 		this.agent.move(move);
 		if (this.agent.getSuccesLastMove()) {
-			// System.out.println("Successful move");
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			this.signal = 1;
 		}
 		

@@ -218,8 +218,6 @@ public class Messages {
 			e.printStackTrace();
 			return null;
 		}
-		AID sender = msg.getSender();
-		obj.put("sender", sender);
 		return obj;
 	}
 	
@@ -245,6 +243,7 @@ public class Messages {
 		obj.put("type", content.getClass().getSimpleName());
 		obj.put("content", content);
 		obj.put("timeStamp", timestamp.getTime());
+		obj.put("sender", this.agent.getClass().getSimpleName());
 		try {
 			if (obj != null){
 				msg.setContentObject((Serializable) obj);

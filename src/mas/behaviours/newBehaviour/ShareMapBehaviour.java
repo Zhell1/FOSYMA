@@ -3,6 +3,7 @@ package mas.behaviours.newBehaviour;
 import mas.abstractAgent;
 import mas.behaviours.atomic.EndAtomic;
 import mas.behaviours.atomic.SendAtomic;
+import mas.behaviours.atomic.SendMapAtomic;
 import mas.behaviours.atomic.WaitForAtomic;
 import mas.behaviours.atomic.WaitForStringAtomic;
 
@@ -13,15 +14,18 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 	 */
 
 	public ShareMapBehaviour(abstractAgent agent) {
+		/*
+		 *  sendMap n'envois pas la meme carte, que la carte courrante....
+		 */
 		super(agent);
 		// TODO Auto-generated constructor stub
 		registerFirstState(new SendAtomic(a, "roger"), "SendRoger");
-		registerState(new WaitForAtomic(a, "HashMap", 20), "WaitMap");
-		registerState(new SendAtomic(a,g.toHashMap()), "SendMap");
+		registerState(new WaitForAtomic(a, "HashMap", 5), "WaitMap");
+		registerState(new SendMapAtomic(a), "SendMap");
 		registerState(new SendAtomic(a,"roger"), "SendRoger");
 		registerState(new SendAtomic(a, "ack"), "SendAck");
-		registerState(new WaitForStringAtomic(a, "ack", 20), "WaitAck");
-		registerState(new WaitForStringAtomic(a, "roger",20), "WaitRoger");
+		registerState(new WaitForStringAtomic(a, "ack", 5), "WaitAck");
+		registerState(new WaitForStringAtomic(a, "roger",5), "WaitRoger");
 		registerLastState(new EndAtomic(a, this, -1), "Fail1");
 		registerLastState(new EndAtomic(a, this, -2), "Fail2");
 		registerLastState(new EndAtomic(a, this, 1), "Success");

@@ -15,12 +15,15 @@ public class GraphAgentBehaviour extends FSMBehaviour{
 
 	public GraphAgentBehaviour(abstractAgent agent) {
 	
+		/* Il ne faut pas mettre l'attente ici car sinon dans tous les behaviors composé de FSM behaviour on a une attente cumulé
+		 * lors de la création
 	try {
 		Thread.sleep(1000);
 	} catch (InterruptedException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+	*/
 	
 	GraphAgent a = (GraphAgent)agent;
 	this.a = a;
@@ -36,6 +39,10 @@ public class GraphAgentBehaviour extends FSMBehaviour{
 	
 	public void setSignal(int endSignal) {
 		this.signal = endSignal;
+	}
+	
+	public int getSignal() {
+		return this.signal;
 	}
 	
 	

@@ -9,6 +9,7 @@ import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import mas.agents.Collector2Agent;
 import mas.agents.CollectorAgent;
 import mas.agents.DummyCollectorAgent;
 import mas.agents.DummyExploAgent;
@@ -18,6 +19,7 @@ import mas.agents.DummyWumpusAgent;
 import mas.agents.DummyWumpusShift;
 import mas.agents.ExploAgent;
 import mas.agents.FirstAgent;
+import mas.agents.SiloAgent;
 import mas.behaviours.FirstAgentExplore;
 
 import java.util.ArrayList;
@@ -209,45 +211,45 @@ public class Principal {
 //		}
 		
 
-		//	Explorer (no backpack)
-		c = containerList.get("container0");
-		agentName="Agent1(explo)";
-		try {
-
-			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
-			agentList.add(ag);
-			System.out.println(agentName+" launched");
-		} catch (StaleProxyException e) {
-			e.printStackTrace();
-		}
-//
-		//Explorer (no backpack)
-		c = containerList.get("container0");
-		agentName="Agent2(explo)";
-		try {
-
-			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
-			agentList.add(ag);
-			System.out.println(agentName+" launched");
-		} catch (StaleProxyException e) {
-			e.printStackTrace();
-		}
-//		
-//
-//		//Collector (backPack)
+//			Explorer (no backpack)
 //		c = containerList.get("container0");
-//		agentName="Agent3(collector)";
+//		agentName="Agent1(explo)";
 //		try {
 //
-//			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,CollectorAgent.class.getName(),objtab);
+//			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+//			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
 //			agentList.add(ag);
 //			System.out.println(agentName+" launched");
 //		} catch (StaleProxyException e) {
 //			e.printStackTrace();
 //		}
+////
+//		//Explorer (no backpack)
+//		c = containerList.get("container0");
+//		agentName="Agent2(explo)";
+//		try {
+//
+//			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+//			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
+//			agentList.add(ag);
+//			System.out.println(agentName+" launched");
+//		} catch (StaleProxyException e) {
+//			e.printStackTrace();
+//		}
+//		
+//
+		//Collector (backPack)
+		c = containerList.get("container0");
+		agentName="Agent3(collector)";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 
 		/*
 		//Collector (backPack)
@@ -265,17 +267,17 @@ public class Principal {
 		*/
 
 		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
-		/*c = containerList.get("container0");
+		c = containerList.get("container0");
 		agentName="Agent5";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_TANKER};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,DummyTankerAgent.class.getName(),objtab);
+			AgentController	ag=c.createNewAgent(agentName,SiloAgent.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
-		}*/
+		}
 		
 		// notre silo
 //		c = containerList.get("container0");

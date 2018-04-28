@@ -21,10 +21,10 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 		if (b || b2) {
 			MyGraph g = this.agent.getmyGraph();
 			ArrayList<String> path = g.NextDijsktra();
-			System.out.println("Path : " + path);
+			this.agent.print("Path : " + path);
 			//fin de l'exploratio
 			if (path == null) {
-				this.signal = 2;
+				this.signal = -1;
 				return;
 			}
 			this.agent.setPath(path);
