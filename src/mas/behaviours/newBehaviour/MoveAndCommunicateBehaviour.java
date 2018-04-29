@@ -21,11 +21,6 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 	
 	public MoveAndCommunicateBehaviour(abstractAgent agent){
 		super(agent);
-		
-		/*
-		 * TODO Quand on re-rentre dans le behaviour, on retourne dans l'état final Success, il faut reinitaliser
-		 * les états
-		 */
 				
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");
@@ -48,8 +43,6 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerTransition("TraiteMsg","Fin1", -1);
 		registerTransition("TraiteMsg","ShareMap", 1);
 		
-//		registerTransition("A1Share", "UpdateMap", 1);
-//		registerTransition("A1Share", "Dest", -1);
 		
 		registerTransition("ShareMap", "UpdateMap", -2);
 		registerTransition("ShareMap", "UpdateMap", 1);

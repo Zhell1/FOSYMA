@@ -33,6 +33,7 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 	private int signal;
 	
 	public CollectorBehaviour(abstractAgent agent){
+		/* MoveTreasor semble mal fonctionner quand il y a 2 agents */
 		super(agent);
 		
 		Condition c1 = a -> {return a.getmyGraph().getSiloPosition() == null;};
@@ -45,67 +46,26 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 		};
 		Action pick = a -> {a.pickTreasure();};
 		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());};
-		Action put = a -> {a.emptyMyBackPack("SiloAgent");};
+		Action put = a -> {a.emptyMyBackPack("Agent5");};
+		Action none = a -> {};
 		
 		
 
 		registerFirstState(new WhileAtomic(a, c2, new ExploratorStep(a)), "SearchTreasor");	
-		registerState(new SingletonAtomic(a, pathTreasor), "PathTresor");
-		registerState(new WhileAtomic(a, c3, new MoveAndCommunicateStep(a)),"MoveTreasor");
+		registerState(new WhileAtomic(a, c3, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathTreasor))),"MoveTreasor");
 		registerState(new WhileAtomic(a, c1, new ExploratorStep(a)), "FindSilo");
-		registerState(new SingletonAtomic(a, pathSilo), "PathSilo");
-		registerState(new WhileAtomic(a, c4, new MoveAndCommunicateStep(a)), "MoveSilo");
+		registerState(new WhileAtomic(a, c4, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathSilo))), "MoveSilo");
 		registerState(new SingletonAtomic(a, pick), "Pick");
 		registerState(new SingletonAtomic(a, put), "Put");
 		
-		registerDefaultTransition("SearchTreasor", "PathTresor");
-		registerDefaultTransition("PathTresor", "MoveTreasor");
+		registerDefaultTransition("SearchTreasor", "MoveTreasor");
 		registerDefaultTransition("MoveTreasor", "Pick");
 		registerDefaultTransition("Pick", "FindSilo");
-		registerDefaultTransition("FindSilo", "PathSilo");
-		registerDefaultTransition("PathSilo", "MoveSilo");
+		registerDefaultTransition("FindSilo", "MoveSilo");
+		//registerDefaultTransition("FindSilo", "PathSilo");
+		//registerDefaultTransition("PathSilo", "MoveSilo");
 		registerDefaultTransition("MoveSilo", "Put");
 		registerDefaultTransition("Put", "SearchTreasor");
-
-		
-		
-//		registerFirstState(new ColectorDestinationAtomic(a), "CollectorDest");
-//		registerState(new ExploreDestinationAtomic(a), "ExploDest");
-//		registerState(new ExploreDestinationAtomic(a), "ExploDest2");
-//		registerState(new MoveAndCommunicateBehaviour(a), "MoveCom");
-//		registerState(new MoveAndCommunicateBehaviour(a), "MoveToTreasure");
-//		registerState(new MoveAndCollectAtomic(a), "DestTreasure");
-//		
-//		registerState(new DestMoveNextTo(a, g.getSiloPosition()), "MoveNextTo");
-//		
-//		registerState(new EndAtomic(a, this, 1), "Last1");
-//		registerState(new SingletonAtomic(a, put), "Put");
-//		
-//		registerTransition("CollectorDest", "ExploDest", -1);
-//		registerTransition("CollectorDest", "DestTreasure", 1);
-//		registerTransition("CollectorDest", "MoveCom", 2);
-//		
-//		registerTransition("ExploDest", "MoveCom", 1);
-//		registerTransition("ExploDest", "CollectorDest", -1);
-//		
-//		// registerTransition("MoveCom", "CollectorDest", 1);
-//		registerTransition("MoveCom", "CollectorDest", 0);
-//		
-//		registerTransition("DestTreasure", "MoveToTreasure", -1);
-//		registerTransition("DestTreasure", "FoundSilo", 1);
-//		
-//		registerTransition("FoundSilo", "ExploDest2", -1);
-//		registerTransition("FoundSilo", "MoveNextTo", 1);
-//		
-//		registerTransition("MoveNextTo", "Put", 1);
-//		
-//		registerTransition("ExploDest2", "MoveCom", 1);
-//		registerTransition("ExploDest2", "FoundSilo", -1);
-//
-//		
-//		
-//		registerDefaultTransition("MoveToTreasure","DestTreasure");
-		
 
 	}
 	

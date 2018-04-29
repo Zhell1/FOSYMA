@@ -2,6 +2,7 @@ package mas.behaviours.newBehaviour;
 
 import java.util.ArrayList;
 
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.FSMBehaviour;
 import mas.abstractAgent;
 import mas.agents.GraphAgent;
@@ -27,6 +28,19 @@ public class ExploratorStep extends GraphAgentBehaviour{
 	public ExploratorStep(abstractAgent agent){
 		super(agent);
 		registerFirstState(new ExploreDestinationAtomic(a), "Dest");
+		registerState(new MoveAndCommunicateBehaviour(a), "MoveCom");
+		registerState(new EndAtomic(a, this, 1), "End");
+		
+		registerTransition("Dest", "MoveCom", 1);
+		registerTransition("Dest", "End", -1);
+		
+		registerDefaultTransition("MoveCom", "Dest");
+		registerDefaultTransition("End", "End");
+	}
+	
+	public ExploratorStep(abstractAgent agent, Behaviour dest){
+		super(agent);
+		registerFirstState(dest , "Dest");
 		registerState(new MoveAndCommunicateBehaviour(a), "MoveCom");
 		registerState(new EndAtomic(a, this, 1), "End");
 		
