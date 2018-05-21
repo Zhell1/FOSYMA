@@ -16,6 +16,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/DedaleEtuFull2018/lib/dedale/dedale-full-0.2-doc.jar!/lib/dedale/doc"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/users/nfs/Etu7/3407027/Téléchargements/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
