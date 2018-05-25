@@ -17,6 +17,7 @@ import mas.behaviours.atomic.SendAtomic;
 import mas.behaviours.atomic.TraiteMsgAtomic;
 import mas.behaviours.atomic.UpdateMapAtomic;
 import mas.behaviours.atomic.VoidAtomic;
+import mas.behaviours.atomic.generic.DirectionManager;
 import mas.behaviours.atomic.generic.IfAtomic;
 import mas.behaviours.atomic.generic.SingletonAtomic;
 import mas.behaviours.atomic.generic.WhileAtomic;
@@ -43,18 +44,20 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 		
 		Action pathSilo = a -> { MyGraph g = a.getmyGraph();
 								a.setPath(g.getShortestPath(g.getSiloPosition()));
-		};
+								a.setSwitchPath(false);};
+								
 		Action pick = a -> {a.pickTreasure();};
-		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());};
+		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());
+									a.setSwitchPath(false);};
 		Action put = a -> {a.emptyMyBackPack("Agent5");};
 		Action none = a -> {};
 		
 		
 
 		registerFirstState(new WhileAtomic(a, c2, new ExploratorStep(a)), "SearchTreasor");	
-		registerState(new WhileAtomic(a, c3, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathTreasor))),"MoveTreasor");
+		registerState(new WhileAtomic(a, c3, new MoveAndCommunicateStep(a, new DirectionManager(a, pathTreasor))),"MoveTreasor");
 		registerState(new WhileAtomic(a, c1, new ExploratorStep(a)), "FindSilo");
-		registerState(new WhileAtomic(a, c4, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathSilo))), "MoveSilo");
+		registerState(new WhileAtomic(a, c4, new MoveAndCommunicateStep(a, new DirectionManager(a, pathSilo))), "MoveSilo");
 		registerState(new SingletonAtomic(a, pick), "Pick");
 		registerState(new SingletonAtomic(a, put), "Put");
 		
