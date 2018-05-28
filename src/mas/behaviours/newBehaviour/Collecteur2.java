@@ -30,61 +30,84 @@ public class Collecteur2 extends GraphAgentBehaviour{
 	/* Pour une raison étrange le signal de sortie d'un FSM behaviour n'est pas le signal retourné ....
 	 * Il s'agit peut être du numero d'état final ?
 	 * 
-	 * TODO : Quand ExploDest = 1, il faut ce déplacer jusqu'au trésors, le ramasser et aller jusqu'au pilot
+	 * TODO : Quand ExploDest = 1, il faut se déplacer jusqu'au trésor, le ramasser puis aller jusqu'au silo
 	 */
 	private int signal;
 	
 	public Collecteur2(abstractAgent agent){
-		/* MoveTreasor semble mal fonctionner quand il y a 2 agents */
+		/* MoveTreasor semble mal fonctionner quand il y a 2 agents ,  todo à tester*/
 		super(agent);
 		
-		Condition silofound = a -> {
-							return a.getmyGraph().getSiloPosition() != null;};
+		Condition silofound = a -> { a.print("silofound ? = " + (a.getmyGraph().getSiloPosition() != null ));
+			                         return a.getmyGraph().getSiloPosition() != null;};
 							
-		Condition tresfound = a -> {a.print("explored : " + a.getmyGraph().getExplored().toString());
-							//a.print("Bordure : " + a.getmyGraph().getBordure().toString());
-							return a.getmyGraph().getBestTreasurePath() != null ;}; // && !(a.getmyGraph().getBordure().isEmpty());};
-		Condition pathOver = a -> {a.print("move tresor ?= "+a.getPath().isEmpty());
-							return (a.getPath().isEmpty());};
-		Condition nextTo = a -> {a.print("deplace silo (path size)= " + a.getPath().size());
-							return a.getPath().size() >= 1 ;};
+		Condition tresfound = a -> {//a.print("explored : " + a.getmyGraph().getExplored().toString());
+							        //a.print("Bordure : " + a.getmyGraph().getBordure().toString());
+							        return a.getmyGraph().getBestTreasurePath() != null;  }; // && !(a.getmyGraph().getBordure().isEmpty());};
+							
+		Condition pathOver = a -> { a.print("pathOver ? = " + a.getPath().isEmpty());
+						        	return (a.getPath().isEmpty());  };
+							
+//		Condition SiloOver = a -> {   a.print("deplace silo, path size) = " + a.getPath().size());
+//						        	return a.getPath().size() >= 0;  };
+						        	
+		Condition siloOver = a -> { a.print("siloOver ? = " + a.getPath().isEmpty());
+						        	return (a.getPath().isEmpty());  };
+						        	
 		
 		Action pathSilo = a -> { MyGraph g = a.getmyGraph();
-								ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
-								a.print(" \n \n PATH SILO");
-								a.print(p.toString());
-								a.setPath(p);
-								a.setSwitchPath(false);};
+								 ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
+								 //comme on ne vas pas exactement sur la case du silo on retire le dernier
+								 a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
+								 p = g.siloPath(p); // retire le dernier noeud du path
+								 a.print("PATH SILO (after)  : " + p.toString() + "\tsilo at " + g.getSiloPosition());
+								 a.setPath(p);
+//								 a.setSwitchPath(false); //todo à supprimer ?
+							     System.console().readLine(); //utile pour planter l'éxécution à un endroit précis
+								};
 								
-		Action pick = a -> {a.pickTreasure();};
-		Action pathTreasor = a -> {
-									a.setPath(a.getmyGraph().getBestTreasurePath());
-									a.setSwitchPath(false);};
-		Action put = a -> {boolean b = a.emptyMyBackPack("Agent5");
-						   a.print("I EMPTY MY BACKPACK :" + b + " ( I am at " + a.getPosition() + ", silo is at "+a.getmyGraph().getSiloPosition());};
+		Action pick = a -> {    
+								int valrestant = a.getmyGraph().getTreasureValue(a.getPosition(), a.getMyTreasureType());
+								a.print("valrestant before pick = " + valrestant);
+								a.pickTreasure();  
+								valrestant =  a.getmyGraph().getTreasureValue(a.getPosition(), a.getMyTreasureType());
+								a.print("valrestant after pick = " + valrestant);
+							};
+		
+		Action pathTresor = a -> {  a.setPath(a.getmyGraph().getBestTreasurePath());
+									//ArrayList<String> Lpath = a.getmyGraph().getBestTreasurePath();
+									//a.print("path set to new treasure at "+ Lpath.get(Lpath.size()-1));
+									a.setSwitchPath(false);   };
+									
+		Action put = a -> {boolean b = a.emptyMyBackPack("AgentSilo");
+						   a.print("I EMPTY MY BACKPACK :" + b + " ( I am at " + a.getPosition() + ", silo is at "+a.getmyGraph().getSiloPosition() + " )");};
+						   
 		Action end = a -> {a.print("END OF THE AGENT");};
+		
 		Action none = a -> {};
+		
 		Condition expAll = a -> {return a.getmyGraph().getBordure().isEmpty() && a.getmyGraph().getBestTreasurePath() ==  null;};
 		
 		
 		
 		
-		registerFirstState(new IfAtomic(a, tresfound, none , pathTreasor), "CheckTres");
+		registerFirstState(new IfAtomic(a, tresfound, none , pathTresor), "CheckTres");
 		registerState(new ExploratorBehaviour(a), "Explo1");
-		registerState(new IfAtomic(a, pathOver, none, pathTreasor), "PathTresOver");
+		
+		registerState(new IfAtomic(a, pathOver, none, pathTresor), "PathTresOver");
 		registerState(new MoveAndCommunicateBehaviour(a), "MC1");
 		
-		registerState(new IfAtomic(a, silofound, none, none), "SiloFound");
+		registerState(new IfAtomic(a, silofound, none, pathSilo), "SiloFound");
 		registerState(new ExploratorBehaviour(a), "Explo2");
 		
-		registerState(new IfAtomic(a, nextTo, none, pathSilo), "nextTo");
+		registerState(new IfAtomic(a, siloOver, none, pathSilo), "PathSiloOver");
 		registerState(new MoveAndCommunicateBehaviour(a), "MC2");
 		
 		registerState(new SingletonAtomic(a, pick), "Pick");
 		registerState(new SingletonAtomic(a, put), "Put");
 		
 		registerTransition("CheckTres", "Explo1", -1);
-		registerTransition("CheckTres","PathTresOver", 1);
+		registerTransition("CheckTres", "PathTresOver", 1);
 		
 		registerDefaultTransition("Explo1", "CheckTres");
 		
@@ -95,14 +118,14 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		
 		registerDefaultTransition("Pick", "SiloFound");
 		registerTransition("SiloFound", "Explo2", -1);
-		registerTransition("SiloFound", "nextTo", 1);
+		registerTransition("SiloFound", "PathSiloOver", 1);
 		
 		registerDefaultTransition("Explo2", "SiloFound");
 		
-		registerTransition("nextTo", "MC2", -1);
-		registerDefaultTransition("MC2", "nextTo");
+		registerTransition("PathSiloOver", "MC2", -1);
+		registerTransition("PathSiloOver", "Put",  1);
 		
-		registerTransition("nextTo","Put", 1);
+		registerDefaultTransition("MC2", "PathSiloOver");
 		
 		registerDefaultTransition("Put", "CheckTres");
 		

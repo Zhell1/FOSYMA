@@ -40,7 +40,7 @@ public class UpdateMapAtomic extends AtomicBehaviour {
 		String s = (String) msg.get("sender");
 		if (s.equals("SiloAgent")) {
 			String pos = (String) map.get("position");
-			this.agent.print("Pilo found on position :" + pos);
+			this.agent.print("Silo found on position :" + pos);
 			g.setSiloPosition(pos);
 		}
 		this.agent.setSwitchPath(true);

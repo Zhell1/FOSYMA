@@ -411,7 +411,22 @@ public class MyGraph {
 			n = path.popNode();
 			res.add(n.toString());
 		}
-		return res;
+		ArrayList<String> res2 = new ArrayList<String>();
+		int t =res.size() -1;
+		for (int i =t; i > 0; i--){
+			res2.add(res.get(i));
+		}
+		
+		return res2;
+	}
+	
+	public ArrayList<String> siloPath(ArrayList<String> Lin) {
+		ArrayList<String> Lout = new ArrayList<String>();
+		int size = Lin.size();
+		for (int i = 0 ; i < size; i++){
+			Lout.add(Lin.get(i));
+		}
+		return Lout;
 	}
 	
 	
@@ -456,7 +471,6 @@ public class MyGraph {
 		ArrayList<Node> L = new ArrayList<Node>();
 		for (Node n : this.graph.getNodeSet()){
 			if (n != null){
-				
 				if (n.getAttribute(type) != null && (boolean)n.getAttribute(type) && getTreasureValue(n.getId(), type) > 0){
 					L.add(n);
 				}
@@ -468,9 +482,9 @@ public class MyGraph {
 	public int getTreasureValue(String nodename, String type){
 		boolean res = false;
 		Node n = this.graph.getNode(nodename);
-		System.out.println("Node n " + n.toString());
+		//System.out.println("Node n " + n.toString());
 		Collection<String> att = n.getAttributeKeySet();
-		System.out.println("att : " + att.toString());
+		//System.out.println("att : " + att.toString());
 		if(type.equals("tresortype1")){
 			return n.getAttribute("value1");
 		}
@@ -544,6 +558,7 @@ public class MyGraph {
 		}
 		return res;
 	}
+	
 	
 	public HashMap<String, Object> toHashMap(){
 		/* Normalement c'est Serializable maintenent

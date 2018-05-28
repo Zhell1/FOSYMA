@@ -248,7 +248,7 @@ public class Messages {
 			if (obj != null){
 				msg.setContentObject((Serializable) obj);
 				this.agt.sendMessage(msg);
-				System.out.println(this.agent.getLocalName() + " SEND :" + obj);
+				System.out.println(this.agent.getLocalName() + " : SEND :" + obj);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

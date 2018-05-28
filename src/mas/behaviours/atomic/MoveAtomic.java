@@ -3,14 +3,10 @@ package mas.behaviours.atomic;
 import mas.abstractAgent;
 
 public class MoveAtomic extends AtomicBehaviour{
-	/*  Deplace l'agent sur la case suivante du path
+	/*  Déplace l'agent sur la case suivante du path
 	 *  signal -1 = erreur (path vide)
-	 *  signal 1 = succes
-	 *  signal 2 = bloquage
-	 */
-	
-	/* TODO
-	 * BUG pour un path de taille  1, car la liste de deplacement dans path est inversé ...
+	 *  signal 1  = succès
+	 *  signal 2  = bloquage
 	 */
 
 	public MoveAtomic(abstractAgent a) {

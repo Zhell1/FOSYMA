@@ -26,7 +26,7 @@ import mas.tools.Action;
 import mas.tools.Condition;
 import mas.tools.MyGraph;
 
-public class CollectorBehaviour extends GraphAgentBehaviour{
+public class CollectorBehaviour_old extends GraphAgentBehaviour{
 	/* Pour une raison étrange le signal de sortie d'un FSM behaviour n'est pas le signal retourné ....
 	 * Il s'agit peut être du numero d'état final ?
 	 * 
@@ -34,7 +34,7 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 	 */
 	private int signal;
 	
-	public CollectorBehaviour(abstractAgent agent){
+	public CollectorBehaviour_old(abstractAgent agent){
 		/* MoveTreasor semble mal fonctionner quand il y a 2 agents */
 		super(agent);
 		
@@ -58,7 +58,7 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 		Action pick = a -> {a.pickTreasure();};
 		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());
 									a.setSwitchPath(false);};
-		Action put = a -> {boolean b = a.emptyMyBackPack("Agent5");
+		Action put = a -> {boolean b = a.emptyMyBackPack("AgentSilo");
 						   a.print("I EMPTY MY BACKPACK :" + b + " ( I am at " + a.getPosition() + ", silo is at "+a.getmyGraph().getSiloPosition());};
 		Action end = a -> {a.print("END OF THE AGENT");};
 		Action none = a -> {};

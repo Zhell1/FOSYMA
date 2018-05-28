@@ -9,13 +9,13 @@ import mas.behaviours.atomic.WaitForStringAtomic;
 
 public class ShareMapBehaviour extends GraphAgentBehaviour {
 	/* signal -1 : pas de réponse au roger
-	 * signal -2 : j'ai reçut une carte , mais l'autre n'a pas répondu quand je lui envoi ma carte
-	 * signal 1 : Succes
+	 * signal -2 : j'ai reçu une carte, mais l'autre n'a pas répondu quand je lui ai envoyé ma carte
+	 * signal 1  : Succès
 	 */
 
 	public ShareMapBehaviour(abstractAgent agent) {
 		/*
-		 *  sendMap n'envois pas la meme carte, que la carte courrante....
+		 *  sendMap n'envoie pas la même carte, que la carte courante....
 		 */
 		super(agent);
 		// TODO Auto-generated constructor stub
@@ -29,7 +29,6 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		registerLastState(new EndAtomic(a, this, -1), "Fail1");
 		registerLastState(new EndAtomic(a, this, -2), "Fail2");
 		registerLastState(new EndAtomic(a, this, 1), "Success");
-		
 	
 		
 		registerTransition("SendRoger", "WaitRoger", 1);
@@ -65,7 +64,7 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 	public void reset() {
 		//this.a.print("reset");
 		this.forceTransitionTo("SendRoger");
-		//this.a.print("etat courrant : " + this.currentName);
+		//this.a.print("état courant : " + this.currentName);
 	}
 
 }

@@ -1,7 +1,7 @@
 package mas.agents;
 
 import mas.behaviours.newBehaviour.Collecteur2;
-import mas.behaviours.newBehaviour.CollectorBehaviour;
+import mas.behaviours.newBehaviour.CollectorBehaviour_old;
 import mas.behaviours.newBehaviour.ExploratorBehaviour;
 import mas.tools.DFManager;
 

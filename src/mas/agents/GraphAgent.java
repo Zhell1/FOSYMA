@@ -93,16 +93,22 @@ public class GraphAgent extends abstractAgent{
 		this.print("capacity before pick :" + this.getBackPackFreeSpace());
 		int q = ((abstractAgent)this).pick();
 		this.print("capacity after pick :" + this.getBackPackFreeSpace());
-		Node n = this.graph.getNode(this.getPosition());
-		List<Couple<String, List<Attribute>>> L = observe();
-		Couple<String, List<Attribute>> cpl = L.get(0);
-		List<Attribute> Latt = cpl.getRight();
-		for (Attribute a : Latt){
-			n.setAttribute(a.getName(), a.getValue());
+		
+		if (q == 0) { // pick failed
+			return false;
 		}
 		
-		if (q == 0) {
-			return false;
+		Node n = this.graph.getNode(this.getPosition()); //noeud courant
+		List<Couple<String, List<Attribute>>> L = observe(); //observe the world around us
+		//find the same case we are on
+		for(Couple<String, List<Attribute>> c : L) {
+			if(c.getLeft().equals(n.getId())) { //test same node
+				List<Attribute> Latt = c.getRight();
+				for (Attribute a : Latt){ //copy all attributes into graph
+					n.setAttribute(a.getName(), a.getValue());
+				}
+				break; //sort de la boucle for
+			}
 		}
 		return true;
 	}

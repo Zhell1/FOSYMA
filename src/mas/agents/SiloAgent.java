@@ -1,6 +1,6 @@
 package mas.agents;
 
-import mas.behaviours.newBehaviour.CollectorBehaviour;
+import mas.behaviours.newBehaviour.CollectorBehaviour_old;
 import mas.behaviours.newBehaviour.SiloBehaviour;
 import mas.tools.DFManager;
 
