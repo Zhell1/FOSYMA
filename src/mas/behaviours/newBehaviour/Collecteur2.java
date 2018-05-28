@@ -26,7 +26,7 @@ import mas.tools.Action;
 import mas.tools.Condition;
 import mas.tools.MyGraph;
 
-public class CollectorBehaviour extends GraphAgentBehaviour{
+public class Collecteur2 extends GraphAgentBehaviour{
 	/* Pour une raison étrange le signal de sortie d'un FSM behaviour n'est pas le signal retourné ....
 	 * Il s'agit peut être du numero d'état final ?
 	 * 
@@ -34,19 +34,20 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 	 */
 	private int signal;
 	
-	public CollectorBehaviour(abstractAgent agent){
+	public Collecteur2(abstractAgent agent){
 		/* MoveTreasor semble mal fonctionner quand il y a 2 agents */
 		super(agent);
 		
-		Condition c1 = a -> {
-							return a.getmyGraph().getSiloPosition() == null;};
-		Condition c2 = a -> {a.print(a.getmyGraph().getExplored().toString());
-							a.print("Bordure : " + a.getmyGraph().getBordure().toString());
-								return a.getmyGraph().getBestTreasurePath() == null && !(a.getmyGraph().getBordure().isEmpty());};
-		Condition c3 = a -> {a.print("move tresor ?= "+!a.getPath().isEmpty());
-							return !(a.getPath().isEmpty());};
-		Condition c4 = a -> {a.print("deplace silo (path size)= " + a.getPath().size());
-							return a.getPath().size() > 1;};
+		Condition silofound = a -> {
+							return a.getmyGraph().getSiloPosition() != null;};
+							
+		Condition tresfound = a -> {a.print("explored : " + a.getmyGraph().getExplored().toString());
+							//a.print("Bordure : " + a.getmyGraph().getBordure().toString());
+							return a.getmyGraph().getBestTreasurePath() != null ;}; // && !(a.getmyGraph().getBordure().isEmpty());};
+		Condition pathOver = a -> {a.print("move tresor ?= "+a.getPath().isEmpty());
+							return (a.getPath().isEmpty());};
+		Condition nextTo = a -> {a.print("deplace silo (path size)= " + a.getPath().size());
+							return a.getPath().size() >= 1 ;};
 		
 		Action pathSilo = a -> { MyGraph g = a.getmyGraph();
 								ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
@@ -56,7 +57,8 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 								a.setSwitchPath(false);};
 								
 		Action pick = a -> {a.pickTreasure();};
-		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());
+		Action pathTreasor = a -> {
+									a.setPath(a.getmyGraph().getBestTreasurePath());
 									a.setSwitchPath(false);};
 		Action put = a -> {boolean b = a.emptyMyBackPack("Agent5");
 						   a.print("I EMPTY MY BACKPACK :" + b + " ( I am at " + a.getPosition() + ", silo is at "+a.getmyGraph().getSiloPosition());};
@@ -66,25 +68,44 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 		
 		
 		
-
-		registerFirstState(new WhileAtomic(a, c2, new ExploratorStep(a)), "SearchTreasor");
 		
-		registerState(new DoWhileAtomic(a, c3, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathTreasor))),"MoveTreasor");
-		registerState(new WhileAtomic(a, c1, new ExploratorStep(a)), "FindSilo");
-		registerState(new DoWhileAtomic(a, c4, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathSilo) )), "MoveSilo");
+		registerFirstState(new IfAtomic(a, tresfound, none , pathTreasor), "CheckTres");
+		registerState(new ExploratorBehaviour(a), "Explo1");
+		registerState(new IfAtomic(a, pathOver, none, pathTreasor), "PathTresOver");
+		registerState(new MoveAndCommunicateBehaviour(a), "MC1");
+		
+		registerState(new IfAtomic(a, silofound, none, none), "SiloFound");
+		registerState(new ExploratorBehaviour(a), "Explo2");
+		
+		registerState(new IfAtomic(a, nextTo, none, pathSilo), "nextTo");
+		registerState(new MoveAndCommunicateBehaviour(a), "MC2");
+		
 		registerState(new SingletonAtomic(a, pick), "Pick");
 		registerState(new SingletonAtomic(a, put), "Put");
-		registerState(new IfAtomic(a, expAll, end, none), "CheckEnd");
-		registerLastState(new SingletonAtomic(a, none), "END");
 		
-		registerDefaultTransition("SearchTreasor", "CheckEnd");
-		registerTransition("CheckEnd", "END", 1);
-		registerTransition("CheckEnd", "MoveTreasor", -1);
-		registerDefaultTransition("MoveTreasor", "Pick");
-		registerDefaultTransition("Pick", "FindSilo");
-		registerDefaultTransition("FindSilo", "MoveSilo");
-		registerDefaultTransition("MoveSilo", "Put");
-		registerDefaultTransition("Put", "SearchTreasor");
+		registerTransition("CheckTres", "Explo1", -1);
+		registerTransition("CheckTres","PathTresOver", 1);
+		
+		registerDefaultTransition("Explo1", "CheckTres");
+		
+		registerTransition("PathTresOver", "MC1", -1);
+		registerTransition("PathTresOver", "Pick", 1);
+		
+		registerDefaultTransition("MC1", "PathTresOver");
+		
+		registerDefaultTransition("Pick", "SiloFound");
+		registerTransition("SiloFound", "Explo2", -1);
+		registerTransition("SiloFound", "nextTo", 1);
+		
+		registerDefaultTransition("Explo2", "SiloFound");
+		
+		registerTransition("nextTo", "MC2", -1);
+		registerDefaultTransition("MC2", "nextTo");
+		
+		registerTransition("nextTo","Put", 1);
+		
+		registerDefaultTransition("Put", "CheckTres");
+		
 
 	}
 	

@@ -34,6 +34,7 @@ public class RandomAtomic extends AtomicBehaviour{
 		List<Couple<String,List<Attribute>>> lobs2= this.agent.observe();//myPosition
 		Random r = new Random();
 		String nextMove = lobs2.get(r.nextInt(lobs2.size())).getLeft();
+		this.agent.print("DEBLOCAGE RANDOM");
 		this.agent.move(nextMove);
 		this.cpt += 1;
 		this.signal = 0;

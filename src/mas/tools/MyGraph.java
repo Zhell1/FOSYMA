@@ -116,7 +116,7 @@ public class MyGraph {
 			return null;
 		}
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, "weight", null);
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -210,7 +210,14 @@ public class MyGraph {
 	}
 	
 	public Set<String> getExplored(){
-		return this.bordure;
+		HashSet<String> res = new HashSet<String>();
+		for(Node  n : this.graph.getNodeSet()) {
+			if((boolean)(n.getAttribute("explored"))){
+				res.add(n.getId());
+			}
+		}
+		
+		return res;
 	}
 	
 	public List<String> Next(){
@@ -229,7 +236,6 @@ public class MyGraph {
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);
 			n.addAttribute("timeStamp", new Date().getTime());
-			n.addAttribute("weight", 1);
 			this.bordure.add(position);
 		}
 	}
@@ -308,7 +314,8 @@ public class MyGraph {
 					addVoisin(voisin);
 					/* Pour une raison étrange apres le merge, on a des probleme de creation d'arrete deja existante */
 					if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
-					this.graph.addEdge(liaison, myPosition, voisin).addAttribute("length",1);
+						this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
+						
 					}
 				}
 			}
@@ -323,7 +330,6 @@ public class MyGraph {
 			n.addAttribute("tresortype2", tresortype2);
 			n.addAttribute("value2", value2);
 			n.addAttribute("timeStamp", new Date().getTime() );
-			n.addAttribute("weight", 1);
 			if (tresortype1){
 				this.tresorList1.add(myPosition);
 			}
@@ -334,7 +340,7 @@ public class MyGraph {
 				String voisin = (lobs.get(i)).getLeft();
 				String liaison = myPosition + "_" + voisin;
 				addVoisin(voisin);
-				this.graph.addEdge(liaison, myPosition, voisin).addAttribute("length",1);
+				this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
 			}
 			
 		}
@@ -344,7 +350,7 @@ public class MyGraph {
 	public ArrayList<String> getShortestPath(String pos){
 		if (pos == null) return null;
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, "weight", null);
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -357,6 +363,7 @@ public class MyGraph {
 		
 		Node n;
 		ArrayList <String> res = new ArrayList <String>();
+		System.out.println("XOXOXO path :" + path.toString());
 		while (path.size() > 1){
 			n = path.popNode();
 			res.add(n.toString());
@@ -370,7 +377,11 @@ public class MyGraph {
 			return null;
 		}
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, "weight", null);
+		if (position == null){
+			System.out.println("BUG LA POSITION DE l'agent est vide");
+			return null;
+		}
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -394,7 +405,7 @@ public class MyGraph {
 			System.out.println("L : " + L.toString());
 		}
 		Path path = dijkstra.getPath(bestNode);
-		
+		System.out.println("XOXOXO path :" + path.toString());
 		ArrayList <String> res = new ArrayList <String>();
 		while (path.size() > 1){
 			n = path.popNode();
@@ -446,7 +457,7 @@ public class MyGraph {
 		for (Node n : this.graph.getNodeSet()){
 			if (n != null){
 				
-				if (n.getAttribute(type) != null && (boolean)n.getAttribute(type)){
+				if (n.getAttribute(type) != null && (boolean)n.getAttribute(type) && getTreasureValue(n.getId(), type) > 0){
 					L.add(n);
 				}
 			}
@@ -457,6 +468,9 @@ public class MyGraph {
 	public int getTreasureValue(String nodename, String type){
 		boolean res = false;
 		Node n = this.graph.getNode(nodename);
+		System.out.println("Node n " + n.toString());
+		Collection<String> att = n.getAttributeKeySet();
+		System.out.println("att : " + att.toString());
 		if(type.equals("tresortype1")){
 			return n.getAttribute("value1");
 		}
@@ -481,7 +495,7 @@ public class MyGraph {
 			return null;
 		}
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -642,8 +656,10 @@ public class MyGraph {
 				this.graph.addNode(this.siloPosition);
 			}
 			Node SP = this.graph.getNode(this.siloPosition);
-			SP.addAttribute("weight", 100000);
 			SP.addAttribute("explored", true);
+			for (Edge e : SP.getEdgeSet()){
+				e.setAttribute("weight", 100000);
+			}
 	
 		}
 		

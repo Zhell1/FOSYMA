@@ -45,6 +45,7 @@ public class MoveAndCommunicateStep extends GraphAgentBehaviour{
 		
 		registerTransition("TraiteMsg","Move", -1);
 		registerTransition("TraiteMsg","ShareMap", 1);
+		registerTransition("TraiteMsg", "Listen", 0);
 		
 //		registerTransition("A1Share", "UpdateMap", 1);
 //		registerTransition("A1Share", "Dest", -1);
@@ -84,6 +85,7 @@ public class MoveAndCommunicateStep extends GraphAgentBehaviour{
 		
 		registerTransition("TraiteMsg","Move", -1);
 		registerTransition("TraiteMsg","ShareMap", 1);
+		registerTransition("TraiteMsg", "Listen", 0);
 		
 //		registerTransition("A1Share", "UpdateMap", 1);
 //		registerTransition("A1Share", "Dest", -1);

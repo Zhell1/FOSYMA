@@ -25,23 +25,45 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");
 		registerState(new ListenAtomic(a), "Listen");
-		registerState(new RandomAtomic(a, 10), "Random");
+		registerState(new RandomAtomic(a, 3), "Random");
 		registerState(new TraiteMsgAtomic(a), "TraiteMsg");
 		registerState(new ShareMapBehaviour(a), "ShareMap");
 		registerState(new UpdateMapAtomic(a), "UpdateMap");
 		
+		registerState(new SendAtomic(a, "ping"), "Send2");
+		registerState(new ListenAtomic(a), "Listen2");
+		
+		registerState(new ShareMapBehaviour(a), "ShareMap2");
+		registerState(new UpdateMapAtomic(a), "UpdateMap2");
+		registerState(new TraiteMsgAtomic(a), "TraiteMsg2");
 		registerLastState(new EndAtomic(a, this, 1), "Fin1");
 		
 			
 		registerTransition("Move", "Fin1", -1);
 		registerTransition("Move", "Send", 1);
-		registerTransition("Move", "Random", 2);
+		registerTransition("Move", "Send2", 2);
+		
+		registerDefaultTransition("Send2", "Listen2");
+		registerDefaultTransition("Listen2", "TraiteMsg2");
+		
+		registerTransition("TraiteMsg2","Fin1", -1);
+		registerTransition("TraiteMsg2","ShareMap2", 1);
+		registerTransition("TraiteMsg2", "Listen2", 0);
+		
+		
+		registerTransition("ShareMap2", "UpdateMap2", -2);
+		registerTransition("ShareMap2", "UpdateMap2", 1);
+		registerTransition("ShareMap2", "Random", -1);
+		
+		registerDefaultTransition("UpdateMap2", "Fin1");
+		
 		
 		registerTransition("Send", "Listen", 1);
 		registerTransition("Listen", "TraiteMsg", 1);
 		
 		registerTransition("TraiteMsg","Fin1", -1);
 		registerTransition("TraiteMsg","ShareMap", 1);
+		registerTransition("TraiteMsg", "Listen", 0);
 		
 		
 		registerTransition("ShareMap", "UpdateMap", -2);

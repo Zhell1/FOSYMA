@@ -11,8 +11,11 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 	 * 
 	 */
 
+	private int cpt;
+
 	public TraiteMsgAtomic(abstractAgent a) {
 		super(a);
+		this.cpt = 0;
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -27,7 +30,13 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 				this.signal = 1;
 				return;
 			}
+			if (cpt <= 4){
+				this.signal = 0;
+				cpt ++;
+				return ;
+			}
 			this.signal = -1;
+			this.cpt = 0;
 			return;
 		}
 	}

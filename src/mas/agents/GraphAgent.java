@@ -15,7 +15,6 @@ import env.Couple;
 import env.EntityType;
 import env.Environment;
 import mas.abstractAgent;
-import mas.behaviours.FirstFSMBehaviour;
 import mas.tools.DFManager;
 import mas.tools.Messages;
 import mas.tools.MyGraph;
@@ -138,6 +137,7 @@ public class GraphAgent extends abstractAgent{
 	
 	public String getNextPath() {
 		this.print("My treasure type :" + this.getMyTreasureType());
+		if(this.path==null) return null;
 
 		//le path est inverser donc il faut prendre le dernier element
 		if (this.path.isEmpty()) {

@@ -10,17 +10,13 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import mas.agents.Collector2Agent;
-import mas.agents.CollectorAgent;
 import mas.agents.DummyCollectorAgent;
 import mas.agents.DummyExploAgent;
-import mas.agents.DummySilo;
 import mas.agents.DummyTankerAgent;
 import mas.agents.DummyWumpusAgent;
 import mas.agents.DummyWumpusShift;
 import mas.agents.ExploAgent;
-import mas.agents.FirstAgent;
 import mas.agents.SiloAgent;
-import mas.behaviours.FirstAgentExplore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -224,7 +220,7 @@ public class Principal {
 //			e.printStackTrace();
 //		}
 ////
-//		//Explorer (no backpack)
+		//Explorer (no backpack)
 //		c = containerList.get("container0");
 //		agentName="Agent2(explo)";
 //		try {
@@ -267,6 +263,7 @@ public class Principal {
 		
 
 		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
+		
 		c = containerList.get("container0");
 		agentName="Agent5";
 		try {
@@ -278,6 +275,7 @@ public class Principal {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
+		
 		
 		// notre silo
 //		c = containerList.get("container0");
