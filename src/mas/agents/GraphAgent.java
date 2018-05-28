@@ -10,6 +10,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
+import env.Attribute;
 import env.Couple;
 import env.EntityType;
 import env.Environment;
@@ -84,6 +85,7 @@ public class GraphAgent extends abstractAgent{
 	
 	public void look() {
 		this.print((this.observe().get(0)).toString());
+		
 	}
 	
 	public boolean pickTreasure() {
@@ -92,6 +94,14 @@ public class GraphAgent extends abstractAgent{
 		this.print("capacity before pick :" + this.getBackPackFreeSpace());
 		int q = ((abstractAgent)this).pick();
 		this.print("capacity after pick :" + this.getBackPackFreeSpace());
+		Node n = this.graph.getNode(this.getPosition());
+		List<Couple<String, List<Attribute>>> L = observe();
+		Couple<String, List<Attribute>> cpl = L.get(0);
+		List<Attribute> Latt = cpl.getRight();
+		for (Attribute a : Latt){
+			n.setAttribute(a.getName(), a.getValue());
+		}
+		
 		if (q == 0) {
 			return false;
 		}
@@ -127,6 +137,8 @@ public class GraphAgent extends abstractAgent{
 	}
 	
 	public String getNextPath() {
+		this.print("My treasure type :" + this.getMyTreasureType());
+
 		//le path est inverser donc il faut prendre le dernier element
 		if (this.path.isEmpty()) {
 			return null;

@@ -116,7 +116,7 @@ public class MyGraph {
 			return null;
 		}
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -209,6 +209,10 @@ public class MyGraph {
 		return this.bordure;
 	}
 	
+	public Set<String> getExplored(){
+		return this.bordure;
+	}
+	
 	public List<String> Next(){
 		List<String> res = new ArrayList<String>();
 		String myPosition=this.myAgent.getCurrentPosition();
@@ -225,6 +229,7 @@ public class MyGraph {
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);
 			n.addAttribute("timeStamp", new Date().getTime());
+			n.addAttribute("weight", 1);
 			this.bordure.add(position);
 		}
 	}
@@ -318,6 +323,7 @@ public class MyGraph {
 			n.addAttribute("tresortype2", tresortype2);
 			n.addAttribute("value2", value2);
 			n.addAttribute("timeStamp", new Date().getTime() );
+			n.addAttribute("weight", 1);
 			if (tresortype1){
 				this.tresorList1.add(myPosition);
 			}
@@ -338,7 +344,7 @@ public class MyGraph {
 	public ArrayList<String> getShortestPath(String pos){
 		if (pos == null) return null;
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -364,7 +370,7 @@ public class MyGraph {
 			return null;
 		}
 		String position = (this.myAgent.getCurrentPosition());
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, null, null);
+		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.NODE, "weight", null);
 		dijkstra.init(this.graph);
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
@@ -384,7 +390,9 @@ public class MyGraph {
 				}
 			}
 		}
-		
+		if (bestNode == null){
+			System.out.println("L : " + L.toString());
+		}
 		Path path = dijkstra.getPath(bestNode);
 		
 		ArrayList <String> res = new ArrayList <String>();
@@ -627,12 +635,20 @@ public class MyGraph {
 			}
 			
 		}
+		
+		if (this.siloPosition == null && siloPos != null) {
+			this.siloPosition = siloPos;
+			if (this.graph.getNode(siloPos) == null){
+				this.graph.addNode(this.siloPosition);
+			}
+			Node SP = this.graph.getNode(this.siloPosition);
+			SP.addAttribute("weight", 100000);
+			SP.addAttribute("explored", true);
+	
+		}
+		
 		//Tous les noeuds du graphe ne sont pas forcement exploré donc il faut recalculer la bordure
 		this.calculateBordure();
-		
-		if (this.siloPosition == null) {
-			this.siloPosition = siloPos;
-		}
 		
 	}
 	

@@ -15,6 +15,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 	}
 	
 	public void action() {
+		this.agent.print("ExploreDestination");
 		boolean b = this.agent.getSwitchPath();
 		ArrayList<String> p = this.agent.getPath();
 		boolean b2 = p.isEmpty();		
@@ -24,6 +25,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 			this.agent.print("Path : " + path);
 			//fin de l'exploratio
 			if (path == null) {
+				this.agent.print("BORDURE CONSISTANCE :" + g.bordureConsistance());
 				this.signal = -1;
 				return;
 			}

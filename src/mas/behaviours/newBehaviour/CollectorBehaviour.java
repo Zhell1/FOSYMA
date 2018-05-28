@@ -18,6 +18,7 @@ import mas.behaviours.atomic.TraiteMsgAtomic;
 import mas.behaviours.atomic.UpdateMapAtomic;
 import mas.behaviours.atomic.VoidAtomic;
 import mas.behaviours.atomic.generic.DirectionManager;
+import mas.behaviours.atomic.generic.DoWhileAtomic;
 import mas.behaviours.atomic.generic.IfAtomic;
 import mas.behaviours.atomic.generic.SingletonAtomic;
 import mas.behaviours.atomic.generic.WhileAtomic;
@@ -37,38 +38,53 @@ public class CollectorBehaviour extends GraphAgentBehaviour{
 		/* MoveTreasor semble mal fonctionner quand il y a 2 agents */
 		super(agent);
 		
-		Condition c1 = a -> {return a.getmyGraph().getSiloPosition() == null;};
-		Condition c2 = a -> {return a.getmyGraph().getBestTreasurePath() == null;};
-		Condition c3 = a -> {return !(a.getPath().isEmpty());};
-		Condition c4 = a -> {return a.getPath().size() != 1;};
+		Condition c1 = a -> {a.print("silo already known? = "+a.getmyGraph().getSiloPosition().toString());
+								return a.getmyGraph().getSiloPosition() == null;};
+		Condition c2 = a -> {a.print("getBestTreasurePath(): " + a.getmyGraph().getBestTreasurePath());
+							a.print("Bordure : " + a.getmyGraph().getBordure().toString());
+								return a.getmyGraph().getBestTreasurePath() == null || !(a.getmyGraph().getBordure().isEmpty());};
+		Condition c3 = a -> {a.print("move tresor ?= "+!a.getPath().isEmpty());
+							return !(a.getPath().isEmpty());};
+		Condition c4 = a -> {a.print("deplace silo (path size)= " + a.getPath().size());
+							return a.getPath().size() > 1;};
 		
 		Action pathSilo = a -> { MyGraph g = a.getmyGraph();
-								a.setPath(g.getShortestPath(g.getSiloPosition()));
+								ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
+								a.print(" \n \n PATH SILO");
+								a.print(p.toString());
+								a.setPath(p);
 								a.setSwitchPath(false);};
 								
 		Action pick = a -> {a.pickTreasure();};
 		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());
 									a.setSwitchPath(false);};
-		Action put = a -> {a.emptyMyBackPack("Agent5");};
+		Action put = a -> {boolean b = a.emptyMyBackPack("Agent5");
+						   a.print("I EMPTY MY BACKPACK :" + b);};
+		Action end = a -> {a.print("END OF THE AGENT");};
 		Action none = a -> {};
+		Condition expAll = a -> {return a.getmyGraph().getBordure().isEmpty() && (a.getmyGraph().getBordure() == null ||  a.getmyGraph().getBestTreasurePath().isEmpty());};
+		
 		
 		
 
 		registerFirstState(new WhileAtomic(a, c2, new ExploratorStep(a)), "SearchTreasor");	
-		registerState(new WhileAtomic(a, c3, new MoveAndCommunicateStep(a, new DirectionManager(a, pathTreasor))),"MoveTreasor");
+		registerState(new DoWhileAtomic(a, c3, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathTreasor))),"MoveTreasor");
 		registerState(new WhileAtomic(a, c1, new ExploratorStep(a)), "FindSilo");
-		registerState(new WhileAtomic(a, c4, new MoveAndCommunicateStep(a, new DirectionManager(a, pathSilo))), "MoveSilo");
+		registerState(new DoWhileAtomic(a, c4, new MoveAndCommunicateStep(a, new SingletonAtomic(a, pathSilo) )), "MoveSilo");
 		registerState(new SingletonAtomic(a, pick), "Pick");
 		registerState(new SingletonAtomic(a, put), "Put");
+		registerState(new IfAtomic(a, expAll, end, none), "CheckEnd");
+		registerLastState(new SingletonAtomic(a, none), "END");
 		
 		registerDefaultTransition("SearchTreasor", "MoveTreasor");
 		registerDefaultTransition("MoveTreasor", "Pick");
 		registerDefaultTransition("Pick", "FindSilo");
 		registerDefaultTransition("FindSilo", "MoveSilo");
-		//registerDefaultTransition("FindSilo", "PathSilo");
-		//registerDefaultTransition("PathSilo", "MoveSilo");
 		registerDefaultTransition("MoveSilo", "Put");
-		registerDefaultTransition("Put", "SearchTreasor");
+		registerDefaultTransition("Put", "CheckEnd");
+		registerTransition("CheckEnd", "END", 1);
+		registerTransition("CheckEnd", "SearchTreasor", -1);
+		registerDefaultTransition("END", "END");
 
 	}
 	
