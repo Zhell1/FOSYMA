@@ -18,12 +18,14 @@ import mas.tools.MyGraph;
 
 public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 	private int signal;
-	
+	/*
+	 * this behaviour makes a move, sends a ping, treats received messages and share the maps if needed
+	 * 
+	 * */
 	public MoveAndCommunicateBehaviour(abstractAgent agent){
 		super(agent);
 		
-		this.a.print("MoveAndCommunicateBehaviour");
-		this.a.print("I am at "+this.a.getPosition()+" and moving");
+		this.a.print("MoveAndCommunicateBehaviour: I am at "+this.a.getPosition()+" and moving");
 				
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");
@@ -43,8 +45,8 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		
 			
 		registerTransition("Move", "Fin1", -1);
-		registerTransition("Move", "Send", 1);
-		registerTransition("Move", "Send2", 2);
+		registerTransition("Move", "Send", 1); //normal ping
+		registerTransition("Move", "Send2", 2); //ping because we are blocked and there is an agent on next case
 		
 		registerDefaultTransition("Send2", "Listen2");
 		registerDefaultTransition("Listen2", "TraiteMsg2");
@@ -56,7 +58,7 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		
 		registerTransition("ShareMap2", "UpdateMap2", -2);
 		registerTransition("ShareMap2", "UpdateMap2", 1);
-		registerTransition("ShareMap2", "Random", -1);
+		registerTransition("ShareMap2", "Random", -1); // we are blocked and sharemap failed => go random
 		
 		registerDefaultTransition("UpdateMap2", "Fin1");
 		

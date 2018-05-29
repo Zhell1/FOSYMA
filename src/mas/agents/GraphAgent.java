@@ -48,6 +48,7 @@ public class GraphAgent extends abstractAgent{
 	private long timeOut;
 	private HashMap<String, Object> lastMsg;
 	private HashMap<String, Object> lastMap;
+	private ArrayList<Integer> lastSentMap;
 	
 	
 	public HashMap<String, Object> getMsg(){
@@ -213,10 +214,11 @@ public class GraphAgent extends abstractAgent{
 	public boolean move(String move) {
 		this.step++;
 		this.succesLastMove = ((mas.abstractAgent)this).moveTo(move);
-		this.myGraph.add();
+		this.myGraph.add(); //add or update
+		
 		//wait time
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(1000); //TODO A SUPPRIMER (JUSTE POUR DEBUG)
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -277,7 +279,7 @@ public class GraphAgent extends abstractAgent{
 		this.mailbox = new Messages(this);
 		this.lastMsg = null;
 		this.switchPath = true;
-		this.timeOut = 1000 * 5;
+		this.timeOut = 1000 * 5; //5 secondes pour timeout
 		
 		System.out.println("the agent "+this.getLocalName()+ " is started");
 

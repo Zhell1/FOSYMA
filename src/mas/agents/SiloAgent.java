@@ -10,7 +10,6 @@ public class SiloAgent extends GraphAgent {
 		super.setup();
 		DFManager.register(this, "silo");
 		this.addBehaviour(new SiloBehaviour(this));
-
 	}
 
 }

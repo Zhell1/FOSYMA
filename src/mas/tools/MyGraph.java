@@ -73,7 +73,9 @@ public class MyGraph {
 	private String siloPosition;
 
 	//private HashSet<String> history;
-
+	int nbmodifs; //kind of timestamp of modifications on the graph
+	
+	
 	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
 		if (myagent == null || mygraph == null){
 			System.out.println("Les composants ne sont pas encore prêts");
@@ -83,10 +85,11 @@ public class MyGraph {
 				//Example to retrieve the current position
 		this.graph = mygraph;
 		this.bordure = new HashSet<String>();
-		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2","timeStamp"));
+		this.attributs = new ArrayList<String>(Arrays.asList("explored","Treasure","Diamonds","timeStamp"));
 		this.ListTreasure = new ArrayList<String>();
 		this.ListDiamonds = new ArrayList<String>();
 		this.siloPosition = null;
+		this.nbmodifs = 0;
 	}
 	
 	public String getSiloPosition() {
@@ -95,6 +98,7 @@ public class MyGraph {
 	
 	public void setSiloPosition(String position) {
 		this.siloPosition = position;
+		this.nbmodifs += 1000; //this is so important that we want to make sure we will send the graph
 	}
 	
 
@@ -241,6 +245,7 @@ public class MyGraph {
 			n.addAttribute("timeStamp", new Date().getTime());
 			this.bordure.add(position);
 		}
+		this.nbmodifs++; // we count this as 1 modif, not very important
 	}
 	
 	public boolean inGraph(String position){
@@ -289,11 +294,17 @@ public class MyGraph {
 			boolean explored = n.getAttribute("explored");;
 			n.setAttribute("timeStamp", new Date().getTime() );
 			if (explored){
+				//if the treasure has changed
+				if((int)n.getAttribute("Treasure") != valuetreasure  || (int)n.getAttribute("Diamonds") != valuediamonds) {
+					this.nbmodifs++;
+				}
+				//update treasure values
 				n.setAttribute("Treasure", valuetreasure);
 				n.setAttribute("Diamonds", valuediamonds);
 			}
 			else {
 				// le noeud appartenait à la frontière
+				this.nbmodifs++;
 				n.setAttribute("explored", true);
 				n.addAttribute("Treasure", valuetreasure);
 				n.addAttribute("Diamonds", valuediamonds);
@@ -321,6 +332,7 @@ public class MyGraph {
 		}
 		else {
 			// Le noeud n'est pas dans le graphe (seulement non initialiser)
+			this.nbmodifs++;
 			print("Initialisation du graphe en : " + myPosition);
 			n = this.graph.addNode(myPosition);
 			n.addAttribute("explored", true);
@@ -356,6 +368,7 @@ public class MyGraph {
 		if (bestNode == null) {
 			return null;
 		}
+		System.out.println("calculating shortest path from "+position+" to "+pos);
 		Path path = dijkstra.getPath(bestNode);
 		
 		Node n;
@@ -402,6 +415,8 @@ public class MyGraph {
 		if (bestNode == null){
 			System.out.println("L : " + L.toString());
 		}
+
+		System.out.println("calculating shortest path from "+position+" to "+bestNode.getId());
 		Path path = dijkstra.getPath(bestNode);
 		System.out.println("XOXOXO_2 path :" + path.toString());
 		//create the return list
@@ -552,7 +567,7 @@ public class MyGraph {
 	
 	public HashMap<String, Object> toHashMap(){
 		/* Normalement c'est Serializable maintenent
-		 * Je fais des conversion car les types nodes et Edges ne sont pas serializable donc je convertis tous en String ... */
+		 * Je fais des conversions car les types nodes et Edges ne sont pas serializable donc je converti tous en String ... */
 		HashMap<String, Object> res = new HashMap<String, Object>();
 		HashMap<String, Object> att;
 		String id;
@@ -602,7 +617,7 @@ public class MyGraph {
 			this.graph.addEdge(liaison, p0, p1).addAttribute("weight", 1);;
 		}
 		this.myAgent = ((mas.abstractAgent) myagent);
-		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;
+		this.attributs = new ArrayList<String>(Arrays.asList("explored","Treasure","Diamonds","timeStamp")) ;
 		this.bordure = border;
 		
 	}
@@ -640,8 +655,9 @@ public class MyGraph {
 			att = (HashMap<String, Object>) c.getRight();
 			
 			n = this.graph.getNode(id);
-			//le noeud n'existe pas dans le mon graphe
+			//le noeud n'existe pas dans mon graphe
 			if (n == null) {
+				this.nbmodifs++;
 				this.graph.addNode(id);
 				newNode = this.graph.getNode(id);
 				newNode.addAttributes(att);
@@ -650,12 +666,16 @@ public class MyGraph {
 				explored1 = n.getAttribute("explored");
 				explored2 = (boolean) att.get("explored");
 				b = explored1 || explored2;
+				if(explored1 != b) { //si on à changé l'état du noeud
+					this.nbmodifs++;
+				}
 				n.setAttribute("explored", b);
 			}
 			
 		}
-		
+		// création du noeud silo
 		if (this.siloPosition == null && siloPos != null) {
+			this.nbmodifs+=1000; //make sure we send the graph since this info is very important
 			this.siloPosition = siloPos;
 			if (this.graph.getNode(siloPos) == null){
 				this.graph.addNode(this.siloPosition);
@@ -663,20 +683,22 @@ public class MyGraph {
 			Node SP = this.graph.getNode(this.siloPosition);
 			SP.addAttribute("explored", true);
 			for (Edge e : SP.getEdgeSet()){
-				e.setAttribute("weight", 100000);
+				e.setAttribute("weight", 100000); // we want to avoid walking on silo
 			}
 	
 		}
 		
 		//Tous les noeuds du graphe ne sont pas forcement exploré donc il faut recalculer la bordure
-		this.calculateBordure();
-		
+		this.calculateBordure();	
 	}
+
 	
+	/*
+	 //this is old and does not work 
 	public void merge(MyGraph g){
-		/* modifie sur place
-		 * Pour la bordure on est obliger de la recalculer
-		 */
+		// modifie sur place
+		// Pour la bordure on est obliger de la recalculer
+		 
 		boolean printdebug = false; //passer à true pour afficher le debug
 		
 		if(printdebug) {
@@ -706,23 +728,23 @@ public class MyGraph {
 			
 			boolean explored1 = false;
 			long timestamp1 = 0;
-			int v1_1=0; // valeur du tresor
-			int v1_2=0;
+			int v1_treasure=0; // valeur du tresor
+			int v1_diamonds=0;
 			if(node1 != null) {
 				explored1 = node1.getAttribute("explored");
 				timestamp1 = node1.getAttribute("timeStamp");
-				v1_1 = get(node1, "value1");
-				v1_2 = get(node1, "value2");
+				v1_treasure = get(node1, "Treasure");
+				v1_diamonds = get(node1, "Diamonds");
 			}
 			boolean explored2 = false;
 			long timestamp2 = 0;
-			int v2_1=0; // valeur du tresor
-			int v2_2=0;
+			int v2_treasure=0; // valeur du tresor
+			int v2_diamonds=0;
 			if(node2 != null) {
 				explored2 = node2.getAttribute("explored");
 				timestamp2 = node2.getAttribute("timeStamp");
-				v2_1 = get(node2, "value1");
-				v2_2 = get(node2, "value2");
+				v2_treasure = get(node2, "Treasure");
+				v2_diamonds = get(node2, "Diamonds");
 			}
 			
 			boolean b = (explored1 || explored2);
@@ -737,33 +759,18 @@ public class MyGraph {
 				newBordure.add(n.getId());
 			}
 			
-			/*mise à jour des attributs des trésors*/
+			//mise à jour des attributs des trésors
 			//si plus récent
 			if(timestamp2 > timestamp1) {
-				n.setAttribute("value1",v2_1);
-				n.setAttribute("value2",v2_2);
-				if(v2_1 == 0) {
-					n.setAttribute("tresortype1",false);
-				}
-				if(v2_2 == 0) {
-					n.setAttribute("tresortype2",false);
-				}
+				n.setAttribute("Treasure",v2_treasure);
 				n.setAttribute("timeStamp", timestamp2);
 			}
 			//sinon on remet l'ancien
 			else {
-				n.setAttribute("value1",v1_1);
-				n.setAttribute("value2",v1_2);
-				if(v1_1 == 0) {
-					n.setAttribute("tresortype1",false);
-				}
-				if(v1_2 == 0) {
-					n.setAttribute("tresortype2",false);
-				}
+				n.setAttribute("Treasure",v1_treasure);
+				n.setAttribute("Diamonds",v1_diamonds);
 				n.setAttribute("timeStamp", timestamp1);
 			}
-		
-			
 		}
 		this.bordure = newBordure;
 		this.graph = newGraph;
@@ -773,9 +780,8 @@ public class MyGraph {
 			printGraph(this);
 			System.out.println("\n\n-------------------------");
 		}
-		
-		
 	}
+	*/
 	
 	public void printGraph(MyGraph mygraph){
 		System.out.println("\n######## GRAPH ##########");
@@ -785,6 +791,7 @@ public class MyGraph {
 		for (Node n : mygraph.graph.getNodeSet()){
 			System.out.println(n.getId()+" "+n.getAttribute("explored"));
 		}
+		System.out.println("nbmodifs: "+this.nbmodifs);
 		System.out.println("###########################\n");
 	}
 	

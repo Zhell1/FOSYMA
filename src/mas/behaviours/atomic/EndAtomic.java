@@ -16,6 +16,7 @@ public class EndAtomic extends AtomicBehaviour{
 	}
 	
 	public void action() {
+	
 		// this.agent.print("Fin : " + this.endSignal);
 		this.b.setSignal(this.endSignal);
 		// this.agent.print("Nouveau signal du behaviour : " + this.b.getSignal());

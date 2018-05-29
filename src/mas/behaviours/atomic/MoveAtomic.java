@@ -24,8 +24,7 @@ public class MoveAtomic extends AtomicBehaviour{
 		if (this.agent.getSuccesLastMove()) {
 			this.signal = 1;
 		}
-		
-		else {
+		else { //the move failed = there is an agent on this case
 			this.agent.putMovePath(move);
 			this.signal = 2;
 		}

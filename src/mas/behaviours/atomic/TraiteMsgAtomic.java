@@ -3,6 +3,7 @@ package mas.behaviours.atomic;
 import java.util.HashMap;
 
 import mas.abstractAgent;
+import mas.agents.GraphAgent;
 
 public class TraiteMsgAtomic extends AtomicBehaviour {
 	/* signal -1 = pas de message
@@ -21,16 +22,30 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 	
 	public void action() {
 		HashMap<String, Object> msg = this.agent.consultLastMsg();
+
 		if (msg == null) {
 			this.signal = -1;
 			return;
 		}
 		if (msg.get("type").equals("String")) {
-			if (msg.get("content").equals("ping")){
+			String msgstring = (String) msg.get("content");
+			if(msgstring.startsWith("ping silo")) {
+				//si on ne sait pas où est le silo
+				GraphAgent graphagent = ((GraphAgent)this.myAgent);
+				if( graphagent.getmyGraph().getSiloPosition() == null ) {
+					String[] lres = msgstring.split(":");
+					String siloposition = lres[1];	 //recup silo position
+					graphagent.getmyGraph().setSiloPosition(siloposition);
+					graphagent.print("TraiteMsgAtomic: found silo from his ping at "+siloposition);
+				}
 				this.signal = 1;
 				return;
 			}
-			if (cpt <= 4){
+			else if (msgstring.equals("ping")){
+				this.signal = 1;
+				return;
+			}
+			if (cpt <= 100){ //traite 100 messages
 				this.signal = 0;
 				cpt ++;
 				return ;

@@ -103,7 +103,22 @@ public class Messages {
 	}
 		
 	public Couple getMsg(){
-		return getMsg("broadcast");
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchAll());
+		String c1 = null; // un des deux entre c1 et c2 est forcément null
+		Object c2 = null;
+		if (msg != null){
+			if (msg.getLanguage().equals("String")){
+				c1 =  getMsgString();
+			}
+			if (msg.getLanguage().equals("Object")){
+				c2 = getMsgObject();
+			}
+		}
+		Couple res = new Couple(c1,c2);
+		return res;
+		
+		//return getMsg("broadcast"); //avant on avait que cette ligne
+		
 	}
 	public Couple getMsg(String idconv){
 		/* 
@@ -111,6 +126,7 @@ public class Messages {
 		 * res.getRight() -> Object 
 		 * provoque une null pointeur exception quand on print car 1 des 2 elements est forcement null*/
 		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
+		
 		String c1 = null;
 		Object c2 = null;
 		if (msg != null){

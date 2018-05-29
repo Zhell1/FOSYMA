@@ -55,12 +55,14 @@ public class Collecteur2 extends GraphAgentBehaviour{
 						        	return (a.getPath().isEmpty());  };
 						        	
 		
-		Action pathSilo = a -> { //a.print("pathSilo calculating");
+		Action pathSilo = a -> { a.print("pathSilo calculating");
 								 MyGraph g = a.getmyGraph();
+								 a.print("silo at: "+g.getSiloPosition());
 								 ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
-								 //comme on ne vas pas exactement sur la case du silo on retire le dernier
-								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition()); //cette ligne segfault
-								 p = g.siloPath(p); // retire le dernier noeud du path
+								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
+								 a.print("p = " + p);
+								 if(p.size() >= 1)
+									 p = g.siloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
 								 a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 a.setPath(p);
 //								 a.setSwitchPath(false); //todo à supprimer ?

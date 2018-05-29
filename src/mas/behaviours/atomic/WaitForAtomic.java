@@ -7,7 +7,7 @@ import mas.abstractAgent;
 
 public class WaitForAtomic extends AtomicBehaviour {
 	/* Attend pour un type de msg : ex carte
-	 * signal -1 : delais de garde expiré
+	 * signal -1 : delai de garde expiré
 	 * signal 0 : attente
 	 * signal 1 : objet trouvé
 	 */
@@ -26,8 +26,7 @@ public class WaitForAtomic extends AtomicBehaviour {
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		long currentTime = timestamp.getTime();
 		this.startTime = currentTime;
-		//on convertit en milisecondes
-		this.timeOut = 1000 * timeOut;
+		this.timeOut = 1000 * timeOut;  //on converti en milisecondes
 		this.type = type;
 	}
 	
@@ -53,6 +52,10 @@ public class WaitForAtomic extends AtomicBehaviour {
 		Object t = msg.get("type");
 		this.agent.print("type :" + t);
 		boolean b = msg.get("type").equals(type);
+		
+		//String sender = (String) msg.get("sender");
+		//System.out.println(this.agent.getLocalName() + " received msg '"+type+"' from "+sender);
+		
 		if (b) {
 			this.startTime = -1;
 			this.signal = 1;

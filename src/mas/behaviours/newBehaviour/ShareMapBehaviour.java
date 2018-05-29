@@ -13,23 +13,24 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 	 * signal 1  : Succès
 	 */
 
-	public ShareMapBehaviour(abstractAgent agent) {
+	public ShareMapBehaviour(abstractAgent agent, String idconv) {
 		/*
 		 *  sendMap n'envoie pas la même carte, que la carte courante....
 		 */
 		super(agent);
 		// TODO Auto-generated constructor stub
-		registerFirstState(new SendAtomic(a, "roger"), "SendRoger");
-		registerState(new WaitForAtomic(a, "HashMap", 5), "WaitMap");
+		registerFirstState(new SendAtomic(a, "roger", idconv), "SendRoger");
+		registerState(new WaitForAtomic(a, "HashMap", 5), "WaitMap"); // attends jusqu'à 5 secondes la carte
 		registerState(new SendMapAtomic(a), "SendMap");
 		registerState(new SendAtomic(a,"roger"), "SendRoger");
 		registerState(new SendAtomic(a, "ack"), "SendAck");
-		registerState(new WaitForStringAtomic(a, "ack", 5), "WaitAck");
-		registerState(new WaitForStringAtomic(a, "roger",5), "WaitRoger");
+		registerState(new WaitForStringAtomic(a, "ack", 5), "WaitAck"); //wait up to 5 sec
+		registerState(new WaitForStringAtomic(a, "roger",5), "WaitRoger"); //wait up to 5 sec
 		registerLastState(new EndAtomic(a, this, -1), "Fail1");
 		registerLastState(new EndAtomic(a, this, -2), "Fail2");
 		registerLastState(new EndAtomic(a, this, 1), "Success");
 	
+		// ******************* transitions ***********************
 		
 		registerTransition("SendRoger", "WaitRoger", 1);
 		

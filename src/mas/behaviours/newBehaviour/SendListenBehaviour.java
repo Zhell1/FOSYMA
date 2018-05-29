@@ -22,7 +22,7 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 	
 	public SendListenBehaviour(abstractAgent agent, Object msg){
 		super(agent);
-		//Pour laisser le temps à l'environement de ce charger
+		//Pour laisser le temps à l'environement de se charger
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
