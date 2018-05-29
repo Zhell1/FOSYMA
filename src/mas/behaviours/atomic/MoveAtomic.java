@@ -14,7 +14,7 @@ public class MoveAtomic extends AtomicBehaviour{
 	}
 	
 	public void action() {
-		this.agent.print("MoveAtomic");
+		//this.agent.print("MoveAtomic");
 		String move = this.agent.getNextPath();
 		// System.out.println("Move : " + move);
 		if (move == null) {

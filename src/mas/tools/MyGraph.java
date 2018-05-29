@@ -75,6 +75,8 @@ public class MyGraph {
 	//private HashSet<String> history;
 	int nbmodifs; //kind of timestamp of modifications on the graph
 	
+	boolean pathtosilofound;
+	
 	
 	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
 		if (myagent == null || mygraph == null){
@@ -90,6 +92,26 @@ public class MyGraph {
 		this.ListDiamonds = new ArrayList<String>();
 		this.siloPosition = null;
 		this.nbmodifs = 0;
+		this.pathtosilofound = false; // will become true after the first path found
+	}
+	
+	public boolean pathtosilofound() {
+		if(siloPosition == null) // si on ne sait même pas où est le silo
+			return false;
+		// si on a pas encore vu de chemin jusqu'à lui
+		if(this.pathtosilofound == false) {
+			//on retest
+			ArrayList<String> path = this.getShortestPath(siloPosition);
+			if(path == null)
+				return false;
+			if(path.size() == 0)
+				return false;
+			//else
+			this.pathtosilofound = true;
+			return true;
+		}
+		//else
+		return true;
 	}
 	
 	public String getSiloPosition() {
@@ -115,6 +137,8 @@ public class MyGraph {
         }
 	}
 	*/
+	
+	//retourne le prochain noeud de la bordure à explorer (le plus proche)
 	public ArrayList<String> NextDijsktra(){
 		/* Le path retourné par Dijsktra comporte l'élément lui-même en premier élément 
 		*/
@@ -361,7 +385,7 @@ public class MyGraph {
 			}
 		}
 	}
-	
+	//calculate shortest path from current position to the one in parameter
 	public ArrayList<String> getShortestPath(String pos){
 		if (pos == null) return null;
 		String position = (this.myAgent.getCurrentPosition());
@@ -379,6 +403,9 @@ public class MyGraph {
 		
 		Node n;
 		System.out.println("XOXOXO_1 path :" + path.toString());
+		if(path==null) return null;
+		if(path.size() == 0) return null;
+		
 		//create the return list
 		ArrayList <String> res = new ArrayList <String>();
 		for(Node node : path.getNodePath()) {
@@ -419,7 +446,8 @@ public class MyGraph {
 			}
 		}
 		if (bestNode == null){
-			System.out.println("L : " + L.toString());
+			System.out.println("treasureList : " + L.toString());
+			System.out.println("my position: " + position);
 		}
 
 		System.out.println("calculating shortest path from "+position+" to "+bestNode.getId());
@@ -436,7 +464,7 @@ public class MyGraph {
 	}
 	
 	
-	public ArrayList<String> siloPath(ArrayList<String> Lin) {
+	public ArrayList<String> formatsiloPath(ArrayList<String> Lin) {
 		ArrayList<String> Lout = new ArrayList<String>();
 		int size = Lin.size();
 		for (int i = 0 ; i < size-1; i++){

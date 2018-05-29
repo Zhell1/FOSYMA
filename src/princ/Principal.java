@@ -249,17 +249,17 @@ public class Principal {
 
 		
 		// Collector (backPack)
-//		c = containerList.get("container0");
-//		agentName="Agent4";
-//		try {
-//
-//			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
-//			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
-//			agentList.add(ag);
-//			System.out.println(agentName+" launched");
-//		} catch (StaleProxyException e) {
-//			e.printStackTrace();
-//		}
+		c = containerList.get("container0");
+		agentName="Agent4(collector)";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 		
 
 		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)

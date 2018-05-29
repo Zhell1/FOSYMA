@@ -39,7 +39,9 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		super(agent);
 		
 		Condition silofound = a -> { a.print("silofound ? = " + (a.getmyGraph().getSiloPosition() != null ));
-			                         return a.getmyGraph().getSiloPosition() != null;};
+									 a.print("path to silo found = " + (a.getmyGraph().pathtosilofound()));
+									 boolean res = (a.getmyGraph().getSiloPosition() != null) && a.getmyGraph().pathtosilofound(); 
+			                         return res;  };
 							
 		Condition tresfound = a -> {//a.print("explored : " + a.getmyGraph().getExplored().toString());
 							        //a.print("Bordure : " + a.getmyGraph().getBordure().toString());
@@ -62,7 +64,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 //a.print("p = " + p);
 								 if(p.size() >= 1)
-									 p = g.siloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
+									 p = g.formatsiloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
 								 a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 a.setPath(p);
 //								 a.setSwitchPath(false); //todo à supprimer ?
