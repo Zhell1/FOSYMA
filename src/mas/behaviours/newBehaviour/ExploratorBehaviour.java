@@ -35,6 +35,7 @@ public class ExploratorBehaviour extends GraphAgentBehaviour{
 		
 		//thomas -> avant on bouclait à l'infini sur movecom & dest
 		//          maintenant on fait 1 seul step (pour tester si il y a un tresor dessus avant de rééxplorer)
+		this.a.print("ExploratorBehaviour");
 		
 		registerFirstState(new ExploreDestinationAtomic(a), "Dest");
 		registerLastState(new MoveAndCommunicateBehaviour(a), "MoveCom");

@@ -55,23 +55,29 @@ public class Collecteur2 extends GraphAgentBehaviour{
 						        	return (a.getPath().isEmpty());  };
 						        	
 		
-		Action pathSilo = a -> { MyGraph g = a.getmyGraph();
+		Action pathSilo = a -> { //a.print("pathSilo calculating");
+								 MyGraph g = a.getmyGraph();
 								 ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
 								 //comme on ne vas pas exactement sur la case du silo on retire le dernier
-								 a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
+								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition()); //cette ligne segfault
 								 p = g.siloPath(p); // retire le dernier noeud du path
-								 a.print("PATH SILO (after)  : " + p.toString() + "\tsilo at " + g.getSiloPosition());
+								 a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 a.setPath(p);
 //								 a.setSwitchPath(false); //todo à supprimer ?
-							     System.console().readLine(); //utile pour planter l'éxécution à un endroit précis
 								};
 								
-		Action pick = a -> {    
-								int valrestant = a.getmyGraph().getTreasureValue(a.getPosition(), a.getMyTreasureType());
+		Action pick = a -> {   
+								int valrestant = a.getmyGraph().getTreasureValue(a.getPosition(),a.getMyTreasureType());
 								a.print("valrestant before pick = " + valrestant);
 								a.pickTreasure();  
 								valrestant =  a.getmyGraph().getTreasureValue(a.getPosition(), a.getMyTreasureType());
 								a.print("valrestant after pick = " + valrestant);
+								try {
+									Thread.sleep(1000); // TODO SUPPRIMER CELA, juste utile pour les tests
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							};
 		
 		Action pathTresor = a -> {  a.setPath(a.getmyGraph().getBestTreasurePath());
@@ -84,20 +90,20 @@ public class Collecteur2 extends GraphAgentBehaviour{
 						   
 		Action end = a -> {a.print("END OF THE AGENT");};
 		
-		Action none = a -> {};
+		Action none = a -> { a.print("none"); };
 		
 		Condition expAll = a -> {return a.getmyGraph().getBordure().isEmpty() && a.getmyGraph().getBestTreasurePath() ==  null;};
 		
 		
 		
 		
-		registerFirstState(new IfAtomic(a, tresfound, none , pathTresor), "CheckTres");
+		registerFirstState(new IfAtomic(a, tresfound, pathTresor, none), "CheckTres");
 		registerState(new ExploratorBehaviour(a), "Explo1");
 		
 		registerState(new IfAtomic(a, pathOver, none, pathTresor), "PathTresOver");
 		registerState(new MoveAndCommunicateBehaviour(a), "MC1");
 		
-		registerState(new IfAtomic(a, silofound, none, pathSilo), "SiloFound");
+		registerState(new IfAtomic(a, silofound, pathSilo, none), "CheckSilo");
 		registerState(new ExploratorBehaviour(a), "Explo2");
 		
 		registerState(new IfAtomic(a, siloOver, none, pathSilo), "PathSiloOver");
@@ -116,11 +122,11 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		
 		registerDefaultTransition("MC1", "PathTresOver");
 		
-		registerDefaultTransition("Pick", "SiloFound");
-		registerTransition("SiloFound", "Explo2", -1);
-		registerTransition("SiloFound", "PathSiloOver", 1);
+		registerDefaultTransition("Pick", "CheckSilo");
+		registerTransition("CheckSilo", "Explo2", -1);
+		registerTransition("CheckSilo", "PathSiloOver", 1);
 		
-		registerDefaultTransition("Explo2", "SiloFound");
+		registerDefaultTransition("Explo2", "CheckSilo");
 		
 		registerTransition("PathSiloOver", "MC2", -1);
 		registerTransition("PathSiloOver", "Put",  1);

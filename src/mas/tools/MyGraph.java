@@ -23,6 +23,8 @@ import env.Couple;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import mas.abstractAgent;
+import mas.agents.Collector2Agent;
+import mas.agents.GraphAgent;
 
 import org.graphstream.algorithm.Dijkstra;
 import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
@@ -64,9 +66,9 @@ public class MyGraph {
 
 	private abstractAgent myAgent;
 
-	private ArrayList<String> tresorList1;
+	private ArrayList<String> ListTreasure;
 
-	private ArrayList<String> tresorList2;
+	private ArrayList<String> ListDiamonds;
 
 	private String siloPosition;
 
@@ -82,8 +84,8 @@ public class MyGraph {
 		this.graph = mygraph;
 		this.bordure = new HashSet<String>();
 		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2","timeStamp"));
-		this.tresorList1 = new ArrayList<String>();
-		this.tresorList2 = new ArrayList<String>();
+		this.ListTreasure = new ArrayList<String>();
+		this.ListDiamonds = new ArrayList<String>();
 		this.siloPosition = null;
 	}
 	
@@ -110,7 +112,7 @@ public class MyGraph {
 	}
 	*/
 	public ArrayList<String> NextDijsktra(){
-		/* Le path retourner par Dijsktra comporte l'element lui meme en premier element 
+		/* Le path retourné par Dijsktra comporte l'élément lui-même en premier élément 
 		*/
 		if (this.getBordure().isEmpty()){
 			return null;
@@ -125,7 +127,7 @@ public class MyGraph {
 		Float mini = Float.MAX_VALUE;
 		float dist;
 		int cpt = 0;
-		List<Node> LbestNode = new ArrayList<Node>();
+		List<Node> LbestNode = new ArrayList<Node>(); //liste des meilleurs noeuds visibles
 		for (String name: this.getBordure()){
 			Node node = this.graph.getNode(name);
 			dist = (float) (dijkstra.getPathLength(node) - 1);
@@ -138,23 +140,24 @@ public class MyGraph {
 				LbestNode.add(node);
 			}
 		}
-		// Le path est une pile, on doit donc la reverse
-		Random r = new Random();
 		if (LbestNode.isEmpty()) {
 			return null;
 		}
-		
+
+		//on prend un noeud au hasard vers lequel aller parmi les meilleurs
+		Random r = new Random();		
 		Node bestNode = LbestNode.get(r.nextInt(LbestNode.size()));
 		Path path = dijkstra.getPath(bestNode);
+
+		//create the return list
 		ArrayList <String> res = new ArrayList <String>();
-		while (path.size() > 1){
-			Node n = path.popNode();
-			res.add(n.toString());
+		for(Node node : path.getNodePath()) {
+			res.add(node.toString());
 		}
-		
+		 res.remove(0); // we remove the case where we are currently
 	
 		String name = this.myAgent.getLocalName();
-		//System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
+		System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
 		return res;
 	}
 	
@@ -259,8 +262,8 @@ public class MyGraph {
 		String myPosition=this.myAgent.getCurrentPosition();	
 		
 		// créer le noeud actuel
-		int value1 = 0, value2 = 0;
-		boolean tresortype1 = false, tresortype2=false;
+		int valuediamonds = 0, valuetreasure = 0;
+		boolean typediamonds = false, typetreasure=false;
 		
 		if (myPosition!=""){
 			List<Couple<String,List<Attribute>>> lobs=this.myAgent.observe();//myPosition
@@ -269,12 +272,12 @@ public class MyGraph {
 			for(Attribute a:lattribute){
 				switch (a) {
 				case TREASURE:
-					tresortype1=true;
-					value1 = (int)a.getValue();
+					typetreasure=true;
+					valuetreasure = (int)a.getValue();
 					break;
 				case DIAMONDS:
-					tresortype2=true;
-					value2 = (int)a.getValue();
+					typediamonds=true;
+					valuediamonds = (int)a.getValue();
 				default:
 					break;
 			}
@@ -286,25 +289,21 @@ public class MyGraph {
 			boolean explored = n.getAttribute("explored");;
 			n.setAttribute("timeStamp", new Date().getTime() );
 			if (explored){
-				n.setAttribute("tresortype1", tresortype1);
-				n.setAttribute("value1", value1);
-				n.setAttribute("tresortype2", tresortype2);
-				n.setAttribute("value2", value2);
+				n.setAttribute("Treasure", valuetreasure);
+				n.setAttribute("Diamonds", valuediamonds);
 			}
 			else {
 				// le noeud appartenait à la frontière
 				n.setAttribute("explored", true);
-				n.addAttribute("tresortype1", tresortype1);
-				n.addAttribute("value1", value1);
-				n.addAttribute("tresortype2", tresortype2);
-				n.addAttribute("value2", value2);
+				n.addAttribute("Treasure", valuetreasure);
+				n.addAttribute("Diamonds", valuediamonds);
 				//on supprime le noeud
 				this.bordure.remove(myPosition);
-				if (tresortype1){
-					this.tresorList1.add(myPosition);
+				if (typetreasure){
+					this.ListTreasure.add(myPosition);
 				}
-				if (tresortype2){
-					this.tresorList2.add(myPosition);
+				if (typediamonds){
+					this.ListDiamonds.add(myPosition);
 				}
 			
 				for (int i =1; i < lobs.size(); i++){
@@ -325,16 +324,14 @@ public class MyGraph {
 			print("Initialisation du graphe en : " + myPosition);
 			n = this.graph.addNode(myPosition);
 			n.addAttribute("explored", true);
-			n.addAttribute("tresortype1", tresortype1);
-			n.addAttribute("value1", value1);
-			n.addAttribute("tresortype2", tresortype2);
-			n.addAttribute("value2", value2);
+			n.addAttribute("Treasure", valuetreasure);
+			n.addAttribute("Diamonds", valuediamonds);
 			n.addAttribute("timeStamp", new Date().getTime() );
-			if (tresortype1){
-				this.tresorList1.add(myPosition);
+			if (typetreasure){
+				this.ListTreasure.add(myPosition);
 			}
-			if (tresortype2){
-				this.tresorList2.add(myPosition);
+			if (typediamonds){
+				this.ListDiamonds.add(myPosition);
 			}
 			for (int i =1; i < lobs.size(); i++){
 				String voisin = (lobs.get(i)).getLeft();
@@ -362,14 +359,15 @@ public class MyGraph {
 		Path path = dijkstra.getPath(bestNode);
 		
 		Node n;
+		System.out.println("XOXOXO_1 path :" + path.toString());
+		//create the return list
 		ArrayList <String> res = new ArrayList <String>();
-		System.out.println("XOXOXO path :" + path.toString());
-		while (path.size() > 1){
-			n = path.popNode();
-			res.add(n.toString());
+		for(Node node : path.getNodePath()) {
+			res.add(node.toString());
 		}
+		res.remove(0); // we remove the case where we are currently
+		//System.out.println("getShortestPath() res = " + res.toString());
 		return res;
-		
 	}
 	
 	public ArrayList<String> getShortestPath(ArrayList<String> L){
@@ -405,25 +403,22 @@ public class MyGraph {
 			System.out.println("L : " + L.toString());
 		}
 		Path path = dijkstra.getPath(bestNode);
-		System.out.println("XOXOXO path :" + path.toString());
+		System.out.println("XOXOXO_2 path :" + path.toString());
+		//create the return list
 		ArrayList <String> res = new ArrayList <String>();
-		while (path.size() > 1){
-			n = path.popNode();
-			res.add(n.toString());
+		for(Node node : path.getNodePath()) {
+			res.add(node.toString());
 		}
-		ArrayList<String> res2 = new ArrayList<String>();
-		int t =res.size() -1;
-		for (int i =t; i > 0; i--){
-			res2.add(res.get(i));
-		}
-		
-		return res2;
+		res.remove(0); // we remove the case where we are currently
+		//System.out.println(res.toString());
+		return res;
 	}
+	
 	
 	public ArrayList<String> siloPath(ArrayList<String> Lin) {
 		ArrayList<String> Lout = new ArrayList<String>();
 		int size = Lin.size();
-		for (int i = 0 ; i < size; i++){
+		for (int i = 0 ; i < size-1; i++){
 			Lout.add(Lin.get(i));
 		}
 		return Lout;
@@ -451,28 +446,19 @@ public class MyGraph {
 	
 	*/
 	
-	public String getTrueTreasureType(){
-		String type = this.myAgent.getMyTreasureType();
-		// System.out.println("================== Sp TYPE : " + type + "===============================");
-		if (type.equals("Treasure")){
-			return "tresortype1";
-		}
-		if (type.equals("Diamonds")){
-			return "tresortype2";
-		}
-		else{
-			return "NONE";
-		}
-	}
 	
 	public ArrayList<Node> getMyTreasuresList(){
-		String type = getTrueTreasureType();
-		// System.out.println("*************** TYPE : " + type + "************************");
+		String type = this.myAgent.getMyTreasureType();
+		//print("treasuretype : "+type);
 		ArrayList<Node> L = new ArrayList<Node>();
 		for (Node n : this.graph.getNodeSet()){
+			//print("this.graph.getNodeSet() = "+ this.graph.getNodeSet().toString());
 			if (n != null){
-				if (n.getAttribute(type) != null && (boolean)n.getAttribute(type) && getTreasureValue(n.getId(), type) > 0){
-					L.add(n);
+				//print("n.getAttribute(type) = " + n.getAttribute(type));
+				if(n.getAttribute(type) != null) { //si le noeud n'est pas dans la bordure
+					if ((int)n.getAttribute(type) > 0){ //si il reste de ce type de trésor dessus
+						L.add(n); // on l'ajoute à la liste
+					}
 				}
 			}
 		}
@@ -485,18 +471,22 @@ public class MyGraph {
 		//System.out.println("Node n " + n.toString());
 		Collection<String> att = n.getAttributeKeySet();
 		//System.out.println("att : " + att.toString());
-		if(type.equals("tresortype1")){
-			return n.getAttribute("value1");
+		if(type.equals("Treasure")){
+			return n.getAttribute("Treasure");
+		}
+		else if(type.equals("Diamonds")){
+			return n.getAttribute("Diamonds");
 		}
 		else {
-			return n.getAttribute("value2");
+			((GraphAgent) this.myAgent).print("getTreasureValue(): ERROR TYPE : "+ type);
+			return 0;
 		}
 	}
 	
 	public ArrayList<Node> getTreasuresList(){
 		ArrayList<Node> L = new ArrayList<Node>();
 		for (Node n : this.graph.getNodeSet()){
-			if ((boolean)n.getAttribute("tresortype1") || (boolean)n.getAttribute("tresortype2")){
+			if ((boolean)n.getAttribute("Treasure") || (boolean)n.getAttribute("Diamonds")){
 				L.add(n);
 			}
 		}
@@ -609,7 +599,7 @@ public class MyGraph {
 			String p0 = (String)c.getLeft();
 			String p1 = (String)c.getRight();
 			String liaison = p0 + "_" + p1;
-			this.graph.addEdge(liaison, p0, p1);
+			this.graph.addEdge(liaison, p0, p1).addAttribute("weight", 1);;
 		}
 		this.myAgent = ((mas.abstractAgent) myagent);
 		this.attributs = new ArrayList<String>(Arrays.asList("explored","value1","value0","tresortype1","tresortype2")) ;

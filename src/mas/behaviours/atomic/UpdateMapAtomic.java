@@ -36,7 +36,7 @@ public class UpdateMapAtomic extends AtomicBehaviour {
 		this.agent.print("I receive :" + map);
 		g.merge(map);
 		this.agent.print("After merge :" + g.toHashMap());
-		this.agent.print("The map have been updated");
+		this.agent.print("The map has been updated");
 		String s = (String) msg.get("sender");
 		if (s.equals("SiloAgent")) {
 			String pos = (String) map.get("position");

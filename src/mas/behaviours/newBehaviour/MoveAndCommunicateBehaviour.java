@@ -21,6 +21,9 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 	
 	public MoveAndCommunicateBehaviour(abstractAgent agent){
 		super(agent);
+		
+		this.a.print("MoveAndCommunicateBehaviour");
+		this.a.print("I am at "+this.a.getPosition()+" and moving");
 				
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");

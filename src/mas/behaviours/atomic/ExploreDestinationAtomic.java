@@ -17,7 +17,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 	public void action() {
 		this.agent.print("ExploreDestination");
 		MyGraph g = this.agent.getmyGraph();
-		boolean b = this.agent.getSwitchPath();
+		boolean b_getswitchpath = this.agent.getSwitchPath();
 		ArrayList<String> p = this.agent.getPath();
 		
 		if (p == null){ //on recalcule le chemin
@@ -32,28 +32,28 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 			this.agent.setPath(path);
 			this.agent.setSwitchPath(false);
 			this.signal = 1;
-			
+			return;
 		}
-		else {
-			boolean b2 = p.isEmpty();		
-			if (b || b2) {
-				MyGraph g1 = this.agent.getmyGraph();
-				ArrayList<String> path = g1.NextDijsktra();
-				this.agent.print("Path : " + path);
-				//fin de l'exploration
-				if (path == null) {
-					this.agent.print("BORDURE CONSISTANCE :" + g1.bordureConsistance());
-					this.signal = -1;
-					return;
-				}
-				this.agent.setPath(path);
-				this.agent.setSwitchPath(false);
-				this.signal = 1;
+		//else
+		boolean b_pathempty = p.isEmpty();
+		
+		if (b_getswitchpath || b_pathempty) {
+			MyGraph g1 = this.agent.getmyGraph(); //pourquoi pas réutiliser g ??
+			ArrayList<String> path = g1.NextDijsktra();
+			this.agent.print("Path : " + path);
+			//fin de l'exploration
+			if (path == null) {
+				this.agent.print("BORDURE CONSISTANCE :" + g1.bordureConsistance());
+				this.signal = -1;
+				return;
 			}
-			else {
-				this.signal = 1;
-			}
+			this.agent.setPath(path);
+			this.agent.setSwitchPath(false);
+			this.signal = 1;
+			return;
 		}
+		//else
+		this.signal = 1;
+		return;
 	}
-
 }

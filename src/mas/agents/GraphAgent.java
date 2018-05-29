@@ -83,31 +83,50 @@ public class GraphAgent extends abstractAgent{
 	}
 	
 	public void look() {
+		// display current case we are on
 		this.print((this.observe().get(0)).toString());
 		
 	}
 	
 	public boolean pickTreasure() {
 		this.print("pick treasure !");
-		look();
+		look(); // display current case we are on
 		this.print("capacity before pick :" + this.getBackPackFreeSpace());
 		int q = ((abstractAgent)this).pick();
 		this.print("capacity after pick :" + this.getBackPackFreeSpace());
 		
 		if (q == 0) { // pick failed
+			print("pick failed :(");
 			return false;
 		}
 		
 		Node n = this.graph.getNode(this.getPosition()); //noeud courant
 		List<Couple<String, List<Attribute>>> L = observe(); //observe the world around us
+		//print(L.toString());
 		//find the same case we are on
 		for(Couple<String, List<Attribute>> c : L) {
+			//print("test case "+c.getLeft() + " =?= "+n.getId());
 			if(c.getLeft().equals(n.getId())) { //test same node
 				List<Attribute> Latt = c.getRight();
+				boolean isTreasure = false;
+				boolean isDiamonds = false;
+				//print("attributes of this case: "+Latt.toString());
 				for (Attribute a : Latt){ //copy all attributes into graph
 					n.setAttribute(a.getName(), a.getValue());
+					//print("attribut: " + a.getName() + " = " + a.getValue());
+					if(a.getName().equals("Diamonds")) {
+						isDiamonds = true;
+					}else if(a.getName().equals("Treasure")){
+						isTreasure = true;
+					}
 				}
-				break; //sort de la boucle for
+				//on doit aussi gérer les cas où on ne récupère pas d'attributs = case vide
+				if(isTreasure == false)
+					n.setAttribute("Treasure", 0);
+				if(isDiamonds == false)
+					n.setAttribute("Diamonds", 0);
+				
+				break; //sort de la boucle car on ne s'intéressait qu'au noeud courant
 			}
 		}
 		return true;
@@ -142,21 +161,21 @@ public class GraphAgent extends abstractAgent{
 	}
 	
 	public String getNextPath() {
-		this.print("My treasure type :" + this.getMyTreasureType());
+		this.print("My treasure type: " + this.getMyTreasureType()+ "\t\t | Silo at "+this.getmyGraph().getSiloPosition());
 		if(this.path==null) return null;
-
-		//le path est inverser donc il faut prendre le dernier element
+		
 		if (this.path.isEmpty()) {
 			return null;
 		}
-		int index = this.path.size() - 1;
-		String move = this.path.get(index);
-		this.path.remove(index);
+		String move = this.path.get(0);
+		print("getNextPath(): moving to "+this.path.get(0).toString());
+		this.path.remove(0);
 		this.nextMove = move;
 		return move;
 	}
 	
 	public void putMovePath(String m) {
+		//TODO VERIFIER QU'ON AJOUTE DU BON COTÉ (À GAUCHE LES PREMIERS À PRENDRE)
 		this.path.add(m);
 	}
 	
