@@ -60,7 +60,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 								 a.print("silo at: "+g.getSiloPosition());
 								 ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
 								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
-								 a.print("p = " + p);
+								 //a.print("p = " + p);
 								 if(p.size() >= 1)
 									 p = g.siloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
 								 a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());

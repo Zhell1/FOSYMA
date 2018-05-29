@@ -101,7 +101,7 @@ public class Messages {
 			sendObject(o, agtname);
 		}
 	}
-		
+	/*
 	public Couple getMsg(){
 		ACLMessage msg = this.agt.receive(MessageTemplate.MatchAll());
 		String c1 = null; // un des deux entre c1 et c2 est forcément null
@@ -120,31 +120,27 @@ public class Messages {
 		//return getMsg("broadcast"); //avant on avait que cette ligne
 		
 	}
+	
 	public Couple getMsg(String idconv){
-		/* 
-		 * res.getLeft() -> String
-		 * res.getRight() -> Object 
-		 * provoque une null pointeur exception quand on print car 1 des 2 elements est forcement null*/
+		 // res.getLeft() -> String
+		// res.getRight() -> Object 
+		 // provoque une null pointeur exception quand on print car 1 des 2 elements est forcement null
 		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
 		
 		String c1 = null;
 		Object c2 = null;
 		if (msg != null){
 			if (msg.getLanguage().equals("String")){
-				c1 =  getMsgString();
+				c1 =  getMsgString(idconv);
 			}
 			if (msg.getLanguage().equals("Object")){
-				c2 = getMsgObject();
+				c2 = getMsgObject(idconv);
 			}
 		}
 		Couple res = new Couple(c1,c2);
 		return res;
 	}
-	
-	public Object getMsgObject() {
-		return getMsgObject("broadcast");
-	}
-	
+	*/
 	public Object getMsgObject(String idconv) {
 		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
 		if (msg != null){
@@ -178,7 +174,7 @@ public class Messages {
 		}
 		return null;
 	}
-	
+	/*
 	public Couple getMsgStringAndSender(){
 		return getMsgStringAndSender("broadcast");
 	}
@@ -216,30 +212,15 @@ public class Messages {
 		Couple res = new Couple(mess,sender);
 		return res;
 	}
+	*/
 	/* ============================================================================
 	 *                           FUNCTION 2.0
 	 * ============================================================================
 	 */
 	
-	public HashMap<String, Object> get2(){
-		ACLMessage msg = this.agt.receive(MessageTemplate.or(MessageTemplate.MatchConversationId("broadcast"), MessageTemplate.MatchConversationId(this.agent.getLocalName())));
-		if (msg == null) {
-			return null;
-		}
-		System.out.println("get2 broadcast msg: " +msg);
-		HashMap<String, Object> obj = null;
-		try {
-			obj =(HashMap<String, Object>)msg.getContentObject();
-		} catch (UnreadableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-		return obj;
-	}
-	
 	public HashMap<String, Object> get2(String idconv){
-		ACLMessage msg = this.agt.receive(MessageTemplate.or(MessageTemplate.MatchConversationId(idconv), MessageTemplate.MatchConversationId(this.agent.getLocalName())));
+		//System.out.println("get2: "+this.agt.getLocalName()+" try to receive msg on: "+idconv);
+		ACLMessage msg = this.agt.receive(MessageTemplate.MatchConversationId(idconv));
 		if (msg == null) {
 			return null;
 		}
@@ -271,12 +252,14 @@ public class Messages {
 		msg.addReceiver(new AID(destinataire,AID.ISLOCALNAME));
 		msg.setSender(this.agent.getAID());
 		msg.setConversationId(idconv);
+
+		System.out.println(this.agt.getLocalName()+" send msg to: "+destinataire+", idconv: "+idconv);
 		
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		obj.put("type", content.getClass().getSimpleName());
 		obj.put("content", content);
 		obj.put("timeStamp", timestamp.getTime());
-		obj.put("sender", this.agent.getClass().getSimpleName());
+		obj.put("sender", this.agent.getLocalName());
 		try {
 			if (obj != null){
 				msg.setContentObject((Serializable) obj);

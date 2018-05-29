@@ -20,7 +20,7 @@ public class WaitForAtomic extends AtomicBehaviour {
 	protected int cpt;
 	private String type;
 	private long startTime;
-	private String idconv;
+	private boolean privee;
 
 	public WaitForAtomic(abstractAgent a, String type, int timeOut) {
 		super(a);
@@ -29,13 +29,13 @@ public class WaitForAtomic extends AtomicBehaviour {
 		this.startTime = currentTime;
 		this.timeOut = 1000 * timeOut;  //on converti en milisecondes
 		this.type = type;
-		this.idconv = null;
+		this.privee = false;
 	}
 	
 
-	public WaitForAtomic(abstractAgent a, String type, int timeOut, String idconv) {
+	public WaitForAtomic(abstractAgent a, String type, int timeOut, boolean privee) {
 		this(a, type, timeOut);
-		this.idconv = idconv;
+		this.privee = privee;
 	}
 	
 	
@@ -53,11 +53,12 @@ public class WaitForAtomic extends AtomicBehaviour {
 			return;
 		}
 		HashMap<String, Object> msg;
-		if(idconv == null) {
+		if(privee == false) {
 			msg = this.agent.getMsg();
 		}
 		else{
-			msg = this.agent.getMsg(idconv);
+			String destinataire = this.agent.getlastPing();
+			msg = this.agent.getMsg(destinataire);
 		}
 		
 		if (msg == null) {

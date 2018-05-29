@@ -14,27 +14,29 @@ public class SendMapAtomic extends AtomicBehaviour {
 	private Object msg;
 	private MyGraph g;
 	private String idconv;
-	private String destinataire;
+	private boolean privee;
 
 	public SendMapAtomic(abstractAgent a) {
 		super(a);
 		MyGraph g = this.agent.getmyGraph();
 		this.g = g;
-		this.destinataire=null;
-		this.idconv = null;
+		this.privee = false;
 	}
-	public SendMapAtomic(abstractAgent a, String destinataire, String idconv) {
+	public SendMapAtomic(abstractAgent a, boolean privee) {
 		this(a);
-		this.destinataire = destinataire;
-		this.idconv = idconv;
+		this.privee = privee;
 	}
 	
 	public void action() {
 		msg = g.toHashMap();
-		if(this.idconv == null)
+		if(this.privee == false)
 			this.agent.mailbox.send(msg);
-		else
-			this.agent.mailbox.send(msg, destinataire, idconv); 
+		else{
+
+			String destinataire = this.agent.getlastPing();
+			String myname = this.agent.getLocalName();
+			this.agent.mailbox.send(msg, destinataire, myname);
+		}
 		this.signal = 1;
 	}
 	

@@ -19,13 +19,12 @@ import mas.tools.MyGraph;
 public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 	private int signal;
 	/*
-	 * this behaviour makes a move, sends a ping, treats received messages and share the maps if needed
+	 * this behaviour makes a move, sends a ping, treats received messages
+	 * and share the map if needed
 	 * 
 	 * */
 	public MoveAndCommunicateBehaviour(abstractAgent agent){
 		super(agent);
-		
-		this.a.print("MoveAndCommunicateBehaviour: I am at "+this.a.getPosition()+" and moving");
 				
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");
@@ -59,6 +58,8 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerTransition("ShareMap2", "UpdateMap2", -2);
 		registerTransition("ShareMap2", "UpdateMap2", 1);
 		registerTransition("ShareMap2", "Random", -1); // we are blocked and sharemap failed => go random
+		registerTransition("ShareMap2", "Random", 2); // TODO A VOIR (lautre à recu ma carte mais ne m'a rien envoyé)
+		//en cas de bloquage il faudrait forcer l'envoi des maps pour recalculer un chemin
 		
 		registerDefaultTransition("UpdateMap2", "Fin1");
 		
@@ -74,6 +75,7 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerTransition("ShareMap", "UpdateMap", -2);
 		registerTransition("ShareMap", "UpdateMap", 1);
 		registerTransition("ShareMap", "Fin1", -1);
+		registerTransition("ShareMap", "Fin1", 2);
 		
 		registerDefaultTransition("UpdateMap","Fin1");
 		

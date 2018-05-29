@@ -191,7 +191,10 @@ public class MyGraph {
 				this.bordure.add(n.getId());
 			}
 		}
-		
+		//si la bordure est vide on veut envoyer la carte aux autres peu importe le nb de modifs
+		if(this.bordure.size() == 0) {
+			this.nbmodifs+=1000;
+		}
 	}
 	
 
@@ -276,84 +279,87 @@ public class MyGraph {
 			
 			for(Attribute a:lattribute){
 				switch (a) {
-				case TREASURE:
-					typetreasure=true;
-					valuetreasure = (int)a.getValue();
-					break;
-				case DIAMONDS:
-					typediamonds=true;
-					valuediamonds = (int)a.getValue();
-				default:
-					break;
-			}
-		}
-		//test si déjà dans graphe
-		Node n= this.graph.getNode(myPosition);
-		if (n != null){
-			//le noeud existe dans le graphe
-			boolean explored = n.getAttribute("explored");;
-			n.setAttribute("timeStamp", new Date().getTime() );
-			if (explored){
-				//if the treasure has changed
-				if((int)n.getAttribute("Treasure") != valuetreasure  || (int)n.getAttribute("Diamonds") != valuediamonds) {
-					this.nbmodifs++;
+					case TREASURE:
+						typetreasure=true;
+						valuetreasure = (int)a.getValue();
+						break;
+					case DIAMONDS:
+						typediamonds=true;
+						valuediamonds = (int)a.getValue();
+					default:
+						break;
 				}
-				//update treasure values
-				n.setAttribute("Treasure", valuetreasure);
-				n.setAttribute("Diamonds", valuediamonds);
+			}
+			//test si déjà dans graphe
+			Node n= this.graph.getNode(myPosition);
+			if (n != null){
+				//le noeud existe dans le graphe
+				boolean explored = n.getAttribute("explored");;
+				n.setAttribute("timeStamp", new Date().getTime() );
+				if (explored){
+					//if the treasure has changed
+					if((int)n.getAttribute("Treasure") != valuetreasure  || (int)n.getAttribute("Diamonds") != valuediamonds) {
+						this.nbmodifs++;
+					}
+					//update treasure values
+					n.setAttribute("Treasure", valuetreasure);
+					n.setAttribute("Diamonds", valuediamonds);
+				}
+				else {
+					// le noeud appartenait à la frontière
+					this.nbmodifs++;
+					n.setAttribute("explored", true);
+					n.addAttribute("Treasure", valuetreasure);
+					n.addAttribute("Diamonds", valuediamonds);
+					//on supprime le noeud
+					this.bordure.remove(myPosition);
+					if (typetreasure){
+						this.ListTreasure.add(myPosition);
+					}
+					if (typediamonds){
+						this.ListDiamonds.add(myPosition);
+					}
+				
+					for (int i =1; i < lobs.size(); i++){
+						String voisin = (lobs.get(i)).getLeft();
+						String liaison = myPosition +"_"+ voisin;
+						String inv = voisin + "_" + myPosition;
+						addVoisin(voisin);
+						/* Pour une raison étrange apres le merge, on a des probleme de creation d'arrete deja existante */
+						if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
+							this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
+							
+						}
+					}
+				}
 			}
 			else {
-				// le noeud appartenait à la frontière
+				// Le noeud n'est pas dans le graphe (seulement non initialiser)
 				this.nbmodifs++;
-				n.setAttribute("explored", true);
+				print("Initialisation du graphe en : " + myPosition);
+				n = this.graph.addNode(myPosition);
+				n.addAttribute("explored", true);
 				n.addAttribute("Treasure", valuetreasure);
 				n.addAttribute("Diamonds", valuediamonds);
-				//on supprime le noeud
-				this.bordure.remove(myPosition);
+				n.addAttribute("timeStamp", new Date().getTime() );
 				if (typetreasure){
 					this.ListTreasure.add(myPosition);
 				}
 				if (typediamonds){
 					this.ListDiamonds.add(myPosition);
 				}
-			
 				for (int i =1; i < lobs.size(); i++){
 					String voisin = (lobs.get(i)).getLeft();
-					String liaison = myPosition +"_"+ voisin;
-					String inv = voisin + "_" + myPosition;
+					String liaison = myPosition + "_" + voisin;
 					addVoisin(voisin);
-					/* Pour une raison étrange apres le merge, on a des probleme de creation d'arrete deja existante */
-					if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
-						this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
-						
-					}
-				}
+					this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
+				}	
+			}
+			//si la bordure est vide on veut envoyer la carte aux autres peu importe le nb de modifs
+			if(this.bordure.size() == 0) {
+				this.nbmodifs+=1000;
 			}
 		}
-		else {
-			// Le noeud n'est pas dans le graphe (seulement non initialiser)
-			this.nbmodifs++;
-			print("Initialisation du graphe en : " + myPosition);
-			n = this.graph.addNode(myPosition);
-			n.addAttribute("explored", true);
-			n.addAttribute("Treasure", valuetreasure);
-			n.addAttribute("Diamonds", valuediamonds);
-			n.addAttribute("timeStamp", new Date().getTime() );
-			if (typetreasure){
-				this.ListTreasure.add(myPosition);
-			}
-			if (typediamonds){
-				this.ListDiamonds.add(myPosition);
-			}
-			for (int i =1; i < lobs.size(); i++){
-				String voisin = (lobs.get(i)).getLeft();
-				String liaison = myPosition + "_" + voisin;
-				addVoisin(voisin);
-				this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
-			}
-			
-		}
-	}
 	}
 	
 	public ArrayList<String> getShortestPath(String pos){
@@ -540,7 +546,9 @@ public class MyGraph {
 		
 	}
 	
-
+	public Integer getnbmodifs(){
+		return (Integer)this.nbmodifs;
+	}
 	
 	/* ====================================================
 	 *              HASH PART

@@ -11,30 +11,31 @@ public class SendAtomic extends AtomicBehaviour {
 	*/
 	
 	private Object msg;
-	private String idconv;
 	private String destinataire;
+	boolean privee;
 
 	public SendAtomic(abstractAgent a, Object msg) {
 		super(a);
 		this.msg = msg;
 		this.destinataire = null;
-		this.idconv=null;
+		this.privee = false;
 	}
 	
 
-	public SendAtomic(abstractAgent a, Object msg, String destinataire, String idconv) {
+	public SendAtomic(abstractAgent a, Object msg, boolean privee) {
 		this(a, msg);
-		this.destinataire = destinataire;
-		this.idconv = idconv;
+		this.privee = privee;
 	}
 	
 	public void action() {
-		this.agent.print("SendAtomic");
-		if(idconv == null) {
+		//this.agent.print("SendAtomic");
+		if(privee == false) {
 			this.agent.mailbox.send(msg);
 		}
 		else {
-			this.agent.mailbox.send(msg, destinataire, idconv);
+			String destinataire = this.agent.getlastPing();
+			String myname = this.agent.getLocalName();
+			this.agent.mailbox.send(msg, destinataire, myname);
 		}
 		this.signal = 1;
 		

@@ -12,7 +12,7 @@ public class ListenAtomic extends AtomicBehaviour {
 	}
 	
 	public void action() {
-		this.agent.print("ListenAtomic");
+		//this.agent.print("ListenAtomic");
 		this.agent.getMsg();
 		this.signal = 1;
 	}

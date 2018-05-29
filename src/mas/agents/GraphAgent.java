@@ -20,16 +20,10 @@ import mas.tools.Messages;
 import mas.tools.MyGraph;
 
 
-public class GraphAgent extends abstractAgent{
-
-	/**
-	 * 
-	 */
-	
+public class GraphAgent extends abstractAgent{	
 	public void supersetup(){
 		super.setup();
 	}
-	
 	private static final long serialVersionUID = -1784844593772918359L;
 	
 	// graphe partiel connu
@@ -48,24 +42,95 @@ public class GraphAgent extends abstractAgent{
 	private long timeOut;
 	private HashMap<String, Object> lastMsg;
 	private HashMap<String, Object> lastMap;
-	private ArrayList<Integer> lastSentMap; // TODO USE THAT
+	private HashMap<String, Integer> lastSentMap;
 	String lastsender;
+	int nbmodifsmin;
+	
+	/**
+	 * This method is automatically called when "agent".start() is executed.
+	 * Consider that Agent is launched for the first time. 
+	 * 			1) set the agent attributes 
+	 *	 		2) add the behaviours
+	 *          
+	 */
+	protected void setup(){
+
+		super.setup();
+
+		final Object[] args = getArguments();
+		if(args!=null && args[0]!=null && args[1]!=null){
+			deployAgent((Environment) args[0],(EntityType)args[1]);
+		}else{
+			System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
+                        System.exit(-1);
+                }
+		//setup graph
+		//setupgraph();
+		this.graph = new SingleGraph("graphAgent");
+		initMyGraph();
+		this.step = 0;
+		this.stepMap = new HashMap<String, Integer>();
+		this.path = new ArrayList<String>();
+		this.mailbox = new Messages(this);
+		this.lastMsg = null;
+		this.switchPath = true;
+		this.timeOut = 1000 * 5;	//5 secondes pour timeout
+		this.lastsender = null;
+		this.lastSentMap = new HashMap<String, Integer>();
+		this.nbmodifsmin = 10;		//5 modifs pour renvoyer la carte
+		
+		System.out.println("the agent "+this.getLocalName()+ " is started");
+
+	}
+	
+	public void print(String m){
+		System.out.println(this.getLocalName()+" : "+m);
+	}
+	/*
+	protected void setupgraph() {
+		//color of a node according to its type
+		String defaultNodeStyle= "node {"+"fill-color: black;"+" size-mode:fit;text-alignment:under; text-size:14;text-color:white;text-background-mode:rounded-box;text-background-color:black;}";
+		String nodeStyle_wumpus= "node.wumpus {"+"fill-color: red;"+"}";
+		String nodeStyle_agent= "node.agent {"+"fill-color: blue;"+"}";
+		String nodeStyle_treasure="node.treasure {"+"fill-color: yellow;"+"}";
+		String nodeStyle_EntryExit="node.exit {"+"fill-color: green;"+"}";
+		
+		String nodeStyle=defaultNodeStyle+nodeStyle_wumpus+nodeStyle_agent+nodeStyle_treasure+nodeStyle_EntryExit;
+		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+
+		this.graph = new SingleGraph("Illustrative example");//generateGraph(true, 30);
+		
+		this.iter=graph.getNodeIterator();
+		
+		//SingleGraph graph = new SingleGraph("Tutorial 1");
+		graph.setAttribute("ui.stylesheet",nodeStyle);
+		
+		//pas besoin d'affichage
+		//Viewer viewer = graph.display();
+		//SpriteManager sman = new SpriteManager(graph);
+		
+	}
+	public void print(String m){
+		System.out.println(this.getLocalName()+" : "+m);
+	}
+	*/
+	
+	//////////////////////////////////////////////////////////////////////////
 	
 	
 	public HashMap<String, Object> getMsg(){
-		return getMsg(null);
+		return getMsg("broadcast");
 	}
 	public HashMap<String, Object> getMsg(String idconv){
+		if(idconv == null) 
+			return null; 
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		long currentTime = timestamp.getTime();
 		long time;
 		HashMap<String, Object> msg;
 		Object t;
 		do { 
-			if(idconv != null)
-				msg = this.mailbox.get2(idconv); //private version
-			else
-				msg = this.mailbox.get2(); // broadcast version
+			msg = this.mailbox.get2(idconv); //private version
 			if (msg == null) {
 				return null;
 			}
@@ -260,74 +325,34 @@ public class GraphAgent extends abstractAgent{
 	public String getlastPing() {
 		return this.lastsender;
 	}
-
-	/**
-	 * This method is automatically called when "agent".start() is executed.
-	 * Consider that Agent is launched for the first time. 
-	 * 			1) set the agent attributes 
-	 *	 		2) add the behaviours
-	 *          
-	 */
-
-	protected void setup(){
-
-		super.setup();
-
-		final Object[] args = getArguments();
-		if(args!=null && args[0]!=null && args[1]!=null){
-			deployAgent((Environment) args[0],(EntityType)args[1]);
-		}else{
-			System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
-                        System.exit(-1);
-                }
-		//setup graph
-		//setupgraph();
-		this.graph = new SingleGraph("graphAgent");
-		initMyGraph();
-		this.step = 0;
-		this.stepMap = new HashMap<String, Integer>();
-		this.path = new ArrayList<String>();
-		this.mailbox = new Messages(this);
-		this.lastMsg = null;
-		this.switchPath = true;
-		this.timeOut = 1000 * 5; //5 secondes pour timeout
-		this.lastsender = null;
-		
-		System.out.println("the agent "+this.getLocalName()+ " is started");
-
+	
+	public void updateLastSentMap(String sender){
+		//si il existe pas déjà on commence par le créer
+		if (! this.lastSentMap.containsKey(sender)){
+			this.lastSentMap.put(sender, 0);
+		}
+		//on met à jour la valeur
+		this.lastSentMap.replace(sender, this.getmyGraph().getnbmodifs());
+	}
+	//retourne le nombre de modifs effectués pour un agent depuis qu'on lui à envoyé
+	public int getDifferenceLastSent(String sender){
+		//si il existe pas déjà on commence par le créer
+		if (! this.lastSentMap.containsKey(sender)){
+			this.lastSentMap.put(sender, 0);
+			return this.getmyGraph().getnbmodifs(); //et on retourne le nombre de modifs total
+		}
+		//si il existe on calcule la différence
+		int current = this.getmyGraph().getnbmodifs();
+		int last = this.lastSentMap.get(sender);
+		return (current - last) ;
 	}
 	
-	public void print(String m){
-		System.out.println(this.getLocalName()+" : "+m);
+	public int getnbmodifsmin(){
+		return this.nbmodifsmin;
 	}
-	/*
-	protected void setupgraph() {
-		//color of a node according to its type
-		String defaultNodeStyle= "node {"+"fill-color: black;"+" size-mode:fit;text-alignment:under; text-size:14;text-color:white;text-background-mode:rounded-box;text-background-color:black;}";
-		String nodeStyle_wumpus= "node.wumpus {"+"fill-color: red;"+"}";
-		String nodeStyle_agent= "node.agent {"+"fill-color: blue;"+"}";
-		String nodeStyle_treasure="node.treasure {"+"fill-color: yellow;"+"}";
-		String nodeStyle_EntryExit="node.exit {"+"fill-color: green;"+"}";
-		
-		String nodeStyle=defaultNodeStyle+nodeStyle_wumpus+nodeStyle_agent+nodeStyle_treasure+nodeStyle_EntryExit;
-		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-
-		this.graph = new SingleGraph("Illustrative example");//generateGraph(true, 30);
-		
-		this.iter=graph.getNodeIterator();
-		
-		//SingleGraph graph = new SingleGraph("Tutorial 1");
-		graph.setAttribute("ui.stylesheet",nodeStyle);
-		
-		//pas besoin d'affichage
-		//Viewer viewer = graph.display();
-		//SpriteManager sman = new SpriteManager(graph);
-		
-	}
-	public void print(String m){
-		System.out.println(this.getLocalName()+" : "+m);
-	}
-	*/
+	
+	
+	
 	
 	/**
 	 * This method is automatically called after doDelete()
