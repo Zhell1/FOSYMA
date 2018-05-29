@@ -16,6 +16,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 	
 	public void action() {
 		this.agent.print("ExploreDestination");
+		
 		MyGraph g = this.agent.getmyGraph();
 		boolean b_getswitchpath = this.agent.getSwitchPath();
 		ArrayList<String> p = this.agent.getPath();

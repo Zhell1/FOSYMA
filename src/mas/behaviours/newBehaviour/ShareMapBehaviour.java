@@ -13,19 +13,28 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 	 * signal 1  : Succès
 	 */
 
-	public ShareMapBehaviour(abstractAgent agent, String idconv) {
+	public ShareMapBehaviour(abstractAgent agent) {
 		/*
 		 *  sendMap n'envoie pas la même carte, que la carte courante....
 		 */
 		super(agent);
+		
+		//on récupère l'idconv = dernière personne à nous avoir envoyé un ping
+		String destname = this.a.getlastPing(); //receive with idconv = dest
+		this.a.print("starting PRIVATE sharemap with " +destname);
+	
+		
+		String myname = this.a.getLocalName(); // send with myname
+		
+		
 		// TODO Auto-generated constructor stub
-		registerFirstState(new SendAtomic(a, "roger", idconv), "SendRoger");
-		registerState(new WaitForAtomic(a, "HashMap", 5), "WaitMap"); // attends jusqu'à 5 secondes la carte
-		registerState(new SendMapAtomic(a), "SendMap");
-		registerState(new SendAtomic(a,"roger"), "SendRoger");
-		registerState(new SendAtomic(a, "ack"), "SendAck");
-		registerState(new WaitForStringAtomic(a, "ack", 5), "WaitAck"); //wait up to 5 sec
-		registerState(new WaitForStringAtomic(a, "roger",5), "WaitRoger"); //wait up to 5 sec
+		registerFirstState(new SendAtomic(a, "roger", destname, myname), "SendRoger");
+		registerState(new WaitForAtomic(a, "HashMap", 5, destname), "WaitMap"); // attends jusqu'à 5 secondes la carte
+		registerState(new SendMapAtomic(a, destname, myname), "SendMap");
+		registerState(new SendAtomic(a,"roger", destname, myname), "SendRoger");
+		registerState(new SendAtomic(a, "ack", destname, myname), "SendAck");
+		registerState(new WaitForStringAtomic(a, "ack", 5, destname), "WaitAck"); //wait up to 5 sec
+		registerState(new WaitForStringAtomic(a, "roger",5, destname), "WaitRoger"); //wait up to 5 sec
 		registerLastState(new EndAtomic(a, this, -1), "Fail1");
 		registerLastState(new EndAtomic(a, this, -2), "Fail2");
 		registerLastState(new EndAtomic(a, this, 1), "Success");

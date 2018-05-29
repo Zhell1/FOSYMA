@@ -22,29 +22,35 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 	
 	public void action() {
 		HashMap<String, Object> msg = this.agent.consultLastMsg();
-
+		this.agent.print("TraiteMsg: "+msg);
 		if (msg == null) {
 			this.signal = -1;
 			return;
 		}
 		if (msg.get("type").equals("String")) {
 			String msgstring = (String) msg.get("content");
+			GraphAgent graphagent = ((GraphAgent)this.myAgent);
 			if(msgstring.startsWith("ping silo")) {
 				//si on ne sait pas où est le silo
-				GraphAgent graphagent = ((GraphAgent)this.myAgent);
 				if( graphagent.getmyGraph().getSiloPosition() == null ) {
 					String[] lres = msgstring.split(":");
 					String siloposition = lres[1];	 //recup silo position
 					graphagent.getmyGraph().setSiloPosition(siloposition);
 					graphagent.print("TraiteMsgAtomic: found silo from his ping at "+siloposition);
 				}
+				graphagent.setlastPing((String)msg.get("sender"));
+				graphagent.print("*** setlastping : "+(String)msg.get("sender")+" ***");
 				this.signal = 1;
 				return;
 			}
 			else if (msgstring.equals("ping")){
+				graphagent.setlastPing((String)msg.get("sender"));
+				graphagent.print("*** setlastping : "+(String)msg.get("sender")+" ***");
 				this.signal = 1;
 				return;
 			}
+
+			
 			if (cpt <= 100){ //traite 100 messages
 				this.signal = 0;
 				cpt ++;

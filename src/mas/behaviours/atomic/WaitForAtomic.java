@@ -20,6 +20,7 @@ public class WaitForAtomic extends AtomicBehaviour {
 	protected int cpt;
 	private String type;
 	private long startTime;
+	private String idconv;
 
 	public WaitForAtomic(abstractAgent a, String type, int timeOut) {
 		super(a);
@@ -28,7 +29,15 @@ public class WaitForAtomic extends AtomicBehaviour {
 		this.startTime = currentTime;
 		this.timeOut = 1000 * timeOut;  //on converti en milisecondes
 		this.type = type;
+		this.idconv = null;
 	}
+	
+
+	public WaitForAtomic(abstractAgent a, String type, int timeOut, String idconv) {
+		this(a, type, timeOut);
+		this.idconv = idconv;
+	}
+	
 	
 	public void action() {
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -43,8 +52,14 @@ public class WaitForAtomic extends AtomicBehaviour {
 			this.signal = -1;
 			return;
 		}
+		HashMap<String, Object> msg;
+		if(idconv == null) {
+			msg = this.agent.getMsg();
+		}
+		else{
+			msg = this.agent.getMsg(idconv);
+		}
 		
-		HashMap<String, Object> msg = this.agent.getMsg();
 		if (msg == null) {
 			this.signal = 0;
 			return;

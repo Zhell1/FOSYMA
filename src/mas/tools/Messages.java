@@ -226,6 +226,23 @@ public class Messages {
 		if (msg == null) {
 			return null;
 		}
+		System.out.println("get2 broadcast msg: " +msg);
+		HashMap<String, Object> obj = null;
+		try {
+			obj =(HashMap<String, Object>)msg.getContentObject();
+		} catch (UnreadableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		return obj;
+	}
+	
+	public HashMap<String, Object> get2(String idconv){
+		ACLMessage msg = this.agt.receive(MessageTemplate.or(MessageTemplate.MatchConversationId(idconv), MessageTemplate.MatchConversationId(this.agent.getLocalName())));
+		if (msg == null) {
+			return null;
+		}
 		HashMap<String, Object> obj = null;
 		try {
 			obj =(HashMap<String, Object>)msg.getContentObject();

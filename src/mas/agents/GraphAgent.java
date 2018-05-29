@@ -48,17 +48,24 @@ public class GraphAgent extends abstractAgent{
 	private long timeOut;
 	private HashMap<String, Object> lastMsg;
 	private HashMap<String, Object> lastMap;
-	private ArrayList<Integer> lastSentMap;
+	private ArrayList<Integer> lastSentMap; // TODO USE THAT
+	String lastsender;
 	
 	
 	public HashMap<String, Object> getMsg(){
+		return getMsg(null);
+	}
+	public HashMap<String, Object> getMsg(String idconv){
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		long currentTime = timestamp.getTime();
 		long time;
 		HashMap<String, Object> msg;
 		Object t;
 		do { 
-			msg = this.mailbox.get2();
+			if(idconv != null)
+				msg = this.mailbox.get2(idconv); //private version
+			else
+				msg = this.mailbox.get2(); // broadcast version
 			if (msg == null) {
 				return null;
 			}
@@ -77,10 +84,7 @@ public class GraphAgent extends abstractAgent{
 			else {
 				print("Message non pris car TIMEOUT");
 			}
-			
-			
 		}while(true);
-
 	}
 	
 	public void look() {
@@ -249,6 +253,13 @@ public class GraphAgent extends abstractAgent{
 	public void initMyGraph(){
 		this.myGraph = new mas.tools.MyGraph((mas.abstractAgent)this, this.graph);
 	}
+	
+	public void setlastPing(String sender) {
+		this.lastsender = sender;
+	}
+	public String getlastPing() {
+		return this.lastsender;
+	}
 
 	/**
 	 * This method is automatically called when "agent".start() is executed.
@@ -280,6 +291,7 @@ public class GraphAgent extends abstractAgent{
 		this.lastMsg = null;
 		this.switchPath = true;
 		this.timeOut = 1000 * 5; //5 secondes pour timeout
+		this.lastsender = null;
 		
 		System.out.println("the agent "+this.getLocalName()+ " is started");
 
