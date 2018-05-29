@@ -1,6 +1,7 @@
 package mas.behaviours.atomic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import mas.abstractAgent;
@@ -35,7 +36,14 @@ public class SendMapAtomic extends AtomicBehaviour {
 
 			String destinataire = this.agent.getlastPing();
 			String myname = this.agent.getLocalName();
-			this.agent.mailbox.send(msg, destinataire, myname);
+			HashMap<String, Object> lastSended = this.agent.SendedMap.get(destinataire);
+			if (lastSended == null) {
+				this.agent.mailbox.send(msg, destinataire, myname);
+				this.signal = 1;
+				return;
+			}
+			Object newMsg = this.agent.getmyGraph().DifMap(lastSended, (HashMap<String, Object>)msg);
+			this.agent.mailbox.send(newMsg, destinataire, myname);
 		}
 		this.signal = 1;
 	}

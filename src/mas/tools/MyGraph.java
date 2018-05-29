@@ -635,6 +635,49 @@ public class MyGraph {
 		return res;
 	}
 	
+	boolean found(Couple c1, List<Couple> L) {
+		for (Couple c2 : L) {
+			if (c1.equals(c2)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public HashMap<String, Object >DifMap(HashMap<String, Object> map1 , HashMap<String, Object> map2){
+		/* map1 : older map, map2 : new map */
+		HashMap<String, Object> res = new HashMap<String, Object>();
+		/* on remet les données pour éviter d'avoir des problèmes de champs non existants */
+		res.put("position", this.myAgent.getCurrentPosition());
+		res.put("siloPosition", this.siloPosition);
+		List<Couple> edge1 = (List<Couple>) map1.get("edges");
+		List<Couple> edge2 = (List<Couple>) map2.get("edges");
+		List<Couple> resEdge = new ArrayList<Couple>();
+		
+		List<Couple> node1 = (List<Couple>) map1.get("nodes");
+		List<Couple> node2 = (List<Couple>) map1.get("nodes");
+		List<Couple> resNode = (List<Couple>) map1.get("nodes");
+		
+		/* si l'arête existe dans la nouvelle carte et pas l'ancienne on la rajoute */
+		for (Couple c2 : edge2) {
+			if (!found(c2, edge1)) {
+				resEdge.add(c2);
+			}
+		}
+		
+		res.put("edges", resEdge);
+		
+		for (Couple c2 : node2) {
+			if (!found(c2, node1)) {
+				resNode.add(c2);
+			}
+		}
+		
+		res.put("nodes", resNode);
+		
+		return res;
+	}
+	
 	public MyGraph (abstractAgent myagent, HashMap<String, Object> map){
 		Collection<Couple>  nodes = (Collection<Couple>) map.get("nodes");
 		Collection<Couple> edges = (Collection<Couple>) map.get("edges");

@@ -43,6 +43,8 @@ public class GraphAgent extends abstractAgent{
 	private HashMap<String, Object> lastMsg;
 	private HashMap<String, Object> lastMap;
 	private HashMap<String, Integer> lastSentMap;
+	//j'ai la flemme de faire mes getter
+	public HashMap<String, HashMap<String, Object>> SendedMap;
 	String lastsender;
 	int nbmodifsmin;
 	
@@ -77,6 +79,7 @@ public class GraphAgent extends abstractAgent{
 		this.timeOut = 1000 * 5;	//5 secondes pour timeout
 		this.lastsender = null;
 		this.lastSentMap = new HashMap<String, Integer>();
+		this.SendedMap = new HashMap<String, HashMap<String, Object>>();
 		this.nbmodifsmin = 10;		//5 modifs pour renvoyer la carte
 		
 		System.out.println("the agent "+this.getLocalName()+ " is started");
