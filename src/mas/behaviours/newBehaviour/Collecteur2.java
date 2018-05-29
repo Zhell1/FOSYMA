@@ -94,7 +94,8 @@ public class Collecteur2 extends GraphAgentBehaviour{
 						   
 		Action end = a -> {a.print("END OF THE AGENT");};
 		
-		Action none = a -> { a.print("none"); };
+		Action none = a -> { //a.print("none");
+								};
 		
 		Condition expAll = a -> {return a.getmyGraph().getBordure().isEmpty() && a.getmyGraph().getBestTreasurePath() ==  null;};
 		

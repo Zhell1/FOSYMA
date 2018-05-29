@@ -39,10 +39,14 @@ public class ExploratorBehaviour extends GraphAgentBehaviour{
 		
 		registerFirstState(new ExploreDestinationAtomic(a), "Dest");
 		registerLastState(new MoveAndCommunicateBehaviour(a), "MoveCom");
+		registerLastState(new VoidAtomic(a), "End1");
 		
 		registerTransition("Dest", "MoveCom", 1);
 		registerTransition("Dest", "End1", -1);
 		registerDefaultTransition("MoveCom", "Dest");	
+		
+		
+		registerDefaultTransition("End1", "End1");
 		
 	}
 	

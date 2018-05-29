@@ -269,6 +269,8 @@ public class MyGraph {
 		if (n == null){
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);
+			n.addAttribute("Treasure", 0);
+			n.addAttribute("Diamonds", 0);
 			n.addAttribute("timeStamp", new Date().getTime());
 			this.bordure.add(position);
 		}
@@ -358,7 +360,7 @@ public class MyGraph {
 				}
 			}
 			else {
-				// Le noeud n'est pas dans le graphe (seulement non initialiser)
+				// Le noeud n'est pas dans le graphe => on le créé
 				this.nbmodifs++;
 				print("Initialisation du graphe en : " + myPosition);
 				n = this.graph.addNode(myPosition);
@@ -415,7 +417,7 @@ public class MyGraph {
 		//System.out.println("getShortestPath() res = " + res.toString());
 		return res;
 	}
-	
+	//get the shortest path to one of the nodes in the list
 	public ArrayList<String> getShortestPath(ArrayList<String> L){
 		if (L == null || L.isEmpty()) {
 			return null;
@@ -448,6 +450,10 @@ public class MyGraph {
 		if (bestNode == null){
 			System.out.println("treasureList : " + L.toString());
 			System.out.println("my position: " + position);
+			return null;
+			//peut arriver si on à échangé la carte avec un autre qui sait où est un trésor
+			// mais que certains noeuds entre nous sont encore sur la bordure
+			//donc dijkstra ne trouve pas de chemin
 		}
 
 		System.out.println("calculating shortest path from "+position+" to "+bestNode.getId());

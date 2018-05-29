@@ -9,8 +9,9 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 
 	public ExploreDestinationAtomic(abstractAgent a) {
 		super(a);
-		/* signal 1 = chemin trouvé
-		 * signal 2 = chemin non trouvé
+		/* signal 1  = chemin trouvé
+		 * signal 2  = chemin non trouvé
+		 * signal -1 = fin de l'exploration
 		 */
 	}
 	
