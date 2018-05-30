@@ -253,7 +253,7 @@ public class Messages {
 		msg.setSender(this.agent.getAID());
 		msg.setConversationId(idconv);
 
-		System.out.println(this.agt.getLocalName()+" send msg to: "+destinataire+", idconv: "+idconv);
+		//System.out.println(this.agt.getLocalName()+" send msg to: "+destinataire+", idconv: "+idconv);
 		
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		obj.put("type", content.getClass().getSimpleName());
@@ -264,7 +264,7 @@ public class Messages {
 			if (obj != null){
 				msg.setContentObject((Serializable) obj);
 				this.agt.sendMessage(msg);
-				System.out.println(this.agent.getLocalName() + " : SEND :" + obj);
+				//System.out.println(this.agent.getLocalName() + " : SEND :" + obj);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

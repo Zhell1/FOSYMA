@@ -44,6 +44,7 @@ public class Principal {
 		//env= new Environment(ENVtype.DOROGOVTSEV_T,15,null);
 		//env= new Environment(ENVtype.DOROGOVTSEV_T,8,null);
 		//env=new Environment("ressources/map2017-2","ressources/map2017-config");
+		//env=new Environment("ressources/mapzhell","ressources/mapzhell.config");
 
 		//1), create the platform (Main container (DF+AMS) + containers + monitoring agents : RMA and SNIFFER)
 		rt=emptyPlatform(containerList);
@@ -236,7 +237,7 @@ public class Principal {
 //
 		//Collector (backPack)
 		c = containerList.get("container0");
-		agentName="Agent3(collector)";
+		agentName="Collector1"; //agentName="Agent3(collector)";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
@@ -250,7 +251,7 @@ public class Principal {
 		
 		// Collector (backPack)
 		c = containerList.get("container0");
-		agentName="Agent4(collector)";
+		agentName="Collector2"; //agentName="Agent4(collector)";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent

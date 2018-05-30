@@ -25,11 +25,12 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 	 * */
 	public MoveAndCommunicateBehaviour(abstractAgent agent){
 		super(agent);
+		int nbrandom = 4; //nb random moves when blocked
 				
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");
 		registerState(new ListenAtomic(a), "Listen");
-		registerState(new RandomAtomic(a, 3), "Random");
+		registerState(new RandomAtomic(a, nbrandom), "Random"); //X random moves 
 		registerState(new TraiteMsgAtomic(a), "TraiteMsg");
 		registerState(new ShareMapBehaviour(a), "ShareMap");
 		registerState(new UpdateMapAtomic(a), "UpdateMap");

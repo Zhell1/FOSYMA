@@ -37,6 +37,7 @@ public class GraphAgent extends abstractAgent{
 	ArrayList<String> path;
 	boolean succesLastMove;
 	boolean switchPath;
+	int sleepbetweenmove;
 
 	public Messages mailbox;
 	private long timeOut;
@@ -45,6 +46,8 @@ public class GraphAgent extends abstractAgent{
 	private HashMap<String, Integer> lastSentMap;
 	String lastsender;
 	int nbmodifsmin;
+	boolean remakepath;
+	int nbmoverandom;
 	
 	/**
 	 * This method is automatically called when "agent".start() is executed.
@@ -64,6 +67,14 @@ public class GraphAgent extends abstractAgent{
 			System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
                         System.exit(-1);
                 }
+		
+		//############ PARAMS ##########
+
+		this.nbmodifsmin 		= 15;			//nb modifs minimum pour renvoyer la carte
+		this.timeOut 			= 1000 * 3;		//secondes pour timeout (*1000 car il faut en ms)
+		this.sleepbetweenmove 	= 800;			//in MS
+		
+		//#############################
 		//setup graph
 		//setupgraph();
 		this.graph = new SingleGraph("graphAgent");
@@ -74,18 +85,21 @@ public class GraphAgent extends abstractAgent{
 		this.mailbox = new Messages(this);
 		this.lastMsg = null;
 		this.switchPath = true;
-		this.timeOut = 1000 * 5;	//5 secondes pour timeout
 		this.lastsender = null;
 		this.lastSentMap = new HashMap<String, Integer>();
-		this.nbmodifsmin = 10;		//5 modifs pour renvoyer la carte
+		this.remakepath = false; // changes to true if the map changed in a way that requires a new path
 		
 		System.out.println("the agent "+this.getLocalName()+ " is started");
-
 	}
 	
 	public void print(String m){
 		System.out.println(this.getLocalName()+" : "+m);
 	}
+	
+	public int getnbmoverandom() {
+		return this.nbmoverandom;
+	}
+			
 	/*
 	protected void setupgraph() {
 		//color of a node according to its type
@@ -231,7 +245,12 @@ public class GraphAgent extends abstractAgent{
 	}
 	
 	public String getNextPath() {
-		this.print("My treasure type: " + this.getMyTreasureType()+ "\t\t | Silo at "+this.getmyGraph().getSiloPosition());
+		String printstring = "My treasure type: " + this.getMyTreasureType();
+		printstring += "\t\t | Silo at "+this.getmyGraph().getSiloPosition();
+		printstring += "\t\t | explored: "+this.getmyGraph().getExplored().size();
+		printstring += "\t\t | bordure: "+this.getmyGraph().getBordure().size();
+		this.print(printstring);
+		
 		if(this.path==null) return null;
 		
 		if (this.path.isEmpty()) {
@@ -245,7 +264,6 @@ public class GraphAgent extends abstractAgent{
 	}
 	
 	public void putMovePath(String m) {
-		//TODO VERIFIER QU'ON AJOUTE DU BON COTÉ (À GAUCHE LES PREMIERS À PRENDRE)
 		this.path.add(m);
 	}
 	
@@ -255,10 +273,17 @@ public class GraphAgent extends abstractAgent{
 	
 	public void resetPath() {
 		this.path.clear();
+		this.remakepath = true;
 	}
 	
 	public void setPath(ArrayList<String> n) {
 		this.path = n;
+	}
+	public boolean getremakepath(){
+		return this.remakepath;
+	}	
+	public void setremakepath(boolean newval){
+		this.remakepath = newval;
 	}
 	
 	public Integer getStepId(String idAgent){
@@ -287,7 +312,7 @@ public class GraphAgent extends abstractAgent{
 		
 		//wait time
 		try {
-			Thread.sleep(1000); //TODO A SUPPRIMER (JUSTE POUR DEBUG)
+			Thread.sleep(this.sleepbetweenmove); //TODO A SUPPRIMER (JUSTE POUR DEBUG)
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

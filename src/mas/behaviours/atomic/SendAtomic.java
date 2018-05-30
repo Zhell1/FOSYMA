@@ -35,6 +35,7 @@ public class SendAtomic extends AtomicBehaviour {
 		else {
 			String destinataire = this.agent.getlastPing();
 			String myname = this.agent.getLocalName();
+			//this.agent.print(" SEND "+msg);
 			this.agent.mailbox.send(msg, destinataire, myname);
 		}
 		this.signal = 1;

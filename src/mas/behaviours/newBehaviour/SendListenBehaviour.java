@@ -22,6 +22,7 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 	
 	public SendListenBehaviour(abstractAgent agent, Object msg){
 		super(agent);
+		/*
 		//Pour laisser le temps à l'environement de se charger
 		try {
 			Thread.sleep(1000);
@@ -29,6 +30,7 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 		
 		/*
 		 * TODO Quand on re-rentre dans le behaviour, on retourne dans l'état final Success, il faut reinitaliser
@@ -73,7 +75,7 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 	
 	public int onEnd() {
 		this.reset();
-		this.a.print("reset ");
+		//this.a.print("reset ");
 		return this.signal;
 		
 	}

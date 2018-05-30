@@ -34,6 +34,7 @@ public class GraphAgentBehaviour extends FSMBehaviour{
 	}
 	
 	public int onEnd() {
+		this.reset();
 		return this.signal;
 	}
 	

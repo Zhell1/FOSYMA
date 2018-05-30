@@ -34,16 +34,38 @@ public class Collecteur2 extends GraphAgentBehaviour{
 	 */
 	private int signal;
 	
+	
 	public Collecteur2(abstractAgent agent){
-		/* MoveTreasor semble mal fonctionner quand il y a 2 agents ,  todo à tester*/
 		super(agent);
 		
+		Condition exploFinie = a-> {	a.print("exploFinie? ="+(a.getmyGraph().getBordure().size() == 0));
+										return (a.getmyGraph().getBordure().size() == 0);
+									};
+		
+		Condition checkRemakePath = a -> { 		a.print("remakePath? ="+a.getremakepath());
+												if(a.getremakepath()){
+													a.setremakepath(false);
+													return true;
+												} else return false;
+										};
+		
 		Condition silofound = a -> { a.print("silofound ? = " + (a.getmyGraph().getSiloPosition() != null ));
-									 a.print("path to silo found = " + (a.getmyGraph().pathtosilofound()));
+									 a.print("path to silo found ? = " + (a.getmyGraph().pathtosilofound()));
+									 a.print("\texplored: "+a.getmyGraph().getExplored().size()+"\tbordure: "+a.getmyGraph().getBordure().size());
+									 if(a.getmyGraph().getBordure().size() == 1){
+										 a.print("\tbordure= "+a.getmyGraph().getBordure());
+									 }
+									 
 									 boolean res = (a.getmyGraph().getSiloPosition() != null) && a.getmyGraph().pathtosilofound(); 
-			                         return res;  };
+			                         a.print("--> res = "+res);
+									 return res;  };
 							
-		Condition tresfound = a -> {//a.print("explored : " + a.getmyGraph().getExplored().toString());
+		Condition tresfound = a -> { a.print("explo finie ? bordure=" + a.getmyGraph().getBordure().size());
+									 if(a.getmyGraph().getBordure().size() == 1)
+										 a.print("\tbordure = "+a.getmyGraph().getBordure());
+		 
+									 a.print("tresfound ? = "+ (a.getmyGraph().getBestTreasurePath() != null));
+									//a.print("explored : " + a.getmyGraph().getExplored().toString());
 							        //a.print("Bordure : " + a.getmyGraph().getBordure().toString());
 							        return a.getmyGraph().getBestTreasurePath() != null;  }; // && !(a.getmyGraph().getBordure().isEmpty());};
 							
@@ -76,15 +98,10 @@ public class Collecteur2 extends GraphAgentBehaviour{
 								a.pickTreasure();  
 								valrestant =  a.getmyGraph().getTreasureValue(a.getPosition(), a.getMyTreasureType());
 								a.print("valrestant after pick = " + valrestant);
-								try {
-									Thread.sleep(1000); // TODO SUPPRIMER CELA, juste utile pour les tests
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
 							};
 		
-		Action pathTresor = a -> {  a.setPath(a.getmyGraph().getBestTreasurePath());
+		Action pathTresor = a -> {  a.print("calculating pathTresor");
+									a.setPath(a.getmyGraph().getBestTreasurePath());
 									//ArrayList<String> Lpath = a.getmyGraph().getBestTreasurePath();
 									//a.print("path set to new treasure at "+ Lpath.get(Lpath.size()-1));
 									a.setSwitchPath(false);   };
@@ -101,29 +118,53 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		
 		
 		
+		// ---------------------------------- states ----------------------------------
 		
 		registerFirstState(new IfAtomic(a, tresfound, pathTresor, none), "CheckTres");
 		registerState(new ExploratorBehaviour(a), "Explo1");
 		
-		registerState(new IfAtomic(a, pathOver, none, pathTresor), "PathTresOver");
+		registerState(new IfAtomic(a, pathOver, none, none), "PathTresOver");
 		registerState(new MoveAndCommunicateBehaviour(a), "MC1");
 		
 		registerState(new IfAtomic(a, silofound, pathSilo, none), "CheckSilo");
 		registerState(new ExploratorBehaviour(a), "Explo2");
 		
-		registerState(new IfAtomic(a, siloOver, none, pathSilo), "PathSiloOver");
+		registerState(new IfAtomic(a, siloOver, none, none), "PathSiloOver");
 		registerState(new MoveAndCommunicateBehaviour(a), "MC2");
 		
 		registerState(new SingletonAtomic(a, pick), "Pick");
 		registerState(new SingletonAtomic(a, put), "Put");
 		
+
+		registerState(new IfAtomic(a, checkRemakePath, pathTresor, none), "CheckRemakePathTres");
+		registerState(new IfAtomic(a, checkRemakePath, pathSilo, none),   "CheckRemakePathSilo");
+		
+
+		registerState(new IfAtomic(a, exploFinie, none, none), "CheckExplo1");
+		registerState(new IfAtomic(a, exploFinie, none, none), "CheckExplo2");
+		
+		
+		registerState(new ExploratorBehaviour(a), "Explo3"); //quand il à tout exploré et plus de trésor
+		
+		//registerLastState(new EndAtomic(a, this, 1), "EndSuccess");
+		
+		//------------------------------- transitions ------------------------------
+		
 		registerTransition("CheckTres", "Explo1", -1);
 		registerTransition("CheckTres", "PathTresOver", 1);
 		
-		registerDefaultTransition("Explo1", "CheckTres");
+		//registerDefaultTransition("Explo1", "CheckTres");
+		registerTransition("Explo1", "CheckTres", 1);
+		registerTransition("Explo1", "CheckExplo1", -1);
+		registerTransition("Explo1", "CheckExplo1", 0); // TODO POURQUOI PARFOIS ON RENVOI 0 ICI ???
+		registerTransition("CheckExplo1", "Explo3", 1);
+		registerTransition("CheckExplo1", "CheckTres", -1);
 		
 		registerTransition("PathTresOver", "MC1", -1);
-		registerTransition("PathTresOver", "Pick", 1);
+		registerTransition("PathTresOver", "CheckRemakePathTres", 1);
+		
+		registerTransition("CheckRemakePathTres", "Pick", -1);
+		registerTransition("CheckRemakePathTres", "CheckTres", 1);
 		
 		registerDefaultTransition("MC1", "PathTresOver");
 		
@@ -131,14 +172,27 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		registerTransition("CheckSilo", "Explo2", -1);
 		registerTransition("CheckSilo", "PathSiloOver", 1);
 		
-		registerDefaultTransition("Explo2", "CheckSilo");
+		//registerDefaultTransition("Explo2", "CheckSilo");
+		registerTransition("Explo2", "CheckSilo", 1);
+		registerTransition("Explo2", "CheckExplo2", -1);
+		registerTransition("Explo2", "CheckExplo2", 0); // TODO POURQUOI PARFOIS ON RENVOI 0 ICI ???
+		registerTransition("CheckExplo2", "Explo3", 1);
+		registerTransition("CheckExplo2", "CheckSilo", -1);
 		
 		registerTransition("PathSiloOver", "MC2", -1);
-		registerTransition("PathSiloOver", "Put",  1);
+		registerTransition("PathSiloOver", "CheckRemakePathSilo",  1);
+
+		registerTransition("CheckRemakePathSilo", "Put", -1);
+		registerTransition("CheckRemakePathSilo", "CheckSilo", 1);
 		
 		registerDefaultTransition("MC2", "PathSiloOver");
 		
 		registerDefaultTransition("Put", "CheckTres");
+		
+		registerDefaultTransition("Explo3", "Explo3");
+		
+
+		//registerDefaultTransition("EndSuccess", "EndSuccess");
 		
 
 	}

@@ -25,20 +25,29 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 		//this.agent.print("TraiteMsg: "+msg);
 		if (msg == null) {
 			this.signal = -1;
+			this.cpt = 0; // TODO A VERIF
 			return;
 		}
 		if (msg.get("type").equals("String")) {
 			String msgstring = (String) msg.get("content");
 			GraphAgent graphagent = ((GraphAgent)this.myAgent);
-			
-			if (msgstring.equals("ping")){
+			if(msgstring.startsWith("ping silo")){
+				String sender = (String)msg.get("sender");
+				graphagent.setlastPing(sender);
+				String[] res = msgstring.split(":");
+				this.agent.getmyGraph().setSiloPosition(res[1]);
+				//graphagent.print("*** setlastping : "+sender+" ***");
+				this.signal = 1;
+				return; 
+			}
+			else if (msgstring.equals("ping")){
 				String sender = (String)msg.get("sender");
 				graphagent.setlastPing(sender);
 				//graphagent.print("*** setlastping : "+sender+" ***");
 				this.signal = 1;
 				return;
 			}			
-			if (cpt <= 1){ //traite Xs messages
+			if (cpt <= 100){ //traite Xs messages
 				this.signal = 0;
 				cpt ++;
 				return;

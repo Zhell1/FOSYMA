@@ -79,6 +79,11 @@ public class WaitForStringAtomic extends AtomicBehaviour {
 			//cas roger
 			if(s.equals("roger")){
 				int nbmodifsmin = this.agent.getnbmodifsmin();
+				
+				this.agent.print("***************************************");
+				this.agent.print("recu roger, nbmodifs since last = "+this.agent.getDifferenceLastSent(sender));
+				this.agent.print("***************************************");
+				
 				if(this.agent.getDifferenceLastSent(sender) > nbmodifsmin){
 					this.signal = 1;
 					return;

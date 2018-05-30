@@ -1,0 +1,58 @@
+
+---
+
+le silo à un ping différent des autres agents:
+ping Silo: position
+ceci est très important car les agents recoivent souvent un ping mais n'ont pas toujours la possibilité au moment où ils le traitent de communiquer la carte (ils se sont déjà éloignés)
+Les agents détectent donc qu'il s'agit d'un ping du silo et extraient sa position.
+De cette manière on s'assure que même si les agents recoivent uniquement le ping du silo ils peuvent instantanément enregistrer sa position sans attendre un transfert de carte.
+
+---
+
+Les agents collecteurs ne restent jamais fixé dans un comportement particulier et ils sont capablent de changer de comportement de façon opportuniste.
+Par exemple, un collecteur qui commence sur un trésor va immédiamement le ramasser, sinon il va passer en mode explorateur, mais dès qu'il trouve un trésor il va le ramasser et soit il à déjà trouvé le silo et il y va pour le déposer, soit il se remet en mode explorateur pour chercher le silo. Et durant chacun de ses déplacements il continue bien sur de communiquer avec les autres agents pour tenter d'obtenir plus d'informations.
+
+
+1) todo: même quand sa bordure est vide, qu'il à fini l'exploration et le ramassage de tous ses trésors connus, il repasse en exploration afin de pouvoir aider les autres collecteurs (de l'autre type de trésor) à avoir des informations récentes. Ceci est utile puisque le wumpus peut déplacer des trésors.
+
+---
+
+on utilise dijkstra pour calculer les PCC avec des points sur les arêtes
+
+toutes les arêtes autour du silo on un point de 1000 et les autres de 1 . De cette manière on s'assure de ne jamais passer par le silo lors des chemin, pour limiter les interblocages avec lui.
+---
+
+dans l'objet graphe on stock une variable nbmodifs qui s'incrémente de 1 à chaque modif du graphe et de 1000 quand on ajoute le silo
+
+Nous avons fais ce choix plutôt que de compter le nombre de pas qui ne veut pas forcément dire que la carte est modifiée et donc il ne serait pas pertinent de la renvoyer. Il en est de même pour un simple timestamp. Compter le nombre de modifications effectuées sur la carte depuis le dernier envoi est la méthode qui nous à semblé la plus pertinente pour limiter l'envoi de cartes.
+
+
+sur le schéma:
+me -> other
+
+une éxécution possible:
+-> ping (broadcast)
+<- roger (privé)
+-> sendmap (privé) 
+<- ack (privé) => update lastSentMap for this agent7
+
+ou une autre:
+<- ping(broadcast)
+-> roger (privé)
+<- no new map
+-> sendmap
+<- ack
+
+etc
+
+
+on compte +1000 modifs en cas d'ajout du silo ou de complétion de la carte entière pour être sur d'envoyer la carte au plus vite après ces evenements.
+
+On pourrait faire la remarque qu'on envoi beaucoup de messages pour ces interactions mais cela est justifié. Puisque l'envoi des cartes est fastidieux et engendre des messages massifs, on à fais le choix d'envoyer plusieurs petits messages de synchronisation afin de déterminer si il est vraiment pertinent d'envoyer une carte.
+
+En effet dans notre programme, tout envoi de carte est normalement reçu. A travers plusieurs éxécution nous n'avons pas constaté (bien que nous prenions ne compte ce cas dans notre code) de fois où un envoi de carte à échoué ou été inutile.
+
+---
+
+
+

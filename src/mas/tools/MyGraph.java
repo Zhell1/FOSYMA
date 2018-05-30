@@ -119,6 +119,8 @@ public class MyGraph {
 	}
 	
 	public void setSiloPosition(String position) {
+		if(this.siloPosition != null) return;
+		
 		this.siloPosition = position;
 		this.nbmodifs += 1000; //this is so important that we want to make sure we will send the graph
 	}
@@ -157,6 +159,7 @@ public class MyGraph {
 		int cpt = 0;
 		List<Node> LbestNode = new ArrayList<Node>(); //liste des meilleurs noeuds visibles
 		for (String name: this.getBordure()){
+			//System.out.println("nextdisjtra: noeud bordure: "+name);
 			Node node = this.graph.getNode(name);
 			dist = (float) (dijkstra.getPathLength(node) - 1);
 			if (dist < mini){
@@ -182,10 +185,10 @@ public class MyGraph {
 		for(Node node : path.getNodePath()) {
 			res.add(node.toString());
 		}
-		 res.remove(0); // we remove the case where we are currently
+		res.remove(0); // we remove the case where we are currently
 	
-		String name = this.myAgent.getLocalName();
-		System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
+		//String name = this.myAgent.getLocalName();
+		//System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
 		return res;
 	}
 	
@@ -319,7 +322,7 @@ public class MyGraph {
 			//test si déjà dans graphe
 			Node n= this.graph.getNode(myPosition);
 			if (n != null){
-				//le noeud existe dans le graphe
+				//le noeud existe dans le graphe et est exploré
 				boolean explored = n.getAttribute("explored");;
 				n.setAttribute("timeStamp", new Date().getTime() );
 				if (explored){
@@ -332,7 +335,7 @@ public class MyGraph {
 					n.setAttribute("Diamonds", valuediamonds);
 				}
 				else {
-					// le noeud appartenait à la frontière
+					// le noeud appartenait à la bordure
 					this.nbmodifs++;
 					n.setAttribute("explored", true);
 					n.addAttribute("Treasure", valuetreasure);
@@ -351,12 +354,14 @@ public class MyGraph {
 						String liaison = myPosition +"_"+ voisin;
 						String inv = voisin + "_" + myPosition;
 						addVoisin(voisin);
-						/* Pour une raison étrange apres le merge, on a des probleme de creation d'arrete deja existante */
 						if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
 							this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
 							
 						}
 					}
+					//comme on à modifié la bordure on à peut-être connecté 2 bout de graphes
+					// qu'on avait merge avec un autre agent avant => on efface le path
+					((GraphAgent)this.myAgent).resetPath();
 				}
 			}
 			else {
@@ -380,6 +385,8 @@ public class MyGraph {
 					addVoisin(voisin);
 					this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
 				}	
+				//comme on à modifié le graphe => on efface le path pour recalculer
+				((GraphAgent)this.myAgent).resetPath();
 			}
 			//si la bordure est vide on veut envoyer la carte aux autres peu importe le nb de modifs
 			if(this.bordure.size() == 0) {
@@ -440,7 +447,7 @@ public class MyGraph {
 		for (String s : L) {
 			n = this.graph.getNode(s);
 			if (n != null) {
-				dist = (float) (dijkstra.getPathLength(n) - 1);
+				dist = (float) (dijkstra.getPathLength(n) - 1); //infinity if there is no path
 				if (dist < mini) {
 					bestNode = n;
 					mini = dist;
@@ -448,8 +455,7 @@ public class MyGraph {
 			}
 		}
 		if (bestNode == null){
-			System.out.println("treasureList : " + L.toString());
-			System.out.println("my position: " + position);
+			System.out.println("treasureList : " + L.toString()+", my position: " + position);
 			return null;
 			//peut arriver si on à échangé la carte avec un autre qui sait où est un trésor
 			// mais que certains noeuds entre nous sont encore sur la bordure
@@ -590,11 +596,12 @@ public class MyGraph {
 	
 	public HashMap<String, Object> getAttributeHashMap(Node n){
 		HashMap<String, Object> res = new HashMap<String, Object>();
-			for (String at : n.getAttributeKeySet()){
-				if (this.attributs.contains(at)){
+		for (String at : n.getAttributeKeySet()){
+			if (this.attributs.contains(at)){
 				res.put(at, n.getAttribute(at));
-				}
 			}
+		}
+		//System.out.println("attributehashmap:"+res);
 		return res;
 	}
 	
@@ -622,19 +629,24 @@ public class MyGraph {
 			nodes.add(couple);
 		}
 		for (Edge e : this.graph.getEdgeSet()){
-			Node p0 = e.getNode0();
+			Node p0 = e.getNode0(); 
 			Node p1 = e.getNode1();
 			Couple couple = new Couple(p0.toString(), p1.toString());
-			edges.add(couple);
+			Couple couple2 = new Couple(couple, e.getAttribute("weight"));
+			edges.add(couple2);
 		}
 		res.put("nodes", nodes);
 		res.put("edges", edges);
-		res.put("border", this.bordure);
-		res.put("position", this.myAgent.getCurrentPosition());
+		//res.put("border", this.bordure);
+		//res.put("position", this.myAgent.getCurrentPosition()); // TODO PEUT ETRE UTILE POUR REGLER LES INTERBLOCAGES ?+DEST
 		res.put("siloPosition", this.siloPosition);
+		
+		//((GraphAgent) this.myAgent).print(this.graph.getNodeCount()+" NODES TO SEND");
+		//((GraphAgent) this.myAgent).print(this.graph.getEdgeCount()+" EDGES TO SEND");
+		
 		return res;
 	}
-	
+	/*
 	public MyGraph (abstractAgent myagent, HashMap<String, Object> map){
 		Collection<Couple>  nodes = (Collection<Couple>) map.get("nodes");
 		Collection<Couple> edges = (Collection<Couple>) map.get("edges");
@@ -661,8 +673,9 @@ public class MyGraph {
 		this.myAgent = ((mas.abstractAgent) myagent);
 		this.attributs = new ArrayList<String>(Arrays.asList("explored","Treasure","Diamonds","timeStamp")) ;
 		this.bordure = border;
-		
 	}
+	*/
+	
 	/*
 	 * TODO
 	 * quand on merge stocker les modifs dans une liste
@@ -679,11 +692,17 @@ public class MyGraph {
 	
 	public void merge(HashMap<String, Object> map2) {
 		
-		Collection<Couple>  nodes = (Collection<Couple>) map2.get("nodes");
+		Collection<Couple> nodes = (Collection<Couple>) map2.get("nodes");
 		Collection<Couple> edges = (Collection<Couple>) map2.get("edges");
-		HashSet<String> border = (HashSet<String>) map2.get("border");
-		String position = (String) map2.get("position");
+		//HashSet<String> border = (HashSet<String>) map2.get("border");
+		//String position = (String) map2.get("position");
 		String siloPos = (String) map2.get("siloPosition");
+		
+		//((GraphAgent) this.myAgent).print(nodes.size()+" NODES RECEIVED");
+		//((GraphAgent) this.myAgent).print(edges.size()+" EDGES RECEIVED");
+		
+		//System.out.println("nodes : "+nodes);
+		//System.out.println("edges : "+edges);
 		
 		String id;
 		HashMap<String, Object> att;
@@ -713,21 +732,40 @@ public class MyGraph {
 				}
 				n.setAttribute("explored", b);
 			}
-			
 		}
-		// création du noeud silo
+		//merge les aretes
+		for(Couple e : edges) {
+			Couple edge = (Couple)e.getLeft();
+			int weight = (int)e.getRight();
+			String node1name = (String)edge.getLeft();
+			String node2name = (String)edge.getRight();
+			String edgename = node1name+"_"+node2name;
+			String edgename2 = node2name+"_"+node1name; // peut exister dans un sens ou l'autre
+			Edge myedge = this.graph.getEdge(edgename);
+			Edge myedge2 = this.graph.getEdge(edgename2);
+			// si l'arète existe pas dans mon graphe
+			if(myedge == null && myedge2 == null){
+				this.nbmodifs++;
+				this.graph.addEdge(edgename, node1name, node2name).setAttribute("weight", weight);
+			}
+			else { // si elle existe déjà
+				//ne rien faire
+			}
+		}
+		// création de la position du silo
 		if (this.siloPosition == null && siloPos != null) {
 			this.nbmodifs+=1000; //make sure we send the graph since this info is very important
 			this.siloPosition = siloPos;
 			if (this.graph.getNode(siloPos) == null){
-				this.graph.addNode(this.siloPosition);
+				//this.graph.addNode(this.siloPosition);
+				System.out.println("*** BIG ERROR MYGRAPH TRYING TO SET SILO BUT NO NODE FOUND ***");
 			}
 			Node SP = this.graph.getNode(this.siloPosition);
-			SP.addAttribute("explored", true);
+			//SP.addAttribute("explored", true);
 			for (Edge e : SP.getEdgeSet()){
 				e.setAttribute("weight", 100000); // we want to avoid walking on silo
 			}
-	
+			
 		}
 		
 		//Tous les noeuds du graphe ne sont pas forcement exploré donc il faut recalculer la bordure
