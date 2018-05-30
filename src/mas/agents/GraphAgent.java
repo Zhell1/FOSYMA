@@ -70,9 +70,9 @@ public class GraphAgent extends abstractAgent{
 		
 		//############ PARAMS ##########
 
-		this.nbmodifsmin 		= 15;			//nb modifs minimum pour renvoyer la carte
-		this.timeOut 			= 1000 * 3;		//secondes pour timeout (*1000 car il faut en ms)
-		this.sleepbetweenmove 	= 800;			//in MS
+		this.nbmodifsmin 		= 30;			//nb modifs minimum pour renvoyer la carte
+		this.timeOut 			= 1000 * 5;		//secondes pour timeout (*1000 car il faut en ms)
+		this.sleepbetweenmove 	= 500;			//in MS
 		
 		//#############################
 		//setup graph
@@ -204,11 +204,16 @@ public class GraphAgent extends abstractAgent{
 						isTreasure = true;
 					}
 				}
-				//on doit aussi gérer les cas où on ne récupère pas d'attributs = case vide
-				if(isTreasure == false)
+				//on doit aussi gérer les cas où on ne récupère pas d'attributs = case vidée
+				//dans ce cas on doit aussi supprimer la case de la liste de trésor dans mygraph
+				if(isTreasure == false){
 					n.setAttribute("Treasure", 0);
-				if(isDiamonds == false)
+					this.myGraph.removeFromListTreasure(n.getId());
+				}
+				if(isDiamonds == false){
 					n.setAttribute("Diamonds", 0);
+					this.myGraph.removeFromListDiamonds(n.getId());
+				}
 				
 				break; //sort de la boucle car on ne s'intéressait qu'au noeud courant
 			}
@@ -264,7 +269,7 @@ public class GraphAgent extends abstractAgent{
 	}
 	
 	public void putMovePath(String m) {
-		this.path.add(m);
+		this.path.add(0, m); //we need to put it back at the front
 	}
 	
 	public ArrayList<String> getPath(){
@@ -359,6 +364,7 @@ public class GraphAgent extends abstractAgent{
 		//on met à jour la valeur
 		this.lastSentMap.replace(sender, this.getmyGraph().getnbmodifs());
 	}
+	
 	//retourne le nombre de modifs effectués pour un agent depuis qu'on lui à envoyé
 	public int getDifferenceLastSent(String sender){
 		//si il existe pas déjà on commence par le créer

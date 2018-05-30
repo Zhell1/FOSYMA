@@ -32,15 +32,20 @@ public class UpdateMapAtomic extends AtomicBehaviour {
 		HashMap<String, Object> map = (HashMap<String, Object>)msg.get("content");
 		MyGraph g = this.agent.getmyGraph();
 
-		this.agent.print("My map :" + g.toHashMap());
-		this.agent.print("I receive :" + map);
+		//this.agent.print("My map :" + g.toHashMap());
+		//this.agent.print("I receive :" + map);
 		g.merge(map);
-		this.agent.print("After merge :" + g.toHashMap());
-		this.agent.print("The map has been updated");
-		String s = (String) msg.get("sender");
-		if (s.equals("SiloAgent")) {
+		//this.agent.print("After merge :" + g.toHashMap());
+		this.agent.print("RECEIVED map : map has been updated");
+		
+		String sender = (String) msg.get("sender");
+		//comme on à fait sendmap avant waitmap, on peut MAJ lastsentmap pour éviter de renvoyer au même agent sa carte
+		this.agent.updateLastSentMap(sender);
+		
+		//on regarde si on à découvert le silo via son ping
+		if (sender.equals("SiloAgent")) {
 			String pos = (String) map.get("position");
-			this.agent.print("Silo found on position :" + pos);
+			this.agent.print("Silo found from its ping on position :" + pos);
 			g.setSiloPosition(pos);
 		}
 		this.agent.setSwitchPath(true);

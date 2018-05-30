@@ -47,6 +47,7 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerTransition("Move", "Fin1", -1);
 		registerTransition("Move", "Send", 1); //normal ping
 		registerTransition("Move", "Send2", 2); //ping because we are blocked and there is an agent on next case
+
 		
 		registerDefaultTransition("Send2", "Listen2");
 		registerDefaultTransition("Listen2", "TraiteMsg2");

@@ -80,11 +80,12 @@ public class WaitForStringAtomic extends AtomicBehaviour {
 			if(s.equals("roger")){
 				int nbmodifsmin = this.agent.getnbmodifsmin();
 				
+				int difflastsent = this.agent.getDifferenceLastSent(sender);
 				this.agent.print("***************************************");
-				this.agent.print("recu roger, nbmodifs since last = "+this.agent.getDifferenceLastSent(sender));
+				this.agent.print("recu roger, nbmodifs since last = "+difflastsent);
 				this.agent.print("***************************************");
 				
-				if(this.agent.getDifferenceLastSent(sender) > nbmodifsmin){
+				if(difflastsent  > nbmodifsmin){
 					this.signal = 1;
 					return;
 				}
@@ -96,6 +97,7 @@ public class WaitForStringAtomic extends AtomicBehaviour {
 			}
 			//cas ack de sharemap
 			if(s.equals("ack_map_received")){
+				this.agent.print("ACK MAP RECEIVED from "+sender);
 				//si on parle d'un ack (de sharemap) il faut MAJ lastSentMap
 				this.agent.updateLastSentMap(sender);
 			}

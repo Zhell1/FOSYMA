@@ -35,6 +35,7 @@ public class SendMapAtomic extends AtomicBehaviour {
 
 			String destinataire = this.agent.getlastPing();
 			String myname = this.agent.getLocalName();
+			this.agent.print("SEND my map to: "+destinataire);
 			this.agent.mailbox.send(msg, destinataire, myname);
 		}
 		this.signal = 1;

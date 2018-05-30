@@ -15,6 +15,8 @@ public class MoveAtomic extends AtomicBehaviour{
 	
 	public void action() {
 		//this.agent.print("MoveAtomic");
+
+		this.agent.print("MoveAtomic original path:"+this.agent.getPath());
 		String move = this.agent.getNextPath();
 		// System.out.println("Move : " + move);
 		if (move == null) {
@@ -25,8 +27,13 @@ public class MoveAtomic extends AtomicBehaviour{
 		if (this.agent.getSuccesLastMove()) {
 			this.signal = 1;
 		}
-		else { //the move failed = there is an agent on this case
-			this.agent.putMovePath(move);
+		else { //the move failed = there is an agent on this case or a problem
+			//this.agent.print("before putMovePath:"+this.agent.getPath());
+			//this.agent.putMovePath(move);
+			//this.agent.print("after putMovePath:"+this.agent.getPath());
+			this.agent.print("move failed, reset path");
+			this.agent.resetPath();
+			//
 			this.signal = 2;
 		}
 		

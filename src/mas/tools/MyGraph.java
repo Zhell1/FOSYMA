@@ -76,6 +76,7 @@ public class MyGraph {
 	int nbmodifs; //kind of timestamp of modifications on the graph
 	
 	boolean pathtosilofound;
+	boolean firsttimebordurevide;
 	
 	
 	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
@@ -93,6 +94,7 @@ public class MyGraph {
 		this.siloPosition = null;
 		this.nbmodifs = 0;
 		this.pathtosilofound = false; // will become true after the first path found
+		this.firsttimebordurevide = true; // passera à faux une fois qu'on l'aura vu
 	}
 	
 	public boolean pathtosilofound() {
@@ -123,6 +125,21 @@ public class MyGraph {
 		
 		this.siloPosition = position;
 		this.nbmodifs += 1000; //this is so important that we want to make sure we will send the graph
+	}
+	
+	//renvoi false si on est sûr qu'il n'y a plus aucun trésor sur la map
+	public boolean anyTreasureLeft() {
+		if (this.getBordure().size() > 0) return true;
+		if(this.ListTreasure.size() > 0 || this.ListDiamonds.size() > 0) return true;
+		else return false;
+	}
+	
+	public void removeFromListTreasure(String nodename) {
+		this.ListTreasure.remove(nodename);
+	}
+	public void removeFromListDiamonds(String nodename) {
+		this.ListDiamonds.remove(nodename);
+		
 	}
 	
 
@@ -220,7 +237,10 @@ public class MyGraph {
 		}
 		//si la bordure est vide on veut envoyer la carte aux autres peu importe le nb de modifs
 		if(this.bordure.size() == 0) {
-			this.nbmodifs+=1000;
+			if(firsttimebordurevide) {
+				this.nbmodifs+=1000;
+				this.firsttimebordurevide = false;
+			}
 		}
 	}
 	
@@ -389,8 +409,9 @@ public class MyGraph {
 				((GraphAgent)this.myAgent).resetPath();
 			}
 			//si la bordure est vide on veut envoyer la carte aux autres peu importe le nb de modifs
-			if(this.bordure.size() == 0) {
+			if(firsttimebordurevide) {
 				this.nbmodifs+=1000;
+				this.firsttimebordurevide = false;
 			}
 		}
 	}
@@ -729,8 +750,37 @@ public class MyGraph {
 				b = explored1 || explored2;
 				if(explored1 != b) { //si on à changé l'état du noeud
 					this.nbmodifs++;
+					n.setAttribute("explored", b);
 				}
-				n.setAttribute("explored", b);
+				int oldvaltreasure = n.getAttribute("Treasure");
+				int oldvaldiamonds = n.getAttribute("Diamonds");
+				int newvaltreasure = (int) att.get("Treasure");
+				int newvaldiamonds = (int) att.get("Diamonds");
+				long oldtimestamp = (long) att.get("timeStamp");
+				long newtimestamp = (long) att.get("timeStamp");
+				//si il met à exploré un noeud qui ne l'était pas
+				if((explored1 != b)){
+					//on met à jour les valeurs
+					n.setAttribute("Treasure", newvaltreasure);
+					n.setAttribute("Diamonds", newvaldiamonds);
+					n.setAttribute("timeStamp", newtimestamp);
+					this.nbmodifs++;
+				}
+				//sinon si les deux sont explorés mais sa valeur est plus récente
+				else if(explored1 && explored2 && newtimestamp > oldtimestamp) {
+					//on met à jour les valeurs
+					n.setAttribute("Treasure", newvaltreasure);
+					n.setAttribute("Diamonds", newvaldiamonds);
+					n.setAttribute("timeStamp", newtimestamp);
+					this.nbmodifs++;
+				}
+				else {
+					//on met les anciennes valeurs
+					n.setAttribute("Treasure", oldvaltreasure);
+					n.setAttribute("Diamonds", oldvaldiamonds);
+					n.setAttribute("timeStamp", oldtimestamp);
+				}
+				
 			}
 		}
 		//merge les aretes

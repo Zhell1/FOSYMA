@@ -38,9 +38,15 @@ public class Collecteur2 extends GraphAgentBehaviour{
 	public Collecteur2(abstractAgent agent){
 		super(agent);
 		
-		Condition exploFinie = a-> {	a.print("exploFinie? ="+(a.getmyGraph().getBordure().size() == 0));
+		Condition exploFinie = a-> {	
+										//si plus aucun trésor on considère l'explo comme fini
+										if(a.getmyGraph().anyTreasureLeft()==false) return true;
+										a.print("exploFinie? ="+(a.getmyGraph().getBordure().size() == 0));
 										return (a.getmyGraph().getBordure().size() == 0);
 									};
+									
+		Condition anyTreasureLeft = a-> { 	a.print("*** anyTreasureLeft ? = " + a.getmyGraph().anyTreasureLeft());
+											return a.getmyGraph().anyTreasureLeft();  };
 		
 		Condition checkRemakePath = a -> { 		a.print("remakePath? ="+a.getremakepath());
 												if(a.getremakepath()){
@@ -143,10 +149,11 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		registerState(new IfAtomic(a, exploFinie, none, none), "CheckExplo1");
 		registerState(new IfAtomic(a, exploFinie, none, none), "CheckExplo2");
 		
+
+		registerState(new IfAtomic(a, anyTreasureLeft, none, none),   "CheckAnyTreasureLeft"); //to check not our type of treasure
+		registerState(new ExploratorBehaviour(a), "Explo3"); //quand il à tout exploré et plus de trésor de notre type
 		
-		registerState(new ExploratorBehaviour(a), "Explo3"); //quand il à tout exploré et plus de trésor
-		
-		//registerLastState(new EndAtomic(a, this, 1), "EndSuccess");
+		registerLastState(new VoidAtomic(a), "EndSuccess"); // quand plus aucun trésor d'aucun type
 		
 		//------------------------------- transitions ------------------------------
 		
@@ -189,10 +196,12 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		
 		registerDefaultTransition("Put", "CheckTres");
 		
-		registerDefaultTransition("Explo3", "Explo3");
+		registerDefaultTransition("Explo3", "CheckAnyTreasureLeft");
+		registerTransition("CheckAnyTreasureLeft", "Explo3", 1);
+		registerTransition("CheckAnyTreasureLeft", "EndSuccess", -1);
 		
 
-		//registerDefaultTransition("EndSuccess", "EndSuccess");
+		registerDefaultTransition("EndSuccess", "EndSuccess");
 		
 
 	}
