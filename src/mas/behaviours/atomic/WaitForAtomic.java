@@ -66,7 +66,7 @@ public class WaitForAtomic extends AtomicBehaviour {
 			return;
 		}
 		Object t = msg.get("type");
-		this.agent.print("type :" + t);
+		//this.agent.print("type :" + t);
 		boolean b = msg.get("type").equals(type);
 		
 		//String sender = (String) msg.get("sender");

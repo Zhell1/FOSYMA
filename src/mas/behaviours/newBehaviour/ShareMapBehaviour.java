@@ -25,11 +25,12 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		// TODO Auto-generated constructor stub
 		registerFirstState(new SendAtomic(a, "roger",true), "SendRoger");
 		registerState(new WaitForAtomic(a, "HashMap", timeout,true), "WaitMap"); // attends jusqu'à 5 secondes la carte
+		registerState(new WaitForAtomic(a, "HashMap", timeout,true), "WaitMap2"); // version où on n'envoi pas la notre
 		registerState(new SendMapAtomic(a,true), "SendMap");
 		registerState(new SendAtomic(a,"roger", true), "SendRoger");
 		registerState(new SendAtomic(a, "ack_map_received", true), "SendAck");
+		registerState(new SendAtomic(a, "ack_map_received", true), "SendAck2");//version where we do not wait for the other ack
 		registerState(new WaitForStringAtomic(a, "ack_map_received", timeout, true), "WaitAck"); //wait up to 5 sec
-		registerState(new WaitForStringAtomic(a, "ack_map_received", timeout, true), "WaitAck2"); //wait up to 5 sec
 		registerState(new WaitForStringAtomic(a, "roger", timeout, true), "WaitRoger"); //wait up to 5 sec
 		registerLastState(new EndAtomic(a, this, -1), "Fail1");
 		registerLastState(new EndAtomic(a, this, -2), "Fail2");
@@ -43,7 +44,7 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		registerTransition("WaitRoger", "Fail1", -1);
 		registerTransition("WaitRoger", "WaitRoger", 0);
 		registerTransition("WaitRoger", "SendMap" , 1);
-		registerTransition("WaitRoger", "WaitMap" , -2);
+		registerTransition("WaitRoger", "WaitMap2" , -2);
 		
 		registerTransition("SendMap", "WaitMap", 1);
 		
@@ -51,12 +52,16 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		registerTransition("WaitMap", "WaitMap", 0);
 		registerTransition("WaitMap", "SendAck" , 1);
 		
+		registerTransition("WaitMap2", "Fail1", -1);
+		registerTransition("WaitMap2", "WaitMap2", 0);
+		registerTransition("WaitMap2", "SendAck2" , 1);
+		
 		registerTransition("SendAck", "WaitAck", 1);
+		registerTransition("SendAck2", "Success", 1);
 		
 		registerTransition("WaitAck", "Fail2", -1);
 		registerTransition("WaitAck", "WaitAck", 0);
 		registerTransition("WaitAck", "Success", 1);
-		
 		
 		//final states		
 		registerDefaultTransition("Fail1", "Fail1");

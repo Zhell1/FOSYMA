@@ -20,7 +20,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 	}
 	
 	public void action() {
-     	this.agent.print("ExploreDestinationAtomic");
+     	//this.agent.print("ExploreDestinationAtomic");
 		
 		MyGraph g = this.agent.getmyGraph();
 		
@@ -43,7 +43,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 		
 		if (p == null){ //on recalcule le chemin
 			ArrayList<String> path = g.NextDijsktra(); //puisque le path était null on cherche dans la bordure
-			this.agent.print("Path : " + path);
+			//this.agent.print("Path : " + path);
 			//fin de l'exploration
 			if (path == null) {
 				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 1");
@@ -62,7 +62,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 		if (p.isEmpty()) {
 			MyGraph g1 = this.agent.getmyGraph(); //pourquoi pas réutiliser g ??
 			ArrayList<String> path = g1.NextDijsktra(); //puisque le path était vide on cherche dans la bordure
-			this.agent.print("Path : " + path);
+			//this.agent.print("Path : " + path);
 			//fin de l'exploration
 			if (path == null) {
 				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 2");

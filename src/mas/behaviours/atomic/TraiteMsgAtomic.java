@@ -25,7 +25,7 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 		//this.agent.print("TraiteMsg: "+msg);
 		if (msg == null) {
 			this.signal = -1;
-			this.cpt = 0; // TODO A VERIF
+			this.cpt = 0;
 			return;
 		}
 		if (msg.get("type").equals("String")) {
@@ -47,7 +47,7 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 				this.signal = 1;
 				return;
 			}			
-			if (cpt <= 100){ //traite Xs messages
+			if (cpt <= 20){ //traite X messages
 				this.signal = 0;
 				cpt ++;
 				return;

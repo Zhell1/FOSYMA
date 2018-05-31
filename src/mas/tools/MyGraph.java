@@ -428,11 +428,11 @@ public class MyGraph {
 		if (bestNode == null) {
 			return null;
 		}
-		System.out.println("calculating shortest path from "+position+" to "+pos);
+		//System.out.println("calculating shortest path from "+position+" to "+pos);
 		Path path = dijkstra.getPath(bestNode);
 		
 		Node n;
-		System.out.println("XOXOXO_1 path :" + path.toString());
+		//System.out.println("XOXOXO_1 path :" + path.toString());
 		if(path==null) return null;
 		if(path.size() == 0) return null;
 		
@@ -483,9 +483,9 @@ public class MyGraph {
 			//donc dijkstra ne trouve pas de chemin
 		}
 
-		System.out.println("calculating shortest path from "+position+" to "+bestNode.getId());
+		//System.out.println("calculating shortest path from "+position+" to "+bestNode.getId());
 		Path path = dijkstra.getPath(bestNode);
-		System.out.println("XOXOXO_2 path :" + path.toString());
+		//System.out.println("XOXOXO_2 path :" + path.toString());
 		//create the return list
 		ArrayList <String> res = new ArrayList <String>();
 		for(Node node : path.getNodePath()) {
@@ -609,6 +609,10 @@ public class MyGraph {
 	
 	public Integer getnbmodifs(){
 		return (Integer)this.nbmodifs;
+	}
+	//this can allow from outside to ask the agent to send the map if an event happens
+	public void addnbmodifs(int toadd) {
+		this.nbmodifs+=1000;
 	}
 	
 	/* ====================================================

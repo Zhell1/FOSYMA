@@ -46,6 +46,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 									};
 									
 		Condition anyTreasureLeft = a-> { 	a.print("*** anyTreasureLeft ? = " + a.getmyGraph().anyTreasureLeft());
+											a.getmyGraph().addnbmodifs(1000); //+1000 = on envoi la carte aux autres pour les prévenir
 											return a.getmyGraph().anyTreasureLeft();  };
 		
 		Condition checkRemakePath = a -> { 		a.print("remakePath? ="+a.getremakepath());
@@ -57,16 +58,15 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		
 		Condition silofound = a -> { a.print("silofound ? = " + (a.getmyGraph().getSiloPosition() != null ));
 									 a.print("path to silo found ? = " + (a.getmyGraph().pathtosilofound()));
-									 a.print("\texplored: "+a.getmyGraph().getExplored().size()+"\tbordure: "+a.getmyGraph().getBordure().size());
-									 if(a.getmyGraph().getBordure().size() == 1){
-										 a.print("\tbordure= "+a.getmyGraph().getBordure());
-									 }
-									 
+									 //a.print("\texplored: "+a.getmyGraph().getExplored().size()+"\tbordure: "+a.getmyGraph().getBordure().size());
+//									 if(a.getmyGraph().getBordure().size() == 1){
+//										 a.print("\tbordure= "+a.getmyGraph().getBordure());
+//									 }
 									 boolean res = (a.getmyGraph().getSiloPosition() != null) && a.getmyGraph().pathtosilofound(); 
-			                         a.print("--> res = "+res);
+			                         //a.print("--> res = "+res);
 									 return res;  };
 							
-		Condition tresfound = a -> { a.print("explo finie ? bordure=" + a.getmyGraph().getBordure().size());
+		Condition tresfound = a -> { //a.print("explo finie ? bordure=" + a.getmyGraph().getBordure().size());
 									 if(a.getmyGraph().getBordure().size() == 1)
 										 a.print("\tbordure = "+a.getmyGraph().getBordure());
 		 
@@ -85,28 +85,28 @@ public class Collecteur2 extends GraphAgentBehaviour{
 						        	return (a.getPath().isEmpty());  };
 						        	
 		
-		Action pathSilo = a -> { a.print("pathSilo calculating");
+		Action pathSilo = a -> { //a.print("pathSilo calculating");
 								 MyGraph g = a.getmyGraph();
-								 a.print("silo at: "+g.getSiloPosition());
+								 //a.print("silo at: "+g.getSiloPosition());
 								 ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
 								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 //a.print("p = " + p);
 								 if(p.size() >= 1)
 									 p = g.formatsiloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
-								 a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
+								 //a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 a.setPath(p);
 //								 a.setSwitchPath(false); //todo à supprimer ?
 								};
 								
 		Action pick = a -> {   
 								int valrestant = a.getmyGraph().getTreasureValue(a.getPosition(),a.getMyTreasureType());
-								a.print("valrestant before pick = " + valrestant);
+								//a.print("valrestant before pick = " + valrestant);
 								a.pickTreasure();  
 								valrestant =  a.getmyGraph().getTreasureValue(a.getPosition(), a.getMyTreasureType());
 								a.print("valrestant after pick = " + valrestant);
 							};
 		
-		Action pathTresor = a -> {  a.print("calculating pathTresor");
+		Action pathTresor = a -> {  //a.print("calculating pathTresor");
 									a.setPath(a.getmyGraph().getBestTreasurePath());
 									//ArrayList<String> Lpath = a.getmyGraph().getBestTreasurePath();
 									//a.print("path set to new treasure at "+ Lpath.get(Lpath.size()-1));
@@ -150,7 +150,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		registerState(new IfAtomic(a, exploFinie, none, none), "CheckExplo2");
 		
 
-		registerState(new IfAtomic(a, anyTreasureLeft, none, none),   "CheckAnyTreasureLeft"); //to check not our type of treasure
+		registerState(new IfAtomic(a, anyTreasureLeft, none, end),   "CheckAnyTreasureLeft"); //to check not our type of treasure
 		registerState(new ExploratorBehaviour(a), "Explo3"); //quand il à tout exploré et plus de trésor de notre type
 		
 		registerLastState(new VoidAtomic(a), "EndSuccess"); // quand plus aucun trésor d'aucun type
