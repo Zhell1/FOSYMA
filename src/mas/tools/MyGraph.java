@@ -808,16 +808,21 @@ public class MyGraph {
 		}
 		// création de la position du silo
 		if (this.siloPosition == null && siloPos != null) {
-			this.nbmodifs+=1000; //make sure we send the graph since this info is very important
-			this.siloPosition = siloPos;
 			if (this.graph.getNode(siloPos) == null){
 				//this.graph.addNode(this.siloPosition);
 				System.out.println("*** BIG ERROR MYGRAPH TRYING TO SET SILO BUT NO NODE FOUND ***");
+				// we cannot add the silo position because we need to also create the edges to the silo
+				// with weight 100000 for dijkstra
+				// so we better wait until we have more info (a map with the silo+edges)
 			}
-			Node SP = this.graph.getNode(this.siloPosition);
-			//SP.addAttribute("explored", true);
-			for (Edge e : SP.getEdgeSet()){
-				e.setAttribute("weight", 100000); // we want to avoid walking on silo
+			else {
+				this.nbmodifs+=1000; //make sure we send the graph since this info is very important
+				this.siloPosition = siloPos;
+				Node SP = this.graph.getNode(this.siloPosition);
+				//SP.addAttribute("explored", true);
+				for (Edge e : SP.getEdgeSet()){
+					e.setAttribute("weight", 100000); // we want to avoid walking on silo
+				}
 			}
 			
 		}

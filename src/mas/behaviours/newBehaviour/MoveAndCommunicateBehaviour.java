@@ -61,7 +61,7 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerTransition("ShareMap2", "UpdateMap2", 1);
 		registerTransition("ShareMap2", "Random", -1); // we are blocked and sharemap failed => go random
 		registerTransition("ShareMap2", "Random", 2); // TODO A VOIR (lautre à recu ma carte mais ne m'a rien envoyé)
-		//en cas de bloquage il faudrait forcer l'envoi des maps pour recalculer un chemin
+		//en cas de bloquage il faudrait forcer l'envoi des maps pour recalculer un chemin ?
 		
 		registerDefaultTransition("UpdateMap2", "Fin1");
 		

@@ -37,8 +37,8 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 		 * les états
 		 */
 				
-		registerFirstState(new WaitAtomic(a, 2), "Wait");
-		registerState(new SendAtomic(a, msg), "Send");
+		registerFirstState(new WaitAtomic(a, 1), "Wait"); //wait 1 second
+		registerState(new SendAtomic(a, msg), "Send"); // send ping
 		registerState(new ListenAtomic(a), "Listen");
 		registerState(new TraiteMsgAtomic(a), "TraiteMsg");
 		registerState(new ShareMapBehaviour(a), "ShareMap");
@@ -48,7 +48,7 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 		registerLastState(new EndAtomic(a, this, 1), "HaveMap");
 		
 		registerDefaultTransition("Wait", "Send");
-				
+			
 		registerTransition("Send", "Listen", 1);
 		registerTransition("Listen", "TraiteMsg", 1);
 		
