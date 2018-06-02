@@ -9,10 +9,12 @@ public class SiloBehaviour extends GraphAgentBehaviour {
 
 		//TODO PAS SUR QUE CA SUFFISE SI LE SILO BOUGE CAR IL FAUT UPDATE LA POSITION
 		this.g.setSiloPosition(this.a.getCurrentPosition()); 
-		this.g.add(); // init le premier noeud
+		this.g.addSilo(); // init le premier noeud
 		
 		registerFirstState(new SendListenBehaviour(a, "ping silo :"+this.a.getCurrentPosition()), "SendListen");
-		
+		//registerState(new SiloMoveAtomic(a), "TestMoveSilo");
+		//registerDefaultTransition("SendListen", "TestMoveSilo");
+		//registerDefaultTransition("TestMoveSilo", "SendListen");
 		registerDefaultTransition("SendListen", "SendListen");
 	}
 

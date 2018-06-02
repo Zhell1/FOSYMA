@@ -41,8 +41,12 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		Condition exploFinie = a-> {	
 										//si plus aucun trésor on considère l'explo comme fini
 										if(a.getmyGraph().anyTreasureLeft()==false) return true;
-										a.print("exploFinie? ="+(a.getmyGraph().getBordure().size() == 0));
-										return (a.getmyGraph().getBordure().size() == 0);
+										boolean bordureempty = (a.getmyGraph().getBordure().size() == 0);
+										boolean ismytreasureleft = (a.getmyGraph().getBestTreasurePath() != null);
+										//si bordure finie et plus de trésor à ramasser de mon type
+										boolean explofinie = bordureempty && !ismytreasureleft;
+										a.print("exploFinie? ="+explofinie);
+										return explofinie;
 									};
 									
 		Condition anyTreasureLeft = a-> { 	a.print("*** anyTreasureLeft ? = " + a.getmyGraph().anyTreasureLeft());
@@ -73,7 +77,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 									 a.print("tresfound ? = "+ (a.getmyGraph().getBestTreasurePath() != null));
 									//a.print("explored : " + a.getmyGraph().getExplored().toString());
 							        //a.print("Bordure : " + a.getmyGraph().getBordure().toString());
-							        return a.getmyGraph().getBestTreasurePath() != null;  }; // && !(a.getmyGraph().getBordure().isEmpty());};
+							        return (a.getmyGraph().getBestTreasurePath() != null);  }; // && !(a.getmyGraph().getBordure().isEmpty());};
 							
 		Condition pathOver = a -> { a.print("pathOver ? = " + a.getPath().isEmpty());
 						        	return (a.getPath().isEmpty());  };

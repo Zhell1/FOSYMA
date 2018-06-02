@@ -316,6 +316,12 @@ public class MyGraph {
 	}
 	
 	public void add() {
+		add2(false);
+	}
+	public void addSilo() {
+		add2(true);
+	}
+	public void add2(boolean isSilo) {
 		String myPosition=this.myAgent.getCurrentPosition();	
 		
 		// créer le noeud actuel
@@ -360,7 +366,7 @@ public class MyGraph {
 					n.setAttribute("explored", true);
 					n.addAttribute("Treasure", valuetreasure);
 					n.addAttribute("Diamonds", valuediamonds);
-					//on supprime le noeud
+					//on supprime le noeud de la bordure
 					this.bordure.remove(myPosition);
 					if (typetreasure){
 						this.ListTreasure.add(myPosition);
@@ -368,12 +374,13 @@ public class MyGraph {
 					if (typediamonds){
 						this.ListDiamonds.add(myPosition);
 					}
-				
+					//ajout des arêtes
 					for (int i =1; i < lobs.size(); i++){
 						String voisin = (lobs.get(i)).getLeft();
 						String liaison = myPosition +"_"+ voisin;
 						String inv = voisin + "_" + myPosition;
 						addVoisin(voisin);
+						//si l'arête n'existe pas déjà on l'ajoute
 						if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
 							this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
 							
@@ -384,8 +391,8 @@ public class MyGraph {
 					((GraphAgent)this.myAgent).resetPath();
 				}
 			}
+			// Le noeud n'est pas dans le graphe => on le créé
 			else {
-				// Le noeud n'est pas dans le graphe => on le créé
 				this.nbmodifs++;
 				print("Initialisation du graphe en : " + myPosition);
 				n = this.graph.addNode(myPosition);
@@ -399,11 +406,15 @@ public class MyGraph {
 				if (typediamonds){
 					this.ListDiamonds.add(myPosition);
 				}
+				//ajout des arêtes
 				for (int i =1; i < lobs.size(); i++){
 					String voisin = (lobs.get(i)).getLeft();
 					String liaison = myPosition + "_" + voisin;
 					addVoisin(voisin);
-					this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
+					if(isSilo)
+						this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",100000);
+					else
+						this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
 				}	
 				//comme on à modifié le graphe => on efface le path pour recalculer
 				((GraphAgent)this.myAgent).resetPath();
@@ -415,6 +426,8 @@ public class MyGraph {
 			}
 		}
 	}
+	
+	
 	//calculate shortest path from current position to the one in parameter
 	public ArrayList<String> getShortestPath(String pos){
 		if (pos == null) return null;
@@ -749,8 +762,9 @@ public class MyGraph {
 				newNode.addAttributes(att);
 			}
 			else {
-				explored1 = n.getAttribute("explored");
-				explored2 = (boolean) att.get("explored");
+				//le noeud existe dans mon graph => update si pertinent
+				explored1 = n.getAttribute("explored"); //mine
+				explored2 = (boolean) att.get("explored"); //other
 				b = explored1 || explored2;
 				if(explored1 != b) { //si on à changé l'état du noeud
 					this.nbmodifs++;
@@ -760,13 +774,13 @@ public class MyGraph {
 				int oldvaldiamonds = n.getAttribute("Diamonds");
 				int newvaltreasure = (int) att.get("Treasure");
 				int newvaldiamonds = (int) att.get("Diamonds");
-				long oldtimestamp = (long) att.get("timeStamp");
+				long oldtimestamp = (long) n.getAttribute("timeStamp");
 				long newtimestamp = (long) att.get("timeStamp");
 				//si il met à exploré un noeud qui ne l'était pas
-				if((explored1 != b)){
+				if((explored1 == false && explored2)){
 					//on met à jour les valeurs
-					n.setAttribute("Treasure", newvaltreasure);
-					n.setAttribute("Diamonds", newvaldiamonds);
+					n.addAttribute("Treasure", newvaltreasure);
+					n.addAttribute("Diamonds", newvaldiamonds);
 					n.setAttribute("timeStamp", newtimestamp);
 					this.nbmodifs++;
 				}
@@ -808,9 +822,13 @@ public class MyGraph {
 		}
 		// création de la position du silo
 		if (this.siloPosition == null && siloPos != null) {
+			//si on à pas déjà un noeud silo
 			if (this.graph.getNode(siloPos) == null){
-				//this.graph.addNode(this.siloPosition);
-				System.out.println("*** BIG ERROR MYGRAPH TRYING TO SET SILO BUT NO NODE FOUND ***");
+				this.graph.addNode(this.siloPosition);
+				Node SP = this.graph.getNode(this.siloPosition);
+				SP.addAttribute("explored", false);
+				// before:
+				// System.out.println("*** BIG ERROR MYGRAPH TRYING TO SET SILO BUT NO NODE FOUND ***");
 				// we cannot add the silo position because we need to also create the edges to the silo
 				// with weight 100000 for dijkstra
 				// so we better wait until we have more info (a map with the silo+edges)

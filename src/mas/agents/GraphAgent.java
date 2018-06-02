@@ -254,6 +254,7 @@ public class GraphAgent extends abstractAgent{
 		printstring += "\t\t | Silo at "+this.getmyGraph().getSiloPosition();
 		printstring += "\t\t | explored: "+this.getmyGraph().getExplored().size();
 		printstring += "\t\t | bordure: "+this.getmyGraph().getBordure().size();
+		printstring += "\t\t | myTreasureLeft: "+(this.getmyGraph().getBestTreasurePath()!=null);
 		this.print(printstring);
 		
 		if(this.path==null) return null;
