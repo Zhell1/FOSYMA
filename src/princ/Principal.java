@@ -225,7 +225,33 @@ public class Principal {
 ////
 		//Explorer (no backpack)
 		c = containerList.get("container0");
-		agentName="AgentExplo";
+		agentName="Explo1";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+		
+		//Explorer (no backpack)
+		c = containerList.get("container0");
+		agentName="Explo2";
+		try {
+
+			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,ExploAgent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+		
+		//Explorer (no backpack)
+		c = containerList.get("container0");
+		agentName="Explo3";
 		try {
 
 			Object[] objtab=new Object[]{env,EntityType.AGENT_EXPLORER};//used to give informations to the agent
@@ -239,9 +265,8 @@ public class Principal {
 
 		//Collector (backPack)
 		c = containerList.get("container0");
-		agentName="AgentCollect"; //agentName="Agent3(collector)";
+		agentName="colT1"; //agentName="Agent3(collector)";
 		try {
-
 			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
 			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
 			agentList.add(ag);
@@ -250,16 +275,48 @@ public class Principal {
 			e.printStackTrace();
 		}
 
+		//Collector (backPack)
+		c = containerList.get("container0");
+		agentName="colT2"; //agentName="Agent3(collector)";
+		try {
+			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+
+		//Collector (backPack)
+		c = containerList.get("container0");
+		agentName="colT3"; //agentName="Agent3(collector)";
+		try {
+			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 		
-	
-		
+		//Collector (backPack)
+		c = containerList.get("container0");
+		agentName="colD1"; //agentName="Agent3(collector)";
+		try {
+			Object[] objtab=new Object[]{env,EntityType.AGENT_COLLECTOR};//used to give informations to the agent
+			AgentController	ag=c.createNewAgent(agentName,Collector2Agent.class.getName(),objtab);
+			agentList.add(ag);
+			System.out.println(agentName+" launched");
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+
 
 		//Tanker-Silo (backPack that count for the exam, but not method pick. Can only receive from the collector agents)
 		
 		c = containerList.get("container0");
 		agentName="Tank";
 		try {
-
 			Object[] objtab=new Object[]{env,EntityType.AGENT_TANKER};//used to give informations to the agent
 			AgentController	ag=c.createNewAgent(agentName,SiloAgent.class.getName(),objtab);
 			agentList.add(ag);
