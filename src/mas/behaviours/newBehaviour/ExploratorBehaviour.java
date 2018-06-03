@@ -22,22 +22,22 @@ public class ExploratorBehaviour extends GraphAgentBehaviour{
 	public ExploratorBehaviour(abstractAgent agent){
 		super(agent);
 				
-//		registerFirstState(new ExploreDestinationAtomic(a), "Dest");
-//		registerState(new MoveAndCommunicateBehaviour(a), "MoveCom");
-//		registerLastState(new VoidAtomic(a), "End1");
-//		
-//		registerTransition("Dest", "MoveCom", 1);
-//		registerTransition("Dest", "End1", -1);
-//		
-//		registerDefaultTransition("MoveCom", "Dest");	
-//		registerDefaultTransition("End1", "End1");
+		registerFirstState(new ExploreDestinationAtomic(a), "Dest");
+		registerState(new MoveAndCommunicateBehaviour(a), "MoveCom");
+		registerLastState(new VoidAtomic(a), "End1");
+		
+		registerTransition("Dest", "MoveCom", 1);
+		registerTransition("Dest", "End1", -1);
+		
+		registerDefaultTransition("MoveCom", "Dest");	
+		registerDefaultTransition("End1", "End1");
 		
 		
 		
 		//thomas -> avant on bouclait à l'infini sur movecom & dest
 		//          maintenant on fait 1 seul step (pour tester si il y a un tresor dessus avant de rééxplorer)
 		//this.a.print("ExploratorBehaviour");
-		
+		/*
 		registerFirstState(new ExploreDestinationAtomic(a), "Dest");
 		//registerLastState(new MoveAndCommunicateBehaviour(a), "MoveCom");
 		//registerLastState(new VoidAtomic(a), "End1");
@@ -53,6 +53,7 @@ public class ExploratorBehaviour extends GraphAgentBehaviour{
 		
 		registerDefaultTransition("End1", "End1");
 		registerDefaultTransition("End2", "End2");
+		*/
 		
 	}
 	public int onEnd() {

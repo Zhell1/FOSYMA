@@ -378,7 +378,7 @@ public class GraphAgent extends abstractAgent{
 		printstring += "\t | explored: "+this.getmyGraph().getExplored().size();
 		printstring += "\t | bordure: "+this.getmyGraph().getBordure().size();
 		printstring += "\t | freespace: "+this.getBackPackFreeSpace();
-		//printstring += "\t\t | myTreasureLeft: "+(this.getmyGraph().getBestTreasurePath()!=null);
+		printstring += "\t | myTreasureLeft: "+(this.getmyGraph().getBestTreasurePath()!=null);
 		this.print(printstring);
 		
 		if(this.path==null) return null;
