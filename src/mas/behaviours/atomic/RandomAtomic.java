@@ -3,10 +3,14 @@ package mas.behaviours.atomic;
 import java.util.List;
 import java.util.Random;
 
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+
 import env.Attribute;
 import env.Couple;
 import mas.abstractAgent;
 import mas.agents.GraphAgent;
+import mas.tools.MyGraph;
 
 public class RandomAtomic extends AtomicBehaviour{
 	/* signal 0 = boucle sur lui meme
@@ -24,6 +28,30 @@ public class RandomAtomic extends AtomicBehaviour{
 	}
 	
 	public void action() {
+		if (this.cpt == 0) {
+			/* first */
+			this.agent.print("COU         COU                       LXOXO");
+			MyGraph g = this.agent.getmyGraph();
+			for ( Edge e : g.getGraphStream().getEdgeSet()) {
+				Node n1 = e.getNode0();
+				Node n2 = e.getNode1();
+				if (n1.getId() == this.agent.getCurrentPosition() && n2.getId() == this.agent.lastmove) {
+					Object o = (e.getAttribute("weight"));
+					
+					if (o != null) {
+						int w = (int)(o);
+						w = w + 10;
+						this.agent.print("==================================");
+						this.agent.print("New value of weigth :" + w);
+						this.agent.print("==================================");
+						Edge ne = g.getGraphStream().getEdge(e.getId());
+						ne.setAttribute("weight", w);
+					}
+					
+				}
+			}
+			
+		}
 		if (this.cpt >= this.timeOut) {
 			this.signal = 1;
 			this.cpt = 0;
