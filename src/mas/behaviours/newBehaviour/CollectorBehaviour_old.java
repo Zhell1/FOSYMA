@@ -58,7 +58,7 @@ public class CollectorBehaviour_old extends GraphAgentBehaviour{
 		Action pick = a -> {a.pickTreasure();};
 		Action pathTreasor = a -> {a.setPath(a.getmyGraph().getBestTreasurePath());
 									a.setSwitchPath(false);};
-		Action put = a -> {boolean b = a.emptyMyBackPack("AgentSilo");
+		Action put = a -> {boolean b = a.emptyMyBackPack("Tank");
 						   a.print("I EMPTY MY BACKPACK :" + b + " ( I am at " + a.getPosition() + ", silo is at "+a.getmyGraph().getSiloPosition());};
 		Action end = a -> {a.print("END OF THE AGENT");};
 		Action none = a -> {};

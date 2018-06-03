@@ -116,7 +116,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 									//a.print("path set to new treasure at "+ Lpath.get(Lpath.size()-1));
 									a.setSwitchPath(false);   };
 									
-		Action put = a -> {boolean b = a.emptyMyBackPack("AgentSilo");
+		Action put = a -> {boolean b = a.emptyMyBackPack("Tank");
 						   a.print("I EMPTY MY BACKPACK :" + b + " ( I am at " + a.getPosition() + ", silo is at "+a.getmyGraph().getSiloPosition() + " )");};
 						   
 		Action end = a -> {a.print("END OF THE AGENT");};

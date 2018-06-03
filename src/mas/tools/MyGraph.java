@@ -896,7 +896,7 @@ public class MyGraph {
 				this.siloPosition = siloPos;
 				Node SP = this.graph.getNode(this.siloPosition);
 				SP.addAttribute("explored", false);
-				SP.addAttribute("timeStamp", 0);
+				SP.addAttribute("timeStamp", (long)0);
 				SP.addAttribute("Treasure", 0);
 				SP.addAttribute("Diamonds", 0);
 				// before:

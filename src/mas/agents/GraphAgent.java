@@ -334,10 +334,10 @@ public class GraphAgent extends abstractAgent{
 			if(n==null)
 				n = destmap.addNode(idnode);
 			Node norig = this.getmyGraph().getNode(idnode);
-			n.addAttribute("explored", norig.getAttribute("explored"));
-			n.addAttribute("Treasure", norig.getAttribute("Treasure"));
-			n.addAttribute("Diamonds", norig.getAttribute("Diamonds"));
-			n.addAttribute("timeStamp", norig.getAttribute("timeStamp"));
+			n.addAttribute("explored", (boolean)norig.getAttribute("explored"));
+			n.addAttribute("Treasure", (int)norig.getAttribute("Treasure"));
+			n.addAttribute("Diamonds", (int)norig.getAttribute("Diamonds"));
+			n.addAttribute("timeStamp", (long)norig.getAttribute("timeStamp"));
 		}
 	}
 	
@@ -374,10 +374,11 @@ public class GraphAgent extends abstractAgent{
 	
 	public String getNextPath() {
 		String printstring = "My treasure type: " + this.getMyTreasureType();
-		printstring += "\t\t | Silo at "+this.getmyGraph().getSiloPosition();
-		printstring += "\t\t | explored: "+this.getmyGraph().getExplored().size();
-		printstring += "\t\t | bordure: "+this.getmyGraph().getBordure().size();
-		printstring += "\t\t | myTreasureLeft: "+(this.getmyGraph().getBestTreasurePath()!=null);
+		printstring += "\t | Silo at "+this.getmyGraph().getSiloPosition();
+		printstring += "\t | explored: "+this.getmyGraph().getExplored().size();
+		printstring += "\t | bordure: "+this.getmyGraph().getBordure().size();
+		printstring += "\t | freespace: "+this.getBackPackFreeSpace();
+		//printstring += "\t\t | myTreasureLeft: "+(this.getmyGraph().getBestTreasurePath()!=null);
 		this.print(printstring);
 		
 		if(this.path==null) return null;
