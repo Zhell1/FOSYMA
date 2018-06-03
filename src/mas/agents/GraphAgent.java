@@ -44,6 +44,7 @@ public class GraphAgent extends abstractAgent{
 	int sleepbetweenmove;
 
 	public Messages mailbox;
+	public String lastmove;
 	private long timeOut;
 	private HashMap<String, Object> lastMsg;
 	private HashMap<String, Object> lastMap;
@@ -438,6 +439,7 @@ public class GraphAgent extends abstractAgent{
 	public boolean move(String move) {
 		this.step++;
 		this.succesLastMove = ((mas.abstractAgent)this).moveTo(move);
+		this.lastmove = move;
 		this.myGraph.add(); //add or update
 		
 		//wait time
