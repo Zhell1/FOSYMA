@@ -10,6 +10,7 @@ import mas.behaviours.atomic.WaitForStringAtomic;
 public class ShareMapBehaviour extends GraphAgentBehaviour {
 	/* signal -1 : pas de réponse au roger
 	 * signal -2 : j'ai reçu une carte, mais l'autre n'a pas répondu quand je lui ai envoyé ma carte
+	 * signal -3 : received "nomap"
 	 * signal 1  : Succès (double envoi + l'autre ma répondu un ack après envoi de ma carte)
 	 * signal 2  : l'autre ne m'as rien envoyé mais moi oui avec ack de sa part 
 	 */
@@ -27,7 +28,7 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		registerState(new WaitForAtomic(a, "HashMap", timeout,true), "WaitMap"); // attends jusqu'à 5 secondes la carte
 		registerState(new WaitForAtomic(a, "HashMap", timeout,true), "WaitMap2"); // version où on n'envoi pas la notre
 		registerState(new SendMapAtomic(a,true), "SendMap");
-		registerState(new SendAtomic(a,"roger", true), "SendRoger");
+		registerState(new SendAtomic(a, "nomap",true), "NoMapToSend");
 		registerState(new SendAtomic(a, "ack_map_received", true), "SendAck");
 		registerState(new SendAtomic(a, "ack_map_received", true), "SendAck2");//version where we do not wait for the other ack
 		registerState(new WaitForStringAtomic(a, "ack_map_received", timeout, true), "WaitAck"); //wait up to 5 sec
@@ -44,17 +45,21 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		registerTransition("WaitRoger", "Fail1", -1);
 		registerTransition("WaitRoger", "WaitRoger", 0);
 		registerTransition("WaitRoger", "SendMap" , 1);
-		registerTransition("WaitRoger", "WaitMap2" , -2);
+		registerTransition("WaitRoger", "NoMapToSend" , -2);
+		
+		registerDefaultTransition("NoMapToSend", "WaitMap2");
 		
 		registerTransition("SendMap", "WaitMap", 1);
 		
 		registerTransition("WaitMap", "Fail1", -1);
 		registerTransition("WaitMap", "WaitMap", 0);
 		registerTransition("WaitMap", "SendAck" , 1);
+		registerTransition("WaitMap", "Fail3" , -2); // recoit "nomap"
 		
 		registerTransition("WaitMap2", "Fail1", -1);
 		registerTransition("WaitMap2", "WaitMap2", 0);
 		registerTransition("WaitMap2", "SendAck2" , 1);
+		registerTransition("WaitMap2", "Fail3" , -2); // recoit "nomap"
 		
 		registerTransition("SendAck", "WaitAck", 1);
 		registerTransition("SendAck2", "Success", 1);
@@ -66,6 +71,7 @@ public class ShareMapBehaviour extends GraphAgentBehaviour {
 		//final states		
 		registerDefaultTransition("Fail1", "Fail1");
 		registerDefaultTransition("Fail2", "Fail2");
+		registerDefaultTransition("Fail3", "Fail3");
 		registerDefaultTransition("Success", "Success");
 	
 	}
