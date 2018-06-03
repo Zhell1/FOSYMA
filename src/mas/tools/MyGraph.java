@@ -66,9 +66,9 @@ public class MyGraph {
 
 	private GraphAgent myAgent;
 
-	private ArrayList<String> ListTreasure;
+	private Set<String> ListTreasure;
 
-	private ArrayList<String> ListDiamonds;
+	private Set<String> ListDiamonds;
 
 	private String siloPosition;
 
@@ -91,8 +91,8 @@ public class MyGraph {
 		this.graph = mygraph;
 		this.bordure = new HashSet<String>();
 		this.attributs = new ArrayList<String>(Arrays.asList("explored","Treasure","Diamonds","timeStamp"));
-		this.ListTreasure = new ArrayList<String>();
-		this.ListDiamonds = new ArrayList<String>();
+		this.ListTreasure = new HashSet<String>();
+		this.ListDiamonds = new HashSet<String>();
 		this.siloPosition = null;
 		this.nbmodifs = 0;
 		this.pathtosilofound = false; // will become true after the first path found
@@ -334,6 +334,7 @@ public class MyGraph {
 		// créer le noeud actuel
 		int valuediamonds = 0, valuetreasure = 0;
 		boolean typediamonds = false, typetreasure=false;
+		String silopos = this.siloPosition;
 		
 		if (myPosition!=""){
 			List<Couple<String,List<Attribute>>> lobs=this.myAgent.observe();//myPosition
@@ -385,10 +386,11 @@ public class MyGraph {
 					
 					//on supprime le noeud de la bordure
 					this.bordure.remove(myPosition);
-					if (typetreasure){
+					//on ajoute le noeud aux liste de trésors si pertinent
+					if (typetreasure && (n.getId().equals(silopos) == false) ){//don't add silo pos to list
 						this.ListTreasure.add(myPosition);
 					}
-					if (typediamonds){
+					if (typediamonds && (n.getId().equals(silopos) == false)){//don't add silo pos to list
 						this.ListDiamonds.add(myPosition);
 					}
 					//ajout des arêtes
@@ -795,6 +797,16 @@ public class MyGraph {
 				newNode = this.graph.getNode(id);
 				newNode.addAttributes(att);
 				this.myAgent.updatetosendmap_addnode(id, att);
+				
+				int treasure = (int) att.get("Treasure");
+				int diamonds = (int) att.get("Diamonds");
+				//on ajoute le noeud aux liste de trésors si pertinent
+				if (treasure>0 && (id.equals(siloPos) == false) ){//don't add silo pos to list
+					this.ListTreasure.add(id);
+				}
+				if (diamonds>0 && (id.equals(siloPos) == false)){//don't add silo pos to list
+					this.ListDiamonds.add(id);
+				}
 			}
 			else {
 				//le noeud existe dans mon graph => update si pertinent
@@ -822,6 +834,15 @@ public class MyGraph {
 					this.myAgent.updatetosendmap_updatenodeattribute(id, "Diamonds", newvaldiamonds);
 					this.myAgent.updatetosendmap_updatenodeattribute(id, "timeStamp", newtimestamp);
 					this.nbmodifs++;
+					int treasure = (int) att.get("Treasure");
+					int diamonds = (int) att.get("Diamonds");
+					//on ajoute le noeud aux liste de trésors si pertinent
+					if (treasure>0 && (id.equals(siloPos) == false) ){//don't add silo pos to list
+						this.ListTreasure.add(id);
+					}
+					if (diamonds>0 && (id.equals(siloPos) == false)){//don't add silo pos to list
+						this.ListDiamonds.add(id);
+					}
 				}
 				//sinon si les deux sont explorés mais sa valeur est plus récente
 				else if(explored1 && explored2 && newtimestamp > oldtimestamp) {

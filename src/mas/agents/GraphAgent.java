@@ -246,13 +246,13 @@ public class GraphAgent extends abstractAgent{
 				//dans ce cas on doit aussi supprimer la case de la liste de trésor dans mygraph
 				if(isTreasure == false){
 					n.setAttribute("Treasure", 0);
-					this.myGraph.removeFromListTreasure(n.getId());
+					this.getmyGraph().removeFromListTreasure(n.getId());
 					//on suppose que si on pick c'est qu'il y avait quelque chose avant
 					updatevaluetosendmap(n.getId(), "Treasure", 0);
 				}
 				if(isDiamonds == false){
 					n.setAttribute("Diamonds", 0);
-					this.myGraph.removeFromListDiamonds(n.getId());
+					this.getmyGraph().removeFromListDiamonds(n.getId());
 					//on suppose que si on pick c'est qu'il y avait quelque chose avant
 					updatevaluetosendmap(n.getId(), "Diamonds", 0);
 				}
