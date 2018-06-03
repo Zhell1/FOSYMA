@@ -891,7 +891,7 @@ public class MyGraph {
 		if (this.siloPosition == null && siloPos != null) {
 			//si on à pas déjà un noeud silo
 			if (this.graph.getNode(siloPos) == null){
-				this.nbmodifs+=1000; //make sure we send the graph since this info is very important
+				//this.nbmodifs+=1000; //make sure we send the graph since this info is very important
 				this.graph.addNode(siloPos);
 				this.siloPosition = siloPos;
 				Node SP = this.graph.getNode(this.siloPosition);
@@ -905,7 +905,7 @@ public class MyGraph {
 				// with weight 100000 for dijkstra
 				// so we better wait until we have more info (a map with the silo+edges)
 			}
-			else {
+			else { // noeud existe déjà
 				this.nbmodifs+=1000; //make sure we send the graph since this info is very important
 				this.siloPosition = siloPos;
 				Node SP = this.graph.getNode(this.siloPosition);
@@ -914,7 +914,16 @@ public class MyGraph {
 					e.setAttribute("weight", 100000); // we want to avoid walking on silo
 				}
 			}
-			
+
+			//met à jour les arrêtes du silo (dans tous les cas=plus safe)
+			if(this.siloPosition != null){
+				Node SP = this.graph.getNode(this.siloPosition);
+				//SP.addAttribute("explored", true);
+				for (Edge e : SP.getEdgeSet()){
+					e.setAttribute("weight", 100000); // we want to avoid walking on silo
+				}
+				
+			}
 		}
 		
 		//Tous les noeuds du graphe ne sont pas forcement exploré donc il faut recalculer la bordure
