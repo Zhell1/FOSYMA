@@ -71,6 +71,10 @@ public class MyGraph {
 	private Set<String> ListDiamonds;
 
 	private String siloPosition;
+	
+	//backup for dijkstra
+	private ArrayList<Edge> siloEdges;
+	private Node siloNode;
 
 	//private HashSet<String> history;
 	int nbmodifs; //kind of timestamp of modifications on the graph
@@ -97,6 +101,8 @@ public class MyGraph {
 		this.nbmodifs = 0;
 		this.pathtosilofound = false; // will become true after the first path found
 		this.firsttimebordurevide = true; // passera à faux une fois qu'on l'aura vu
+		this.siloNode = null;
+		this.siloEdges = null;
 	}
 	
 	public boolean pathtosilofound() {
@@ -159,6 +165,44 @@ public class MyGraph {
         }
 	}
 	*/
+	
+	public void removeandbackupsilo(){
+		if(siloPosition == null){
+			this.siloNode = null;
+			this.siloEdges = null;
+			return;
+		}
+		//else
+		this.myAgent.print("removing silo for dijsktra: silo at "+this.siloPosition);
+		this.siloNode = graph.getNode(this.siloPosition);
+		if(this.siloNode != null) {
+			for(Edge edge : siloNode.getEdgeSet()) {
+				if(edge != null) {
+					if (this.siloEdges == null)
+						this.siloEdges = new ArrayList<Edge>();
+					this.siloEdges.add(edge);
+					this.myAgent.print("removing silo for dijsktra: remove edge "+edge.getId());
+					graph.removeEdge(edge.getId());
+				}
+			}
+			this.myAgent.print("removing silo for dijkstra: removing node "+this.siloPosition);
+			graph.removeNode(this.siloPosition);
+		}
+	}
+	public void reloadsilofrombackup(){
+		if(this.siloNode == null) return;
+		//put back silo node
+		Node newnode = this.graph.addNode(this.siloNode.getId());
+		//put back attributes
+		for(String attname : this.siloNode.getAttributeKeySet()){
+			newnode.addAttribute(attname, this.siloNode.getAttribute(attname));
+		}
+		//put back edges
+		for(Edge edge : this.siloEdges){
+			this.graph.addEdge(edge.getId(), edge.getNode0(), edge.getNode1());
+			//et maintenant on se fiche du weight
+		}
+	}
 	
 	//retourne le prochain noeud de la bordure à explorer (le plus proche)
 	public ArrayList<String> NextDijsktra(){
@@ -465,7 +509,9 @@ public class MyGraph {
 		if (pos == null) return null;
 		String position = (this.myAgent.getCurrentPosition());
 		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
+		
 		dijkstra.init(this.graph);
+		
 		dijkstra.setSource(this.graph.getNode(position));
 		dijkstra.compute();
 		
@@ -478,8 +524,12 @@ public class MyGraph {
 		
 		Node n;
 		//System.out.println("XOXOXO_1 path :" + path.toString());
-		if(path==null) return null;
-		if(path.size() == 0) return null;
+		if(path==null){
+			return null;
+		}
+		if(path.size() == 0){
+			return null;
+		}
 		
 		//create the return list
 		ArrayList <String> res = new ArrayList <String>();
