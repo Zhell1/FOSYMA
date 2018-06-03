@@ -52,6 +52,7 @@ public class WaitForAtomic extends AtomicBehaviour {
 			this.signal = -1;
 			return;
 		}
+		/////////////////////////////////
 		HashMap<String, Object> msg;
 		if(privee == false) {
 			msg = this.agent.getMsg();
@@ -76,8 +77,17 @@ public class WaitForAtomic extends AtomicBehaviour {
 			this.startTime = -1;
 			this.signal = 1;
 			return;
+		}
+		else if(msg.get("type").equals("String")) {
+			if(msg.get("content").equals("nomap")){
+				this.startTime = -1;
+				this.signal = -2;
+				return;
 			}
-		this.signal = 0;
+		}
+		else {
+			this.signal = 0;
 		}
 	}
+}
 

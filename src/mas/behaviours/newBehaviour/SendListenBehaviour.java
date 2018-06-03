@@ -61,6 +61,7 @@ public class SendListenBehaviour extends GraphAgentBehaviour{
 		registerTransition("ShareMap", "UpdateMap", 1);
 		registerTransition("ShareMap", "NoMap", -1);
 		registerTransition("ShareMap", "NoMap", 2);
+		registerTransition("ShareMap", "NoMap", -3);
 		
 		registerDefaultTransition("UpdateMap","HaveMap");
 		registerDefaultTransition("NoMsg", "NoMsg");

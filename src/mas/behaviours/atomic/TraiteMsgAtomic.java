@@ -47,7 +47,7 @@ public class TraiteMsgAtomic extends AtomicBehaviour {
 				this.signal = 1;
 				return;
 			}			
-			if (cpt <= 5){ //traite X messages
+			if (cpt <= 100){ //traite X messages
 				this.signal = 0;
 				cpt ++;
 				return;

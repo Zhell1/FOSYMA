@@ -78,7 +78,7 @@ public class GraphAgent extends abstractAgent{
 
 		this.nbmodifsmin 		= 30;			//nb modifs minimum pour renvoyer la carte
 		this.timeOut 			= 1000 * 4;		//secondes pour timeout des messages (*1000 car il faut en ms)
-		this.sleepbetweenmove 	= 500;			//in MS
+		this.sleepbetweenmove 	= 700;			//in MS
 		
 		//#############################
 		//setup graph
@@ -153,7 +153,7 @@ public class GraphAgent extends abstractAgent{
 		}
 		//si on à déjà envoyé
 		else {
-			this.print(this.toSendMap.get(destinataire).toString());
+			//this.print(this.toSendMap.get(destinataire).toString());
 			//on retourne la map à envoyer
 			Graph map = this.toSendMap.get(destinataire);
 			return this.getmyGraph().toHashMap2(map); // on envoie converti
@@ -268,8 +268,10 @@ public class GraphAgent extends abstractAgent{
 		for(String dest : this.toSendMap.keySet()) {
 			Graph destmap = this.toSendMap.get(dest);
 			Node n = destmap.getNode(nodename);
-			if(n == null)
+			if(n == null) {
 				updatetosendmap_addfromfullgraph(nodename); //on l'a supprimé donc on le recrée comme
+				n = destmap.getNode(nodename);
+			}
 			n.setAttribute(attname, newvalue); // add or replace
 		}
 	}
@@ -483,7 +485,8 @@ public class GraphAgent extends abstractAgent{
 		//on met à jour la valeur
 		this.lastSentMap.replace(sender, this.getmyGraph().getnbmodifs());
 		Graph currgraph = toSendMap.get(sender);
-		currgraph.clear(); //vide la tosendmap car on à recu ack
+		if(currgraph != null)
+			currgraph.clear(); //vide la tosendmap car on à recu ack
 		//toSendMap.replace(sender, currgraph); 
 	}
 	

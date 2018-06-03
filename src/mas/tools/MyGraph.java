@@ -870,7 +870,9 @@ public class MyGraph {
 		if (this.siloPosition == null && siloPos != null) {
 			//si on à pas déjà un noeud silo
 			if (this.graph.getNode(siloPos) == null){
-				this.graph.addNode(this.siloPosition);
+				this.nbmodifs+=1000; //make sure we send the graph since this info is very important
+				this.graph.addNode(siloPos);
+				this.siloPosition = siloPos;
 				Node SP = this.graph.getNode(this.siloPosition);
 				SP.addAttribute("explored", false);
 				// before:
