@@ -896,6 +896,9 @@ public class MyGraph {
 				this.siloPosition = siloPos;
 				Node SP = this.graph.getNode(this.siloPosition);
 				SP.addAttribute("explored", false);
+				SP.addAttribute("timeStamp", 0);
+				SP.addAttribute("Treasure", 0);
+				SP.addAttribute("Diamonds", 0);
 				// before:
 				// System.out.println("*** BIG ERROR MYGRAPH TRYING TO SET SILO BUT NO NODE FOUND ***");
 				// we cannot add the silo position because we need to also create the edges to the silo
