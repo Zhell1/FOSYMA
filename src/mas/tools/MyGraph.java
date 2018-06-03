@@ -64,7 +64,7 @@ public class MyGraph {
 	private List<String> attributs;
 
 
-	private abstractAgent myAgent;
+	private GraphAgent myAgent;
 
 	private ArrayList<String> ListTreasure;
 
@@ -79,11 +79,13 @@ public class MyGraph {
 	boolean firsttimebordurevide;
 	
 	
-	public MyGraph(mas.abstractAgent myagent, Graph mygraph) {
+	public MyGraph(GraphAgent myagent, Graph mygraph) {
 		if (myagent == null || mygraph == null){
 			System.out.println("Les composants ne sont pas encore prêts");
 		}
-		this.myAgent = ((mas.abstractAgent) myagent);
+		//this.myAgent = ((mas.abstractAgent) myagent);
+		this.myAgent = myagent;
+		
 		
 				//Example to retrieve the current position
 		this.graph = mygraph;
@@ -121,6 +123,7 @@ public class MyGraph {
 	}
 	
 	public void setSiloPosition(String position) {
+		//no need to update silopos on tosendmap because we always send our own when converting to hashmap before sending
 		if(this.siloPosition != null) return;
 		
 		this.siloPosition = position;
@@ -287,9 +290,11 @@ public class MyGraph {
 		return res;
 	}
 	
-	public void addVoisin(String position){
+	public void addVoisin(String position){		
 		Node n = this.graph.getNode(position);
 		if (n == null){
+			this.myAgent.updatetosendmapaddvoisin(position); // add voisin to all tosendmap
+			
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);
 			n.addAttribute("Treasure", 0);
@@ -419,14 +424,14 @@ public class MyGraph {
 				//comme on à modifié le graphe => on efface le path pour recalculer
 				((GraphAgent)this.myAgent).resetPath();
 			}
-			//si la bordure est vide on veut envoyer la carte aux autres peu importe le nb de modifs
-			if(firsttimebordurevide) {
-				this.nbmodifs+=1000;
-				this.firsttimebordurevide = false;
-			}
+			//Tous les noeuds du graphe ne sont pas forcement exploré donc il faut recalculer la bordure
+			this.calculateBordure();	
 		}
 	}
-	
+	//only for int (treasures)
+	public void updatenodevalue(String attname, int newvalue){
+		this.graph.setAttribute(attname, newvalue);
+	}
 	
 	//calculate shortest path from current position to the one in parameter
 	public ArrayList<String> getShortestPath(String pos){
@@ -632,6 +637,8 @@ public class MyGraph {
 	 *              HASH PART
 	 ==================================================== */
 	
+		
+	
 	public HashMap<String, Object> getAttributeHashMap(Node n){
 		HashMap<String, Object> res = new HashMap<String, Object>();
 		for (String at : n.getAttributeKeySet()){
@@ -651,8 +658,10 @@ public class MyGraph {
 		return res;
 	}
 	
-	
-	public HashMap<String, Object> toHashMap(){
+	public HashMap<String, Object> toHashMap() {
+		return toHashMap2(this.graph);
+	}
+	public HashMap<String, Object> toHashMap2(Graph currgraph){
 		/* Normalement c'est Serializable maintenent
 		 * Je fais des conversions car les types nodes et Edges ne sont pas serializable donc je converti tous en String ... */
 		HashMap<String, Object> res = new HashMap<String, Object>();
@@ -660,13 +669,13 @@ public class MyGraph {
 		String id;
 		List<Couple> nodes = new ArrayList<Couple>();
 		List<Couple> edges = new ArrayList<Couple>();
-		for (Node n : this.graph.getNodeSet()){
+		for (Node n : currgraph.getNodeSet()){
 			id = (n.getId());
 			att = getAttributeHashMap(n);
 			Couple couple = new Couple(id, att);
 			nodes.add(couple);
 		}
-		for (Edge e : this.graph.getEdgeSet()){
+		for (Edge e : currgraph.getEdgeSet()){
 			Node p0 = e.getNode0(); 
 			Node p1 = e.getNode1();
 			Couple couple = new Couple(p0.toString(), p1.toString());

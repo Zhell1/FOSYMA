@@ -3,6 +3,7 @@ package mas.behaviours.atomic;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.HashMap;
 import mas.abstractAgent;
 import mas.tools.DFManager;
 import mas.tools.MyGraph;
@@ -29,14 +30,17 @@ public class SendMapAtomic extends AtomicBehaviour {
 	
 	public void action() {
 		msg = g.toHashMap();
-		if(this.privee == false)
+		if(this.privee == false) // normalement ça n'arrive plus maintenant ?
 			this.agent.mailbox.send(msg);
 		else{
-
 			String destinataire = this.agent.getlastPing();
 			String myname = this.agent.getLocalName();
 			this.agent.print("SEND my map to: "+destinataire);
-			this.agent.mailbox.send(msg, destinataire, myname);
+			//this.agent.mailbox.send(msg, destinataire, myname);
+			
+			HashMap<String,Object> toSendMap = this.agent.gettoSendMap(destinataire);
+			this.agent.mailbox.send(toSendMap, destinataire, myname);
+			
 		}
 		this.signal = 1;
 	}
