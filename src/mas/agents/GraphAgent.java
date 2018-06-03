@@ -8,8 +8,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.SingleGraph;
 
 import env.Attribute;
@@ -51,7 +53,7 @@ public class GraphAgent extends abstractAgent{
 	boolean remakepath;
 	int nbmoverandom;
 	
-	public HashMap<String, Graph> toSendMap; // TODO use this to send only part of map TODO make it private and some getters
+	private HashMap<String, Graph> toSendMap; // TODO use this to send only part of map TODO make it private and some getters
 	
 	/**
 	 * This method is automatically called when "agent".start() is executed.
@@ -139,14 +141,19 @@ public class GraphAgent extends abstractAgent{
 	
 	public HashMap<String,Object> gettoSendMap(String destinataire) {
 		// si on à jamais envoyé
+		//this.print("gettosendmap for agent "+destinataire+" : "+this.toSendMap.containsKey(destinataire));
 		if(this.toSendMap.containsKey(destinataire) == false) {
 			//on met à jour
-			Graph fullmap = this.getmyGraph().getGraphStream();
-			this.toSendMap.put(destinataire, fullmap); //on crée une entrée avec la fullmap (attente ack pour clean)
+			Graph fullmap = this.getmyGraph().getGraphStream(); // tout envoyer
+			Graph tosendmapGraph = Graphs.clone(fullmap);
+			this.toSendMap.put(destinataire, tosendmapGraph); //on crée une entrée avec la fullmap
+			this.print("creating a toSendMap for "+destinataire);
+			//attente ack pour clean : normalement ça marche puisque l'agent se déplace pas tant que sharemap est pas terminé (ack recu ou timeout)
 			return this.getmyGraph().toHashMap2(fullmap); // on envoie tout converti !
 		}
 		//si on à déjà envoyé
 		else {
+			this.print(this.toSendMap.get(destinataire).toString());
 			//on retourne la map à envoyer
 			Graph map = this.toSendMap.get(destinataire);
 			return this.getmyGraph().toHashMap2(map); // on envoie converti
@@ -260,21 +267,77 @@ public class GraphAgent extends abstractAgent{
 	public void updatevaluetosendmap(String nodename, String attname, int newvalue){
 		for(String dest : this.toSendMap.keySet()) {
 			Graph destmap = this.toSendMap.get(dest);
-			destmap.getNode(nodename).setAttribute(attname, newvalue); // add or replace
+			Node n = destmap.getNode(nodename);
+			if(n == null)
+				updatetosendmap_addfromfullgraph(nodename); //on l'a supprimé donc on le recrée comme
+			n.setAttribute(attname, newvalue); // add or replace
 		}
 	}
 	//add a voisin on all tosendmap
-	public void updatetosendmapaddvoisin(String voisin){
+		public void updatetosendmapaddvoisin(String voisin){
+			for(String dest : this.toSendMap.keySet()) {
+				Graph destmap = this.toSendMap.get(dest);
+				Node n = destmap.addNode(voisin);
+				n.addAttribute("explored", false);
+				n.addAttribute("Treasure", 0);
+				n.addAttribute("Diamonds", 0);
+				n.addAttribute("timeStamp", new Date().getTime());
+			}
+		}
+		//TODO merge et add2
+		public void updatetosendmap_addnode(String id, HashMap<String, Object> att) {
+			for(String dest : this.toSendMap.keySet()) {
+				Graph destmap = this.toSendMap.get(dest);
+				Node newNode = destmap.getNode(id);
+				if(newNode == null)
+					newNode = destmap.addNode(id);
+				newNode.addAttributes(att);
+			}
+		}	
+		public void updatetosendmap_updatenodeattribute(String id, String attname, Object attval) {
+			for(String dest : this.toSendMap.keySet()) {
+				Graph destmap = this.toSendMap.get(dest);
+				Node n = destmap.getNode(id);
+				if(n==null) {
+					updatetosendmap_addfromfullgraph(id); //on l'a supprimé donc on le recrée comme
+					n = destmap.getNode(id);
+				}
+				n.setAttribute(attname,  attval);
+			}
+		}
+	public void updatetosendmap_addedge(String edgename, String node1name, String node2name, int weight){
 		for(String dest : this.toSendMap.keySet()) {
 			Graph destmap = this.toSendMap.get(dest);
-			Node n = destmap.addNode(voisin);
-			n.addAttribute("explored", false);
-			n.addAttribute("Treasure", 0);
-			n.addAttribute("Diamonds", 0);
-			n.addAttribute("timeStamp", new Date().getTime());
+			Edge newedge = destmap.getEdge(edgename);
+			if(newedge == null){
+				Node node1 = destmap.getNode(node1name);
+				Node node2 = destmap.getNode(node2name);
+				if(node1 == null) {
+					updatetosendmap_addfromfullgraph(node1name);
+					node1 = destmap.getNode(node1name);
+				}
+				if(node2 == null){
+					updatetosendmap_addfromfullgraph(node2name);
+					node2 = destmap.getNode(node2name);
+				}
+				destmap.addEdge(edgename, node1name, node2name).setAttribute("weight", weight);
+			}
 		}
 	}
-	//TODO merge et add2
+	//récupère un noeud prééexistant et le rajoute dans les graphes tosendmap (pour modif attribut)
+	public void updatetosendmap_addfromfullgraph(String idnode) {
+		for(String dest : this.toSendMap.keySet()) {
+			Graph destmap = this.toSendMap.get(dest);
+			Node n = destmap.getNode(idnode);
+			if(n==null)
+				n = destmap.addNode(idnode);
+			Node norig = this.getmyGraph().getNode(idnode);
+			n.addAttribute("explored", norig.getAttribute("explored"));
+			n.addAttribute("Treasure", norig.getAttribute("Treasure"));
+			n.addAttribute("Diamonds", norig.getAttribute("Diamonds"));
+			n.addAttribute("timeStamp", norig.getAttribute("timeStamp"));
+		}
+	}
 	
 	//la bordure est recalculée par le récepteur donc rien à faire
 	/************* fin update to send map *************************/
@@ -415,11 +478,13 @@ public class GraphAgent extends abstractAgent{
 		//si il existe pas déjà on commence par le créer
 		if (! this.lastSentMap.containsKey(sender)){
 			this.lastSentMap.put(sender, 0); //int = nbmodifs
-			this.toSendMap.put(sender, null); // hashmap à vide car on a recu ack
+			// attention : ne pas créer dans tosendmap ici, on le fait dans gettosendmap
 		}
 		//on met à jour la valeur
 		this.lastSentMap.replace(sender, this.getmyGraph().getnbmodifs());
-		this.toSendMap.replace(sender, null); //vide la tosendmap car on à recu ack
+		Graph currgraph = toSendMap.get(sender);
+		currgraph.clear(); //vide la tosendmap car on à recu ack
+		//toSendMap.replace(sender, currgraph); 
 	}
 	
 	//retourne le nombre de modifs effectués pour un agent depuis qu'on lui à envoyé
@@ -427,7 +492,7 @@ public class GraphAgent extends abstractAgent{
 		//si il existe pas déjà on commence par le créer
 		if (! this.lastSentMap.containsKey(sender)){
 			this.lastSentMap.put(sender, 0); //this one only counts modifications as int
-			this.toSendMap.put(sender, null); // we will update the hashmap in this one
+			//this.toSendMap.put(sender, null); //don't do it here !!!
 			return this.getmyGraph().getnbmodifs(); //et on retourne le nombre de modifs total
 		}
 		//si il existe on calcule la différence

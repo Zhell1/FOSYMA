@@ -294,7 +294,6 @@ public class MyGraph {
 		Node n = this.graph.getNode(position);
 		if (n == null){
 			this.myAgent.updatetosendmapaddvoisin(position); // add voisin to all tosendmap
-			
 			n = this.graph.addNode(position);
 			n.addAttribute("explored", false);
 			n.addAttribute("Treasure", 0);
@@ -318,6 +317,9 @@ public class MyGraph {
 		System.out.println("\n\n\n==========================================");
 		System.out.println(msg);
 		System.out.println("\n\n\n==========================================");
+	}
+	public Node getNode(String nodename) {
+		return this.graph.getNode(nodename);
 	}
 	
 	public void add() {
@@ -354,8 +356,11 @@ public class MyGraph {
 			Node n= this.graph.getNode(myPosition);
 			if (n != null){
 				//le noeud existe dans le graphe et est exploré
-				boolean explored = n.getAttribute("explored");;
+				boolean explored = n.getAttribute("explored");
 				n.setAttribute("timeStamp", new Date().getTime() );
+
+				this.myAgent.updatetosendmap_updatenodeattribute(n.getId(), "timeStamp", new Date().getTime());
+				
 				if (explored){
 					//if the treasure has changed
 					if((int)n.getAttribute("Treasure") != valuetreasure  || (int)n.getAttribute("Diamonds") != valuediamonds) {
@@ -363,7 +368,9 @@ public class MyGraph {
 					}
 					//update treasure values
 					n.setAttribute("Treasure", valuetreasure);
+					this.myAgent.updatetosendmap_updatenodeattribute(n.getId(), "Treasure", valuetreasure);
 					n.setAttribute("Diamonds", valuediamonds);
+					this.myAgent.updatetosendmap_updatenodeattribute(n.getId(), "Diamonds", valuediamonds);
 				}
 				else {
 					// le noeud appartenait à la bordure
@@ -371,6 +378,11 @@ public class MyGraph {
 					n.setAttribute("explored", true);
 					n.addAttribute("Treasure", valuetreasure);
 					n.addAttribute("Diamonds", valuediamonds);
+					
+					this.myAgent.updatetosendmap_updatenodeattribute(n.getId(), "explored", true);
+					this.myAgent.updatetosendmap_updatenodeattribute(n.getId(), "Treasure", valuetreasure);
+					this.myAgent.updatetosendmap_updatenodeattribute(n.getId(), "Diamonds", valuediamonds);
+					
 					//on supprime le noeud de la bordure
 					this.bordure.remove(myPosition);
 					if (typetreasure){
@@ -388,7 +400,7 @@ public class MyGraph {
 						//si l'arête n'existe pas déjà on l'ajoute
 						if (this.graph.getEdge(inv) == null && this.graph.getEdge(liaison) == null){
 							this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
-							
+							this.myAgent.updatetosendmap_addedge(liaison, myPosition, voisin, 1);
 						}
 					}
 					//comme on à modifié la bordure on à peut-être connecté 2 bout de graphes
@@ -405,6 +417,15 @@ public class MyGraph {
 				n.addAttribute("Treasure", valuetreasure);
 				n.addAttribute("Diamonds", valuediamonds);
 				n.addAttribute("timeStamp", new Date().getTime() );
+				
+				//now add node to all tosendmap
+				HashMap<String, Object> attributes = new HashMap<String, Object>();
+				attributes.put("explored", true);
+				attributes.put("Treasure", valuetreasure);
+				attributes.put("Diamonds", valuediamonds);
+				attributes.put("timeStamp", new Date().getTime() );
+				this.myAgent.updatetosendmap_addnode(n.getId(), attributes);
+				
 				if (typetreasure){
 					this.ListTreasure.add(myPosition);
 				}
@@ -416,10 +437,14 @@ public class MyGraph {
 					String voisin = (lobs.get(i)).getLeft();
 					String liaison = myPosition + "_" + voisin;
 					addVoisin(voisin);
-					if(isSilo)
+					if(isSilo){
 						this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",100000);
-					else
+						this.myAgent.updatetosendmap_addedge(liaison, myPosition, voisin, 100000);
+					}
+					else{
 						this.graph.addEdge(liaison, myPosition, voisin).addAttribute("weight",1);
+						this.myAgent.updatetosendmap_addedge(liaison, myPosition, voisin, 1);
+					}
 				}	
 				//comme on à modifié le graphe => on efface le path pour recalculer
 				((GraphAgent)this.myAgent).resetPath();
@@ -769,6 +794,7 @@ public class MyGraph {
 				this.graph.addNode(id);
 				newNode = this.graph.getNode(id);
 				newNode.addAttributes(att);
+				this.myAgent.updatetosendmap_addnode(id, att);
 			}
 			else {
 				//le noeud existe dans mon graph => update si pertinent
@@ -778,6 +804,7 @@ public class MyGraph {
 				if(explored1 != b) { //si on à changé l'état du noeud
 					this.nbmodifs++;
 					n.setAttribute("explored", b);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "explored", true);
 				}
 				int oldvaltreasure = n.getAttribute("Treasure");
 				int oldvaldiamonds = n.getAttribute("Diamonds");
@@ -791,6 +818,9 @@ public class MyGraph {
 					n.addAttribute("Treasure", newvaltreasure);
 					n.addAttribute("Diamonds", newvaldiamonds);
 					n.setAttribute("timeStamp", newtimestamp);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "Treasure", newvaltreasure);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "Diamonds", newvaldiamonds);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "timeStamp", newtimestamp);
 					this.nbmodifs++;
 				}
 				//sinon si les deux sont explorés mais sa valeur est plus récente
@@ -799,6 +829,9 @@ public class MyGraph {
 					n.setAttribute("Treasure", newvaltreasure);
 					n.setAttribute("Diamonds", newvaldiamonds);
 					n.setAttribute("timeStamp", newtimestamp);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "Treasure", newvaltreasure);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "Diamonds", newvaldiamonds);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "timeStamp", newtimestamp);
 					this.nbmodifs++;
 				}
 				else {
@@ -806,6 +839,9 @@ public class MyGraph {
 					n.setAttribute("Treasure", oldvaltreasure);
 					n.setAttribute("Diamonds", oldvaldiamonds);
 					n.setAttribute("timeStamp", oldtimestamp);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "Treasure", oldvaltreasure);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "Diamonds", oldvaldiamonds);
+					this.myAgent.updatetosendmap_updatenodeattribute(id, "timeStamp", oldtimestamp);
 				}
 				
 			}
@@ -824,6 +860,7 @@ public class MyGraph {
 			if(myedge == null && myedge2 == null){
 				this.nbmodifs++;
 				this.graph.addEdge(edgename, node1name, node2name).setAttribute("weight", weight);
+				this.myAgent.updatetosendmap_addedge(edgename, node1name, node2name, weight);
 			}
 			else { // si elle existe déjà
 				//ne rien faire
