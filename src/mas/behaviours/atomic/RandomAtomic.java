@@ -24,10 +24,12 @@ public class RandomAtomic extends AtomicBehaviour{
 		super(a);
 		// TODO Auto-generated constructor stub
 		this.cpt = 0;
-		this.timeOut = timeOut;
+		this.timeOut = timeOut; // now useless ?
 	}
 	
 	public void action() {
+		int nbmovesrandom = this.agent.getnbmoverandom();
+		
 		if (this.cpt == 0) {
 			/* first */
 			this.agent.print("COU         COU                       LXOXO");
@@ -40,25 +42,27 @@ public class RandomAtomic extends AtomicBehaviour{
 					
 					if (o != null) {
 						int w = (int)(o);
-						w = w + 10;
+						w = w + 10; // each time we block
 						this.agent.print("==================================");
 						this.agent.print("New value of weigth :" + w);
 						this.agent.print("==================================");
+						this.agent.setnbmoverandom(this.agent.getnbmoverandom()*2); //doubles everytime ?
 						Edge ne = g.getGraphStream().getEdge(e.getId());
 						ne.setAttribute("weight", w);
 					}
-					
 				}
 			}
 			
 		}
-		if (this.cpt >= this.timeOut) {
+		//if (this.cpt >= this.timeOut) {
+		if (this.cpt >= nbmovesrandom) {
 			this.signal = 1;
 			Random r2 = new Random();
 			int t2 = r2.nextInt(5);
 			this.block(t2 * 1000);
 			this.cpt = 0;
 			this.agent.setSwitchPath(true);
+			this.agent.resetnbmoverandom();
 			return;
 		}
 		

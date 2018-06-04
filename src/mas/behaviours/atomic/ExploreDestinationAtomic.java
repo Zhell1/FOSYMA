@@ -61,7 +61,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 			//this.agent.print("Path : " + path);
 			//fin de l'exploration
 			if (path == null) {
-				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 1");
+				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 2");
 				//this.agent.print("BORDURE CONSISTANCE :" + g.bordureConsistance());
 				this.signal = -1;
 				return;
@@ -80,7 +80,7 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 			//this.agent.print("Path : " + path);
 			//fin de l'exploration
 			if (path == null) {
-				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 2");
+				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 3");
 				//this.agent.print("BORDURE CONSISTANCE :" + g1.bordureConsistance());
 				this.signal = -1;
 				return;

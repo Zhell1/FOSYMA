@@ -53,6 +53,7 @@ public class GraphAgent extends abstractAgent{
 	int nbmodifsmin;
 	boolean remakepath;
 	int nbmoverandom;
+	int nbmoverandomoriginal;
 	
 	private HashMap<String, Graph> toSendMap; // TODO use this to send only part of map TODO make it private and some getters
 	
@@ -80,6 +81,7 @@ public class GraphAgent extends abstractAgent{
 		this.nbmodifsmin 		= 30;			//nb modifs minimum pour renvoyer la carte
 		this.timeOut 			= 1000 * 4;		//secondes pour timeout des messages (*1000 car il faut en ms)
 		this.sleepbetweenmove 	= 400;			//in MS
+		this.nbmoverandom		= 4;			// nb random moves by default
 		
 		//#############################
 		//setup graph
@@ -95,6 +97,7 @@ public class GraphAgent extends abstractAgent{
 		this.lastsender = null;
 		this.lastSentMap = new HashMap<String, Integer>(); //nbmodifs
 		this.remakepath = false; // changes to true if the map changed in a way that requires a new path
+		this.nbmoverandomoriginal = this.nbmoverandom;
 		
 		this.toSendMap = new HashMap<String, Graph>(); //actual hashmap graph
 		
@@ -107,6 +110,12 @@ public class GraphAgent extends abstractAgent{
 	
 	public int getnbmoverandom() {
 		return this.nbmoverandom;
+	}
+	public void setnbmoverandom(int newnb) {		
+		this.nbmoverandom = newnb;
+	}
+	public void resetnbmoverandom() {		
+		this.nbmoverandom = this.nbmoverandomoriginal;
 	}
 			
 	/*
@@ -311,8 +320,13 @@ public class GraphAgent extends abstractAgent{
 	public void updatetosendmap_addedge(String edgename, String node1name, String node2name, int weight){
 		for(String dest : this.toSendMap.keySet()) {
 			Graph destmap = this.toSendMap.get(dest);
+			
+			String[] res = edgename.split("_");
+			String edgenameinv = res[1]+"_"+res[0];
+			
 			Edge newedge = destmap.getEdge(edgename);
-			if(newedge == null){
+			Edge newedgeinv = destmap.getEdge(edgenameinv);
+			if(newedge == null && newedgeinv == null){
 				Node node1 = destmap.getNode(node1name);
 				Node node2 = destmap.getNode(node2name);
 				if(node1 == null) {
@@ -323,7 +337,8 @@ public class GraphAgent extends abstractAgent{
 					updatetosendmap_addfromfullgraph(node2name);
 					node2 = destmap.getNode(node2name);
 				}
-				destmap.addEdge(edgename, node1name, node2name).setAttribute("weight", weight);
+				destmap.addEdge(edgename, node1name, node2name);
+				destmap.getEdge(edgename).setAttribute("weight", weight);
 			}
 		}
 	}

@@ -25,12 +25,12 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 	 * */
 	public MoveAndCommunicateBehaviour(abstractAgent agent){
 		super(agent);
-		int nbrandom = 4; //nb random moves when blocked
+		int timeout = 4;
 				
 		registerFirstState(new MoveAtomic(a), "Move");
 		registerState(new SendAtomic(a, "ping"), "Send");
 		registerState(new ListenAtomic(a), "Listen");
-		registerState(new RandomAtomic(a, nbrandom), "Random"); //X random moves 
+		registerState(new RandomAtomic(a, timeout), "Random"); 
 		registerState(new TraiteMsgAtomic(a), "TraiteMsg");
 		registerState(new ShareMapBehaviour(a), "ShareMap");
 		registerState(new UpdateMapAtomic(a), "UpdateMap");
@@ -42,9 +42,10 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerState(new UpdateMapAtomic(a), "UpdateMap2");
 		registerState(new TraiteMsgAtomic(a), "TraiteMsg2");
 		registerLastState(new EndAtomic(a, this, 1), "Fin1");
+		registerLastState(new EndAtomic(a, this, -2), "Fin2");
 		
 			
-		registerTransition("Move", "Fin1", -1);
+		registerTransition("Move", "Fin2", -1);
 		registerTransition("Move", "Send", 1); //normal ping
 		registerTransition("Move", "Send2", 2); //ping because we are blocked and there is an agent on next case
 
@@ -87,6 +88,7 @@ public class MoveAndCommunicateBehaviour extends GraphAgentBehaviour{
 		registerTransition("Random", "Fin1", 1);
 		
 		registerTransition("Fin1", "Fin1", 1);
+		registerTransition("Fin2", "Fin2", 1);
 	}
 	
 	public void reset() {

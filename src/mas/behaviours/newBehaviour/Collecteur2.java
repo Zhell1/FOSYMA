@@ -1,7 +1,13 @@
 package mas.behaviours.newBehaviour;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+
+import env.Attribute;
+import env.Couple;
 import jade.core.behaviours.FSMBehaviour;
 import mas.abstractAgent;
 import mas.agents.GraphAgent;
@@ -50,7 +56,7 @@ public class Collecteur2 extends GraphAgentBehaviour{
 									};
 									
 		Condition anyTreasureLeft = a-> { 	a.print("*** anyTreasureLeft ? = " + a.getmyGraph().anyTreasureLeft());
-											a.getmyGraph().addnbmodifs(1000); //+1000 = on envoi la carte aux autres pour les prévenir
+											//a.getmyGraph().addnbmodifs(1000); //+1000 = on envoi la carte aux autres pour les prévenir
 											return a.getmyGraph().anyTreasureLeft();  };
 		
 		Condition checkRemakePath = a -> { 		a.print("remakePath? ="+a.getremakepath());
@@ -85,8 +91,27 @@ public class Collecteur2 extends GraphAgentBehaviour{
 //		Condition SiloOver = a -> {   a.print("deplace silo, path size) = " + a.getPath().size());
 //						        	return a.getPath().size() >= 0;  };
 						        	
-		Condition siloOver = a -> { a.print("siloOver ? = " + a.getPath().isEmpty());
-						        	return (a.getPath().isEmpty());  };
+		Condition siloOver = a -> { if(a.getPath() != null){
+										a.print("siloOver ? = " + a.getPath().isEmpty());
+										return (a.getPath().isEmpty());
+									} else {
+										//path problem: reset
+										a.setPath(g.getShortestPath(g.getSiloPosition()));
+										a.print("siloOver ? = null -> false");
+										a.print("path : "+a.getPath().toString());
+										return false;
+									}
+			/*
+									boolean siloover = false;
+									String silopos = this.g.getSiloPosition();
+									List<Couple<String, List<Attribute>>> observe = this.a.observe();
+									for(int i = 0; i < observe.size(); i++){
+										if (observe.get(i).getLeft().equals(silopos)) siloover = true;
+									}
+									a.print("siloOver ? = "+siloover);
+									return siloover;
+									*/
+						        	  };
 						        	
 		
 		Action pathSilo = a -> { //a.print("pathSilo calculating");
@@ -95,8 +120,10 @@ public class Collecteur2 extends GraphAgentBehaviour{
 								 ArrayList<String> p = g.getShortestPath(g.getSiloPosition());
 								// a.print("PATH SILO (before) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 //a.print("p = " + p);
-								 if(p.size() >= 1)
-									 p = g.formatsiloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
+								 if(p != null) {
+									 if(p.size() >= 1)
+										 p = g.formatsiloPath(p); // retire le dernier noeud du path (car on ne vas pas sur la case du silo)
+							      }
 								 //a.print("PATH SILO (after) : " + p.toString() + "\tsilo at " + g.getSiloPosition());
 								 a.setPath(p);
 //								 a.setSwitchPath(false); //todo à supprimer ?
@@ -177,7 +204,8 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		registerTransition("CheckRemakePathTres", "Pick", -1);
 		registerTransition("CheckRemakePathTres", "CheckTres", 1);
 		
-		registerDefaultTransition("MC1", "PathTresOver");
+		registerTransition("MC1", "PathTresOver", 1);
+		registerTransition("MC1", "PathTresOver", 0);
 		
 		registerDefaultTransition("Pick", "CheckSilo");
 		registerTransition("CheckSilo", "Explo2", -1);
@@ -196,7 +224,8 @@ public class Collecteur2 extends GraphAgentBehaviour{
 		registerTransition("CheckRemakePathSilo", "Put", -1);
 		registerTransition("CheckRemakePathSilo", "CheckSilo", 1);
 		
-		registerDefaultTransition("MC2", "PathSiloOver");
+		registerTransition("MC2", "PathSiloOver", 1);
+		registerTransition("MC2", "PathSiloOver", 0);
 		
 		registerDefaultTransition("Put", "CheckTres");
 		

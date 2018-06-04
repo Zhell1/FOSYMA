@@ -176,7 +176,10 @@ public class MyGraph {
 		this.myAgent.print("removing silo for dijsktra: silo at "+this.siloPosition);
 		this.siloNode = graph.getNode(this.siloPosition);
 		if(this.siloNode != null) {
-			for(Edge edge : siloNode.getEdgeSet()) {
+			//this.myAgent.print("nb edges: " +siloNode.getEdgeSet().size());
+			// apparently removing edges makes dijkstra.compute() segfault
+			for(Edge edge : siloNode.getEachEdge()){
+//			for(Edge edge : siloNode.getEdgeSet()) {
 				if(edge != null) {
 					if (this.siloEdges == null)
 						this.siloEdges = new ArrayList<Edge>();
@@ -191,17 +194,25 @@ public class MyGraph {
 	}
 	public void reloadsilofrombackup(){
 		if(this.siloNode == null) return;
+		this.myAgent.print("reloading silo:"+this.siloNode.getId());
 		//put back silo node
 		Node newnode = this.graph.addNode(this.siloNode.getId());
 		//put back attributes
 		for(String attname : this.siloNode.getAttributeKeySet()){
 			newnode.addAttribute(attname, this.siloNode.getAttribute(attname));
 		}
+		
 		//put back edges
-		for(Edge edge : this.siloEdges){
-			this.graph.addEdge(edge.getId(), edge.getNode0(), edge.getNode1());
-			//et maintenant on se fiche du weight
+		if(this.siloEdges != null) {
+			for(Edge edge : this.siloEdges){
+				//put back edge and weight
+				this.graph.addEdge(edge.getId(), edge.getNode0(), edge.getNode1());
+				this.graph.getEdge(edge.getId()).setAttribute("weight", edge.getAttribute("weight"));
+			}
 		}
+		
+		this.siloNode=null;
+		this.siloEdges=null;
 	}
 	
 	//retourne le prochain noeud de la bordure à explorer (le plus proche)
@@ -211,11 +222,26 @@ public class MyGraph {
 		if (this.getBordure().isEmpty()){
 			return null;
 		}
+		
+		this.myAgent.print("NextDijsktra()");//todo a supprimer
+		
+		boolean isexplorer = false;
+		if(this.myAgent.getLocalName().startsWith("Explo") == false){
+			//I don't know why but removesilo for explorer makes a segfault on .compute()
+			this.removeandbackupsilo();
+		}
+		else {
+			this.myAgent.print("NextDijstra: explorer detected");
+			isexplorer = true;
+		}
+		
+		
 		String position = (this.myAgent.getCurrentPosition());
 		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		dijkstra.init(this.graph);
+		this.myAgent.print("Dijkstra from "+this.graph.getNode(position));
 		dijkstra.setSource(this.graph.getNode(position));
-		dijkstra.compute();
+		dijkstra.compute(); // TODO this segfaults with an explorer just exchanging map with silo
 
 		// Print the lengths of the new shortest paths
 		Float mini = Float.MAX_VALUE;
@@ -223,19 +249,41 @@ public class MyGraph {
 		int cpt = 0;
 		List<Node> LbestNode = new ArrayList<Node>(); //liste des meilleurs noeuds visibles
 		for (String name: this.getBordure()){
-			//System.out.println("nextdisjtra: noeud bordure: "+name);
-			Node node = this.graph.getNode(name);
-			dist = (float) (dijkstra.getPathLength(node) - 1);
-			if (dist < mini){
-				mini = dist;
-				LbestNode.clear();
-				LbestNode.add(node);
+			if(name.equals(this.siloPosition)){
+				//nothing if silo is in border
 			}
-			if (dist == mini){
-				LbestNode.add(node);
+			else {
+				//System.out.println("nextdisjtra: noeud bordure: "+name);
+				Node node = this.graph.getNode(name);
+				boolean validpath = true;
+				if(isexplorer) {
+					Path path = dijkstra.getPath(node);
+					if(path.contains(this.graph.getNode(this.siloPosition))){
+						validpath = false;
+					}
+					/*
+					for (Edge edge: dijkstra.getPathEdges(node)){
+						if( edge.getNode0().equals(this.siloPosition) || edge.getNode1().equals(this.siloPosition)) {
+							validpath = false;
+							break;
+						}
+					}*/
+				}
+				if(validpath) {
+					dist = (float) (dijkstra.getPathLength(node) - 1);
+					if (dist < mini){
+						mini = dist;
+						LbestNode.clear();
+						LbestNode.add(node);
+					}
+					if (dist == mini){
+						LbestNode.add(node);
+					}
+				}
 			}
 		}
 		if (LbestNode.isEmpty()) {
+			this.reloadsilofrombackup();
 			return null;
 		}
 
@@ -253,6 +301,7 @@ public class MyGraph {
 	
 		//String name = this.myAgent.getLocalName();
 		//System.out.println(name + " is in " + position + " next : " + res + " list: "+path);
+		this.reloadsilofrombackup();
 		return res;
 	}
 	
@@ -507,6 +556,11 @@ public class MyGraph {
 	//calculate shortest path from current position to the one in parameter
 	public ArrayList<String> getShortestPath(String pos){
 		if (pos == null) return null;
+		this.myAgent.print("getShortestPath: cible "+pos+" from "+this.myAgent.getCurrentPosition()); //todo a supprimer
+		
+		if(pos.equals(this.siloPosition) == false)
+			this.removeandbackupsilo(); 
+		
 		String position = (this.myAgent.getCurrentPosition());
 		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		
@@ -517,6 +571,7 @@ public class MyGraph {
 		
 		Node bestNode = this.graph.getNode(pos);
 		if (bestNode == null) {
+			this.reloadsilofrombackup();
 			return null;
 		}
 		//System.out.println("calculating shortest path from "+position+" to "+pos);
@@ -525,9 +580,11 @@ public class MyGraph {
 		Node n;
 		//System.out.println("XOXOXO_1 path :" + path.toString());
 		if(path==null){
+			this.reloadsilofrombackup();
 			return null;
 		}
 		if(path.size() == 0){
+			this.reloadsilofrombackup();
 			return null;
 		}
 		
@@ -538,6 +595,9 @@ public class MyGraph {
 		}
 		res.remove(0); // we remove the case where we are currently
 		//System.out.println("getShortestPath() res = " + res.toString());
+		
+
+		this.reloadsilofrombackup();
 		return res;
 	}
 	//get the shortest path to one of the nodes in the list
@@ -593,12 +653,15 @@ public class MyGraph {
 	
 	
 	public ArrayList<String> formatsiloPath(ArrayList<String> Lin) {
-		ArrayList<String> Lout = new ArrayList<String>();
+		/*ArrayList<String> Lout = new ArrayList<String>();
 		int size = Lin.size();
 		for (int i = 0 ; i < size-1; i++){
 			Lout.add(Lin.get(i));
 		}
 		return Lout;
+		*/
+		Lin.remove(this.siloPosition); // remove siloposition from path
+		return Lin;
 	}
 	
 	
@@ -669,12 +732,14 @@ public class MyGraph {
 		}
 		return L;
 	}
-	
+	/*
 	public ArrayList<String> getCollectorNextNode(HeuristiqueInterface f){
-		/* f : la fonction heuristique */
+		// f : la fonction heuristique 
+		 * 
 		if (this.graph.getNodeCount() == 0){
 			return null;
 		}
+		
 		String position = (this.myAgent.getCurrentPosition());
 		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "weight", null);
 		dijkstra.init(this.graph);
@@ -698,9 +763,9 @@ public class MyGraph {
 			Node n = path.popNode();
 			res.add(n.toString());
 		}
-		return res;
-		
+		return res;	
 	}
+*/
 	
 	public Integer getnbmodifs(){
 		return (Integer)this.nbmodifs;
