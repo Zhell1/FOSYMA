@@ -80,7 +80,7 @@ public class GraphAgent extends abstractAgent{
 
 		this.nbmodifsmin 		= 30;			//nb modifs minimum pour renvoyer la carte
 		this.timeOut 			= 1000 * 4;		//secondes pour timeout des messages (*1000 car il faut en ms)
-		this.sleepbetweenmove 	= 400;			//in MS
+		this.sleepbetweenmove 	= 200;			//in MS
 		this.nbmoverandom		= 4;			// nb random moves by default
 		
 		//#############################
