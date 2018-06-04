@@ -39,6 +39,21 @@ public class ExploreDestinationAtomic extends AtomicBehaviour {
 		}
 		
 		boolean b_getswitchpath = this.agent.getSwitchPath();
+		if (b_getswitchpath) {
+			ArrayList<String> path = g.NextDijsktra(); //puisque le path était null on cherche dans la bordure
+			//this.agent.print("Path : " + path);
+			//fin de l'exploration
+			if (path == null) {
+				this.agent.print("ExploreDestinationAtomic: fin de l'exploration 1");
+				//this.agent.print("BORDURE CONSISTANCE :" + g.bordureConsistance());
+				this.signal = -1;
+				return;
+			}
+			this.agent.setPath(path);
+			this.agent.setSwitchPath(false);
+			this.signal = 1;
+			return;
+		}
 		ArrayList<String> p = this.agent.getPath();
 		
 		if (p == null){ //on recalcule le chemin

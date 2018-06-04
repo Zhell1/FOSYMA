@@ -1,4 +1,3 @@
-
 package mas.behaviours.atomic;
 
 import java.util.List;
@@ -55,9 +54,6 @@ public class RandomAtomic extends AtomicBehaviour{
 		}
 		if (this.cpt >= this.timeOut) {
 			this.signal = 1;
-			Random r2 = new Random();
-			int t2 = r2.nextInt(5);
-			this.block(t2 * 1000);
 			this.cpt = 0;
 			this.agent.setSwitchPath(true);
 			return;
