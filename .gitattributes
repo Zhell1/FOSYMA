@@ -1,0 +1,4 @@
+ressources/* linguist-vendored
+.metadata/* linguist-vendored
+.settings/* linguist-vendored
+lib/dedale/* linguist-vendored
